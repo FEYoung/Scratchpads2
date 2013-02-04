@@ -241,7 +241,7 @@ function emonocot_spm_field_group_info(){
       6 => 'field_spm_em_anatomy',
       7 => 'field_spm_em_anatomy_ref'
     ),
-    'format_type' => 'field_group_stripy_div',
+    'format_type' => 'tab',
     'format_settings' => array(
       'formatter' => 'closed',
       'instance_settings' => array(
@@ -268,7 +268,7 @@ function emonocot_spm_field_group_info(){
       0 => 'field_spm_em_taxonomic_notes',
       1 => 'field_spm_em_tn_ref'
     ),
-    'format_type' => 'field_group_stripy_div',
+    'format_type' => 'tab',
     'format_settings' => array(
       'formatter' => 'closed',
       'instance_settings' => array(
@@ -301,7 +301,7 @@ function emonocot_spm_field_group_info(){
       6 => 'group_relevance',
       7 => 'group_spm_em_taxonomy'
     ),
-    'format_type' => 'field_group_stripy_div',
+    'format_type' => 'tab',
     'format_settings' => array(
       'formatter' => '',
       'instance_settings' => array(
@@ -535,36 +535,5 @@ function emonocot_spm_field_group_info(){
     )
   );
   $export['group_spm_em_taxonomy|node|spm|default'] = $field_group;
-  $field_group = new stdClass();
-  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
-  $field_group->api_version = 1;
-  $field_group->identifier = 'group_vertical_tabs|node|spm|default';
-  $field_group->group_name = 'group_vertical_tabs';
-  $field_group->entity_type = 'node';
-  $field_group->bundle = 'spm';
-  $field_group->mode = 'default';
-  $field_group->parent_name = '';
-  $field_group->data = array(
-    'label' => 'Vertical tabs',
-    'weight' => '2',
-    'children' => array(
-      0 => 'group_spm_em_misc',
-      1 => 'group_conservation',
-      2 => 'group_description',
-      3 => 'group_eco_and_distro',
-      4 => 'group_evol_and_systematics',
-      5 => 'group_overview',
-      6 => 'group_relevance',
-      7 => 'group_spm_em_taxonomy'
-    ),
-    'defaultat_type' => 'tabs',
-    'defaultat_settings' => array(
-      'defaultatter' => '',
-      'instance_settings' => array(
-        'classes' => ''
-      )
-    )
-  );
-  $export['group_vertical_tabs|node|spm|default'] = $field_group;
   return $export;
 }
