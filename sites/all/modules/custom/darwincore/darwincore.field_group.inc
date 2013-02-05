@@ -47,13 +47,15 @@ function darwincore_field_group_info() {
   $field_group->parent_name = 'group_tabs';
   $field_group->data = array(
     'label' => 'Collection',
-    'weight' => '23',
+    'weight' => '22',
     'children' => array(
       0 => 'field_collector',
       1 => 'field_collector_number',
       2 => 'field_date_collected',
       3 => 'field_notes',
       4 => 'field_number',
+      5 => 'field_time_collected',
+      6 => 'field_date_collected_verbatim',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
@@ -196,7 +198,7 @@ function darwincore_field_group_info() {
   $field_group->parent_name = 'group_tabs';
   $field_group->data = array(
     'label' => 'Location',
-    'weight' => '25',
+    'weight' => '23',
     'children' => array(
       0 => 'field_location',
     ),
@@ -280,15 +282,9 @@ function darwincore_field_group_info() {
   $field_group->parent_name = 'group_tabs';
   $field_group->data = array(
     'label' => 'Miscellaneous',
-    'weight' => '24',
+    'weight' => '26',
     'children' => array(
-      0 => 'field_count',
-      1 => 'field_genbank_number',
-      2 => 'field_lifestage',
-      3 => 'field_other_catalogue_numbers',
-      4 => 'field_remarks',
-      5 => 'field_sex',
-      6 => 'field_media',
+      0 => 'field_remarks',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
@@ -302,6 +298,35 @@ function darwincore_field_group_info() {
     ),
   );
   $export['group_miscellaneous|node|specimen_observation|form'] = $field_group;
+
+  $field_group = new stdClass;
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_related_materials|node|specimen_observation|form';
+  $field_group->group_name = 'group_related_materials';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'specimen_observation';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_tabs';
+  $field_group->data = array(
+    'label' => 'Related Materials',
+    'weight' => '25',
+    'children' => array(
+      0 => 'field_media',
+      1 => 'field_genbank_number',
+      2 => 'field_other_catalogue_numbers',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_related_materials|node|specimen_observation|form'] = $field_group;
 
   $field_group = new stdClass;
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -338,19 +363,21 @@ function darwincore_field_group_info() {
   $field_group->mode = 'form';
   $field_group->parent_name = 'group_tabs';
   $field_group->data = array(
-    'label' => 'Required',
+    'label' => 'Basics',
     'weight' => '21',
     'children' => array(
       0 => 'field_basis_of_record',
       1 => 'field_catalogue_number',
       2 => 'field_collection_code',
       3 => 'field_institution_code',
-      4 => 'title',
+      4 => 'field_information_witheld',
+      5 => 'title',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
-      'label' => 'Required',
+      'label' => 'Basics',
       'instance_settings' => array(
+        'display_mode' => '',
         'required_fields' => 1,
         'classes' => '',
         'description' => '',
@@ -399,11 +426,12 @@ function darwincore_field_group_info() {
     'label' => 'Tabs',
     'weight' => '0',
     'children' => array(
-      0 => 'group_taxonomy',
-      1 => 'group_required',
-      2 => 'group_collection',
-      3 => 'group_miscellaneous',
-      4 => 'group_location',
+      0 => 'group_collection',
+      1 => 'group_location',
+      2 => 'group_miscellaneous',
+      3 => 'group_required',
+      4 => 'group_taxonomy',
+      5 => 'group_related_materials',
     ),
     'format_type' => 'tabs',
     'format_settings' => array(
@@ -451,19 +479,23 @@ function darwincore_field_group_info() {
   $field_group->mode = 'form';
   $field_group->parent_name = 'group_tabs';
   $field_group->data = array(
-    'label' => 'Taxonomy',
-    'weight' => '23',
+    'label' => 'Identification',
+    'weight' => '24',
     'children' => array(
-      0 => 'field_type_status',
-      1 => 'field_taxonomic_name',
+      0 => 'field_count',
+      1 => 'field_date_identified',
       2 => 'field_identification_qualifier',
       3 => 'field_identified_by',
-      4 => 'field_date_identified',
+      4 => 'field_lifestage',
+      5 => 'field_sex',
+      6 => 'field_taxonomic_name',
+      7 => 'field_type_status',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
-      'label' => 'Taxonomy',
+      'label' => 'Identification',
       'instance_settings' => array(
+        'display_mode' => '',
         'required_fields' => 0,
         'classes' => '',
         'description' => '',
