@@ -46,7 +46,7 @@ function darwincore_field_group_info() {
   $field_group->mode = 'form';
   $field_group->parent_name = 'group_tabs';
   $field_group->data = array(
-    'label' => 'Collection',
+    'label' => 'Specimen or Observation',
     'weight' => '22',
     'children' => array(
       0 => 'field_collector',
@@ -54,13 +54,15 @@ function darwincore_field_group_info() {
       2 => 'field_date_collected',
       3 => 'field_notes',
       4 => 'field_number',
-      5 => 'field_time_collected',
-      6 => 'field_date_collected_verbatim',
+      5 => 'field_preparation',
+      6 => 'field_sampling_protocol',
+      7 => 'field_sampling_effort',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
-      'label' => 'Collection',
+      'label' => 'Specimen or Observation',
       'instance_settings' => array(
+        'display_mode' => '',
         'required_fields' => 0,
         'classes' => '',
         'description' => '',
@@ -73,6 +75,39 @@ function darwincore_field_group_info() {
   $field_group = new stdClass;
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
+  $field_group->identifier = 'group_coordinates|node|location|form';
+  $field_group->group_name = 'group_coordinates';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'location';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_tabs';
+  $field_group->data = array(
+    'label' => 'Coordinates',
+    'weight' => '24',
+    'children' => array(
+      0 => 'field_coordinate_system',
+      1 => 'field_coordinate_uncertainty',
+      2 => 'field_geodetic_datum',
+      3 => 'field_georeference_protocol',
+      4 => 'field_georeference_remarks',
+      5 => 'field_verbatim_latitude',
+      6 => 'field_verbatim_longitude',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_coordinates|node|location|form'] = $field_group;
+
+  $field_group = new stdClass;
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
   $field_group->identifier = 'group_extra_fields|node|location|form';
   $field_group->group_name = 'group_extra_fields';
   $field_group->entity_type = 'node';
@@ -80,30 +115,22 @@ function darwincore_field_group_info() {
   $field_group->mode = 'form';
   $field_group->parent_name = 'group_tabs';
   $field_group->data = array(
-    'label' => 'Extra fields',
-    'weight' => '24',
+    'label' => 'Geography',
+    'weight' => '25',
     'children' => array(
       0 => 'field_continent_or_ocean',
       1 => 'field_country',
-      2 => 'field_island_group',
-      3 => 'field_island',
-      4 => 'field_state_province',
-      5 => 'field_county',
-      6 => 'field_locality',
-      7 => 'field_coordinate_system',
-      8 => 'field_coordinate_uncertainty',
-      9 => 'field_geodetic_datum',
-      10 => 'field_georeference_protocol',
-      11 => 'field_georeference_remarks',
-      12 => 'field_max_depth',
-      13 => 'field_max_elevation',
-      14 => 'field_min_depth',
-      15 => 'field_min_elevation',
+      2 => 'field_county',
+      3 => 'field_island_group',
+      4 => 'field_island',
+      5 => 'field_locality',
+      6 => 'field_state_province',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
-      'label' => 'Extra fields',
+      'label' => 'Geography',
       'instance_settings' => array(
+        'display_mode' => '',
         'required_fields' => 0,
         'classes' => '',
         'description' => '',
@@ -112,6 +139,38 @@ function darwincore_field_group_info() {
     ),
   );
   $export['group_extra_fields|node|location|form'] = $field_group;
+
+  $field_group = new stdClass;
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_height|node|location|form';
+  $field_group->group_name = 'group_height';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'location';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_tabs';
+  $field_group->data = array(
+    'label' => 'Depth/Elevation',
+    'weight' => '26',
+    'children' => array(
+      0 => 'field_max_depth',
+      1 => 'field_max_elevation',
+      2 => 'field_min_depth',
+      3 => 'field_min_elevation',
+      4 => 'field_verbatim_elevation',
+      5 => 'field_verbatim_depth',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_height|node|location|form'] = $field_group;
 
   $field_group = new stdClass;
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -190,6 +249,34 @@ function darwincore_field_group_info() {
   $field_group = new stdClass;
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
+  $field_group->identifier = 'group_location_other|node|location|form';
+  $field_group->group_name = 'group_location_other';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'location';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_tabs';
+  $field_group->data = array(
+    'label' => 'Other',
+    'weight' => '27',
+    'children' => array(
+      0 => 'field_georeference_sources',
+      1 => 'field_verification_status',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_location_other|node|location|form'] = $field_group;
+
+  $field_group = new stdClass;
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
   $field_group->identifier = 'group_location|node|specimen_observation|form';
   $field_group->group_name = 'group_location';
   $field_group->entity_type = 'node';
@@ -201,6 +288,7 @@ function darwincore_field_group_info() {
     'weight' => '23',
     'children' => array(
       0 => 'field_location',
+      1 => 'field_dwc_habitat',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
@@ -283,9 +371,7 @@ function darwincore_field_group_info() {
   $field_group->data = array(
     'label' => 'Miscellaneous',
     'weight' => '26',
-    'children' => array(
-      0 => 'field_remarks',
-    ),
+    'children' => array(),
     'format_type' => 'tab',
     'format_settings' => array(
       'label' => 'Miscellaneous',
@@ -370,7 +456,7 @@ function darwincore_field_group_info() {
       1 => 'field_catalogue_number',
       2 => 'field_collection_code',
       3 => 'field_institution_code',
-      4 => 'field_information_witheld',
+      4 => 'field_parent_specimen',
       5 => 'title',
     ),
     'format_type' => 'tab',
@@ -398,10 +484,13 @@ function darwincore_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Tabs',
-    'weight' => '0',
+    'weight' => '1',
     'children' => array(
       0 => 'group_extra_fields',
       1 => 'group_map',
+      2 => 'group_coordinates',
+      3 => 'group_height',
+      4 => 'group_location_other',
     ),
     'format_type' => 'tabs',
     'format_settings' => array(
@@ -429,9 +518,9 @@ function darwincore_field_group_info() {
       0 => 'group_collection',
       1 => 'group_location',
       2 => 'group_miscellaneous',
-      3 => 'group_required',
-      4 => 'group_taxonomy',
-      5 => 'group_related_materials',
+      3 => 'group_related_materials',
+      4 => 'group_required',
+      5 => 'group_taxonomy',
     ),
     'format_type' => 'tabs',
     'format_settings' => array(
@@ -487,9 +576,10 @@ function darwincore_field_group_info() {
       2 => 'field_identification_qualifier',
       3 => 'field_identified_by',
       4 => 'field_lifestage',
-      5 => 'field_sex',
-      6 => 'field_taxonomic_name',
-      7 => 'field_type_status',
+      5 => 'field_remarks',
+      6 => 'field_sex',
+      7 => 'field_taxonomic_name',
+      8 => 'field_type_status',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
