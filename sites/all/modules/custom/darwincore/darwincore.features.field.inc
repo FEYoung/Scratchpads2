@@ -1294,6 +1294,8 @@ function darwincore_field_default_fields() {
           'Preserved Specimen' => 'Preserved Specimen',
           'Sound Recording' => 'Sound Recording',
           'Still Image' => 'Still Image',
+          'DNA Sequence' => ' DNA Sequence',
+          'Extract' => 'Extract',
         ),
         'allowed_values_function' => '',
       ),
