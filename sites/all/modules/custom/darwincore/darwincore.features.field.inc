@@ -1338,7 +1338,7 @@ function darwincore_field_default_fields() {
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_select',
-        'weight' => '3',
+        'weight' => '-4',
       ),
     ),
   );
@@ -1412,7 +1412,7 @@ function darwincore_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '6',
+        'weight' => '-1',
       ),
     ),
   );
@@ -1486,7 +1486,7 @@ function darwincore_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '5',
+        'weight' => '-2',
       ),
     ),
   );
@@ -2120,6 +2120,95 @@ function darwincore_field_default_fields() {
     ),
   );
 
+  // Exported field: 'node-specimen_observation-field_inherit_values_from'
+  $fields['node-specimen_observation-field_inherit_values_from'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_inherit_values_from',
+      'foreign keys' => array(
+        'nid' => array(
+          'columns' => array(
+            'nid' => 'nid',
+          ),
+          'table' => 'node',
+        ),
+      ),
+      'indexes' => array(
+        'nid' => array(
+          0 => 'nid',
+        ),
+      ),
+      'module' => 'node_reference',
+      'settings' => array(
+        'referenceable_types' => array(
+          'biblio' => 0,
+          'location' => 0,
+          'media_gallery' => 0,
+          'page' => 0,
+          'specimen_observation' => 'specimen_observation',
+          'spm' => 0,
+        ),
+        'view' => array(
+          'args' => array(),
+          'display_name' => '',
+          'view_name' => '',
+        ),
+      ),
+      'translatable' => '0',
+      'type' => 'node_reference',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => '',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'node_reference',
+          'settings' => array(),
+          'type' => 'node_reference_default',
+          'weight' => 12,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'entityconnect_unload_add' => '0',
+      'entityconnect_unload_edit' => '0',
+      'field_name' => 'field_inherit_values_from',
+      'label' => 'Inherit values from',
+      'required' => 0,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'node_reference',
+        'settings' => array(
+          'autocomplete_match' => 'contains',
+          'autocomplete_path' => 'node_reference/autocomplete',
+          'size' => '60',
+        ),
+        'type' => 'node_reference_autocomplete',
+        'weight' => 0,
+      ),
+    ),
+  );
+
   // Exported field: 'node-specimen_observation-field_institution_code'
   $fields['node-specimen_observation-field_institution_code'] = array(
     'field_config' => array(
@@ -2189,7 +2278,7 @@ function darwincore_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '4',
+        'weight' => '-3',
       ),
     ),
   );
@@ -3003,6 +3092,7 @@ function darwincore_field_default_fields() {
   t('Georeference remarks');
   t('Identification qualifier');
   t('Identified by');
+  t('Inherit values from');
   t('Institution code');
   t('Island');
   t('Island group');

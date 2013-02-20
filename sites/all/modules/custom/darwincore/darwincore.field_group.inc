@@ -54,9 +54,6 @@ function darwincore_field_group_info() {
       2 => 'field_date_collected',
       3 => 'field_notes',
       4 => 'field_number',
-      5 => 'field_preparation',
-      6 => 'field_sampling_protocol',
-      7 => 'field_sampling_effort',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
@@ -288,7 +285,6 @@ function darwincore_field_group_info() {
     'weight' => '23',
     'children' => array(
       0 => 'field_location',
-      1 => 'field_dwc_habitat',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
@@ -456,8 +452,8 @@ function darwincore_field_group_info() {
       1 => 'field_catalogue_number',
       2 => 'field_collection_code',
       3 => 'field_institution_code',
-      4 => 'field_parent_specimen',
-      5 => 'title',
+      4 => 'title',
+      5 => 'field_inherit_values_from',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
