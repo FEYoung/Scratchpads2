@@ -46,7 +46,7 @@ function darwincore_field_group_info() {
   $field_group->mode = 'form';
   $field_group->parent_name = 'group_tabs';
   $field_group->data = array(
-    'label' => 'Specimen or Observation',
+    'label' => 'Collection Information',
     'weight' => '22',
     'children' => array(
       0 => 'field_collector',
@@ -54,10 +54,13 @@ function darwincore_field_group_info() {
       2 => 'field_date_collected',
       3 => 'field_notes',
       4 => 'field_number',
+      5 => 'field_sampling_protocol',
+      6 => 'field_sampling_effort',
+      7 => 'field_dwc_habitat',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
-      'label' => 'Specimen or Observation',
+      'label' => 'Collection Information',
       'instance_settings' => array(
         'display_mode' => '',
         'required_fields' => 0,
@@ -452,8 +455,8 @@ function darwincore_field_group_info() {
       1 => 'field_catalogue_number',
       2 => 'field_collection_code',
       3 => 'field_institution_code',
-      4 => 'title',
-      5 => 'field_inherit_values_from',
+      4 => 'field_inherit_values_from',
+      5 => 'title',
     ),
     'format_type' => 'tab',
     'format_settings' => array(

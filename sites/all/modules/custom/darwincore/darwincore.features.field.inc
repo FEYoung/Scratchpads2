@@ -1571,7 +1571,7 @@ function darwincore_field_default_fields() {
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_select',
-        'weight' => '9',
+        'weight' => '24',
       ),
     ),
   );
@@ -1645,7 +1645,7 @@ function darwincore_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '7',
+        'weight' => '22',
       ),
     ),
   );
@@ -1799,7 +1799,7 @@ function darwincore_field_default_fields() {
           'year_range' => '-3:+3',
         ),
         'type' => 'date_text',
-        'weight' => '10',
+        'weight' => '25',
       ),
     ),
   );
@@ -1887,6 +1887,82 @@ function darwincore_field_default_fields() {
         ),
         'type' => 'date_text',
         'weight' => '6',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_dwc_habitat'
+  $fields['node-specimen_observation-field_dwc_habitat'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_dwc_habitat',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(),
+      'translatable' => '0',
+      'type' => 'text_long',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Example: "oak savanna", "pre-cordilleran steppe".',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 15,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_dwc_habitat',
+      'label' => 'Habitat',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'rows' => '5',
+        ),
+        'type' => 'text_textarea',
+        'weight' => '21',
       ),
     ),
   );
@@ -2206,7 +2282,7 @@ function darwincore_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => 0,
+        'weight' => '0',
       ),
     ),
   );
@@ -2604,7 +2680,7 @@ function darwincore_field_default_fields() {
           'rows' => '5',
         ),
         'type' => 'text_textarea',
-        'weight' => '11',
+        'weight' => '26',
       ),
     ),
   );
@@ -2678,7 +2754,7 @@ function darwincore_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '8',
+        'weight' => '23',
       ),
     ),
   );
@@ -2823,6 +2899,158 @@ function darwincore_field_default_fields() {
         ),
         'type' => 'text_textarea',
         'weight' => '17',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_sampling_effort'
+  $fields['node-specimen_observation-field_sampling_effort'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_sampling_effort',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(),
+      'translatable' => '0',
+      'type' => 'text_long',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Example: "40 trap-nights", "10 observer-hours; 10 km by foot; 30 km by car".',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 14,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_sampling_effort',
+      'label' => 'Sampling Effort',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'rows' => '5',
+        ),
+        'type' => 'text_textarea',
+        'weight' => '20',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_sampling_protocol'
+  $fields['node-specimen_observation-field_sampling_protocol'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_sampling_protocol',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(),
+      'translatable' => '0',
+      'type' => 'text_long',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'xamples: "UV light trap", "mist net", "bottom trawl", "ad hoc observation", "point count", "Penguins from space: faecal stains reveal the location of emperor penguin colonies, http://dx.doi.org/10.1111/j.1466-8238.2009.00467.x", "Takats et al. 2001. Guidelines for Nocturnal Owl Monitoring in North America. Beaverhill Bird Observatory and Bird Studies Canada, Edmonton, Alberta. 32 pp.", "http://www.bsc-eoc.org/download/Owl.pdf"',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 13,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_sampling_protocol',
+      'label' => 'Sampling Protocol',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'rows' => '5',
+        ),
+        'type' => 'text_textarea',
+        'weight' => '19',
       ),
     ),
   );
@@ -3085,6 +3313,8 @@ function darwincore_field_default_fields() {
   t('County');
   t('Date collected');
   t('Date identified');
+  t('Example: "40 trap-nights", "10 observer-hours; 10 km by foot; 30 km by car".');
+  t('Example: "oak savanna", "pre-cordilleran steppe".');
   t('Field notes');
   t('Field number');
   t('GenBank number');
@@ -3092,6 +3322,7 @@ function darwincore_field_default_fields() {
   t('Geodetic datum');
   t('Georeference protocol');
   t('Georeference remarks');
+  t('Habitat');
   t('Identification qualifier');
   t('Identified by');
   t('Inherit values from');
@@ -3110,6 +3341,8 @@ function darwincore_field_default_fields() {
   t('Notes taken in the field for the catalogued item.');
   t('Other catalogue numbers');
   t('Remarks');
+  t('Sampling Effort');
+  t('Sampling Protocol');
   t('Select a location that this specimen was collected from.');
   t('Sex');
   t('State/Province');
@@ -3137,6 +3370,7 @@ function darwincore_field_default_fields() {
   t('The number of individuals present in the lot or container. Not to be used for observations.');
   t('Type status');
   t('Verbatim Coordinate System');
+  t('xamples: "UV light trap", "mist net", "bottom trawl", "ad hoc observation", "point count", "Penguins from space: faecal stains reveal the location of emperor penguin colonies, http://dx.doi.org/10.1111/j.1466-8238.2009.00467.x", "Takats et al. 2001. Guidelines for Nocturnal Owl Monitoring in North America. Beaverhill Bird Observatory and Bird Studies Canada, Edmonton, Alberta. 32 pp.", "http://www.bsc-eoc.org/download/Owl.pdf"');
 
   return $fields;
 }

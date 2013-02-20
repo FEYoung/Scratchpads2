@@ -101,7 +101,5 @@ function darwincore_node_load($nodes, $types){
     	  }
     	}
     }
-    
-  	  //Inherit values
   }
 }
