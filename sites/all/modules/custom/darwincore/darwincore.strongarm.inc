@@ -168,7 +168,8 @@ function darwincore_strongarm() {
   $strongarm->api_version = 1;
   $strongarm->name = 'node_options_location';
   $strongarm->value = array(
-    0 => 'revision',
+    0 => 'status',
+    1 => 'revision',
   );
   $export['node_options_location'] = $strongarm;
 
@@ -177,7 +178,8 @@ function darwincore_strongarm() {
   $strongarm->api_version = 1;
   $strongarm->name = 'node_options_specimen_observation';
   $strongarm->value = array(
-    0 => 'revision',
+    0 => 'status',
+    1 => 'revision',
   );
   $export['node_options_specimen_observation'] = $strongarm;
 
