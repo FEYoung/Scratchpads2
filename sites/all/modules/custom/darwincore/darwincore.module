@@ -83,3 +83,23 @@ function darwincore_location_node_form_validate($form, &$form_state){
     form_set_error('title', t('The title field for a location must be unique.'));
   }
 }
+
+function darwincore_node_load($nodes, $types){
+  if (array_search('specimen_observation', $types) != FALSE) {
+  	return;
+  }
+  
+  foreach ($nodes as $node){
+    if (isset($node->field_inherit_values_from['und'][0]['nid'])){
+    	$parent_nid = $node->field_inherit_values_from['und'][0]['nid'];
+    	$parent = node_load($parent_nid);
+    	foreach ($node as $key => $value) {
+    	  if (substr($key, 0, 5) == 'field') {
+    	  	if (sizeof($value) == 0) {
+    	  	  $node->$key = $parent->$key;
+    	  	}
+    	  }
+    	}
+    }
+  }
+}
