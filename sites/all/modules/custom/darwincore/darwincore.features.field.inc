@@ -10,6 +10,747 @@
 function darwincore_field_default_fields() {
   $fields = array();
 
+  // Exported field: 'field_collection_item-field_associated_taxa-field_associated_taxon'
+  $fields['field_collection_item-field_associated_taxa-field_associated_taxon'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_associated_taxon',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '0',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'field_associated_taxa',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => '',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 1,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'field_collection_item',
+      'field_name' => 'field_associated_taxon',
+      'label' => 'Associated taxon',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '2',
+      ),
+    ),
+  );
+
+  // Exported field: 'field_collection_item-field_associated_taxa-field_association_type'
+  $fields['field_collection_item-field_associated_taxa-field_association_type'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_association_type',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '0',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'field_associated_taxa',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'e.g. "host"',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 0,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'field_collection_item',
+      'field_name' => 'field_association_type',
+      'label' => 'Association type',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '1',
+      ),
+    ),
+  );
+
+  // Exported field: 'field_collection_item-field_measurements-field_measurement_accuracy'
+  $fields['field_collection_item-field_measurements-field_measurement_accuracy'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_measurement_accuracy',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '0',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'field_measurements',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'e.g. "0.01", "normal distribution with variation of 2 m"',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 3,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'field_collection_item',
+      'field_name' => 'field_measurement_accuracy',
+      'label' => 'Measurement Accuracy',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '4',
+      ),
+    ),
+  );
+
+  // Exported field: 'field_collection_item-field_measurements-field_measurement_by'
+  $fields['field_collection_item-field_measurements-field_measurement_by'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '-1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_measurement_by',
+      'foreign keys' => array(
+        'uid' => array(
+          'columns' => array(
+            'uid' => 'uid',
+          ),
+          'table' => 'users',
+        ),
+      ),
+      'indexes' => array(
+        'uid' => array(
+          0 => 'uid',
+        ),
+      ),
+      'module' => 'user_reference',
+      'settings' => array(
+        'referenceable_roles' => array(
+          2 => 0,
+          3 => '3',
+          4 => 0,
+          5 => '5',
+        ),
+        'referenceable_status' => array(
+          0 => '0',
+          1 => '1',
+        ),
+        'view' => array(
+          'args' => array(),
+          'display_name' => 'references_1',
+          'view_name' => 'users_references',
+        ),
+      ),
+      'translatable' => '0',
+      'type' => 'user_reference',
+    ),
+    'field_instance' => array(
+      'bundle' => 'field_measurements',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => '',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'user_reference',
+          'settings' => array(),
+          'type' => 'user_reference_default',
+          'weight' => 5,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'field_collection_item',
+      'entityconnect_unload_add' => '0',
+      'entityconnect_unload_edit' => '0',
+      'field_name' => 'field_measurement_by',
+      'label' => 'Measurement By',
+      'required' => 0,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'user_reference',
+        'settings' => array(
+          'autocomplete_match' => 'contains',
+          'autocomplete_path' => 'user_reference/autocomplete',
+          'size' => '60',
+        ),
+        'type' => 'user_reference_autocomplete',
+        'weight' => '6',
+      ),
+    ),
+  );
+
+  // Exported field: 'field_collection_item-field_measurements-field_measurement_date'
+  $fields['field_collection_item-field_measurements-field_measurement_date'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_measurement_date',
+      'foreign keys' => array(),
+      'indexes' => array(),
+      'module' => 'date',
+      'settings' => array(
+        'cache_count' => '4',
+        'cache_enabled' => 0,
+        'granularity' => array(
+          'day' => 'day',
+          'hour' => 0,
+          'minute' => 0,
+          'month' => 'month',
+          'second' => 0,
+          'year' => 'year',
+        ),
+        'timezone_db' => '',
+        'todate' => '',
+        'tz_handling' => 'none',
+      ),
+      'translatable' => '0',
+      'type' => 'date',
+    ),
+    'field_instance' => array(
+      'bundle' => 'field_measurements',
+      'deleted' => '0',
+      'description' => 'Date on which the measurement was made',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'date',
+          'settings' => array(
+            'format_type' => 'long',
+            'fromto' => 'both',
+            'multiple_from' => '',
+            'multiple_number' => '',
+            'multiple_to' => '',
+          ),
+          'type' => 'date_default',
+          'weight' => 6,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'field_collection_item',
+      'field_name' => 'field_measurement_date',
+      'label' => 'Measurement Date',
+      'required' => 0,
+      'settings' => array(
+        'default_value' => 'now',
+        'default_value2' => 'same',
+        'default_value_code' => '',
+        'default_value_code2' => '',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'date',
+        'settings' => array(
+          'increment' => 15,
+          'input_format' => 'Y-m-d H:i:s',
+          'input_format_custom' => '',
+          'label_position' => 'above',
+          'text_parts' => array(),
+          'year_range' => '-3:+3',
+        ),
+        'type' => 'date_text',
+        'weight' => '7',
+      ),
+    ),
+  );
+
+  // Exported field: 'field_collection_item-field_measurements-field_measurement_method'
+  $fields['field_collection_item-field_measurements-field_measurement_method'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_measurement_method',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '0',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'field_measurements',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'e.g. "minimum convex polygon around burrow entrances" for a home range area, "barometric altimeter" for an elevation',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 4,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'field_collection_item',
+      'field_name' => 'field_measurement_method',
+      'label' => 'Measurement Method',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '5',
+      ),
+    ),
+  );
+
+  // Exported field: 'field_collection_item-field_measurements-field_measurement_remarks'
+  $fields['field_collection_item-field_measurements-field_measurement_remarks'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_measurement_remarks',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(),
+      'translatable' => '0',
+      'type' => 'text_long',
+    ),
+    'field_instance' => array(
+      'bundle' => 'field_measurements',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'e.g. "tip of tail missing" ',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 7,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'field_collection_item',
+      'field_name' => 'field_measurement_remarks',
+      'label' => 'Measurement Remarks',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'rows' => '5',
+        ),
+        'type' => 'text_textarea',
+        'weight' => '8',
+      ),
+    ),
+  );
+
+  // Exported field: 'field_collection_item-field_measurements-field_measurement_type'
+  $fields['field_collection_item-field_measurements-field_measurement_type'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_measurement_type',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '0',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'field_measurements',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'e.g. "tail length", "temperature", "trap line length", "survey area", "trap type" ',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 0,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'field_collection_item',
+      'field_name' => 'field_measurement_type',
+      'label' => 'Measurement Type',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '1',
+      ),
+    ),
+  );
+
+  // Exported field: 'field_collection_item-field_measurements-field_measurement_unit'
+  $fields['field_collection_item-field_measurements-field_measurement_unit'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_measurement_unit',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '0',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'field_measurements',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'e.g. "mm", "C", "km", "ha" ',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 2,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'field_collection_item',
+      'field_name' => 'field_measurement_unit',
+      'label' => 'Measurement Unit',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '3',
+      ),
+    ),
+  );
+
+  // Exported field: 'field_collection_item-field_measurements-field_measurement_value'
+  $fields['field_collection_item-field_measurements-field_measurement_value'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_measurement_value',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '0',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'field_measurements',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => '"45", "20", "1", "14.5", "UV-light" ',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 1,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'field_collection_item',
+      'field_name' => 'field_measurement_value',
+      'label' => 'Measurement Value',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '2',
+      ),
+    ),
+  );
+
   // Exported field: 'node-location-field_continent_or_ocean'
   $fields['node-location-field_continent_or_ocean'] = array(
     'field_config' => array(
@@ -1266,6 +2007,72 @@ function darwincore_field_default_fields() {
     ),
   );
 
+  // Exported field: 'node-specimen_observation-field_associated_taxa'
+  $fields['node-specimen_observation-field_associated_taxa'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '-1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_associated_taxa',
+      'foreign keys' => array(),
+      'indexes' => array(),
+      'module' => 'field_collection',
+      'settings' => array(
+        'path' => '',
+      ),
+      'translatable' => '0',
+      'type' => 'field_collection',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => '',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'field_collection',
+          'settings' => array(
+            'add' => 'Add',
+            'delete' => 'Delete',
+            'description' => TRUE,
+            'edit' => 'Edit',
+            'view_mode' => 'full',
+          ),
+          'type' => 'field_collection_view',
+          'weight' => 21,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_associated_taxa',
+      'label' => 'Associated taxa',
+      'required' => 0,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 0,
+        'module' => 'field_collection',
+        'settings' => array(),
+        'type' => 'field_collection_embed',
+        'weight' => '35',
+      ),
+    ),
+  );
+
   // Exported field: 'node-specimen_observation-field_basis_of_record'
   $fields['node-specimen_observation-field_basis_of_record'] = array(
     'field_config' => array(
@@ -1645,7 +2452,7 @@ function darwincore_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '22',
+        'weight' => '26',
       ),
     ),
   );
@@ -1712,7 +2519,7 @@ function darwincore_field_default_fields() {
         'module' => 'number',
         'settings' => array(),
         'type' => 'number',
-        'weight' => '14',
+        'weight' => '30',
       ),
     ),
   );
@@ -1886,7 +2693,83 @@ function darwincore_field_default_fields() {
           'year_range' => '-3:+3',
         ),
         'type' => 'date_text',
-        'weight' => '6',
+        'weight' => '1',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_dwc_behaviour'
+  $fields['node-specimen_observation-field_dwc_behaviour'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_dwc_behaviour',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(),
+      'translatable' => '0',
+      'type' => 'text_long',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'A description of the behaviour shown by the subject at the time the Occurrence was recorded. e.g. "roosting", "foraging", "running".',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 22,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_dwc_behaviour',
+      'label' => 'Behaviour',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'rows' => '5',
+        ),
+        'type' => 'text_textarea',
+        'weight' => '36',
       ),
     ),
   );
@@ -1967,6 +2850,160 @@ function darwincore_field_default_fields() {
     ),
   );
 
+  // Exported field: 'node-specimen_observation-field_establishment_means'
+  $fields['node-specimen_observation-field_establishment_means'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_establishment_means',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '0',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'The process by which the biological individual(s) represented in the Occurrence became established at the location. Recommended best practice is to use a controlled vocabulary. e.g. "cultivated", "invasive", "escaped from captivity", "wild", "native" ',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 23,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_establishment_means',
+      'label' => 'Establishment Means',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '37',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_event_remarks'
+  $fields['node-specimen_observation-field_event_remarks'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_event_remarks',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(),
+      'translatable' => '0',
+      'type' => 'text_long',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Comments or notes about the event, e.g. "after the recent rains the river is nearly at flood stage" ',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 18,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_event_remarks',
+      'label' => 'Event remarks',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'rows' => '5',
+        ),
+        'type' => 'text_textarea',
+        'weight' => '28',
+      ),
+    ),
+  );
+
   // Exported field: 'node-specimen_observation-field_genbank_number'
   $fields['node-specimen_observation-field_genbank_number'] = array(
     'field_config' => array(
@@ -2036,7 +3073,7 @@ function darwincore_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '15',
+        'weight' => '32',
       ),
     ),
   );
@@ -2110,7 +3147,167 @@ function darwincore_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '4',
+        'weight' => '-1',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_identification_references'
+  $fields['node-specimen_observation-field_identification_references'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '-1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_identification_references',
+      'foreign keys' => array(
+        'nid' => array(
+          'columns' => array(
+            'nid' => 'nid',
+          ),
+          'table' => 'node',
+        ),
+      ),
+      'indexes' => array(
+        'nid' => array(
+          0 => 'nid',
+        ),
+      ),
+      'module' => 'node_reference',
+      'settings' => array(
+        'referenceable_types' => array(
+          'biblio' => 'biblio',
+          'location' => 0,
+          'media_gallery' => 0,
+          'page' => 0,
+          'specimen_observation' => 0,
+          'spm' => 0,
+        ),
+        'view' => array(
+          'args' => array(),
+          'display_name' => '',
+          'view_name' => '',
+        ),
+      ),
+      'translatable' => '0',
+      'type' => 'node_reference',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'References used for making the identification.',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'node_reference',
+          'settings' => array(),
+          'type' => 'node_reference_default',
+          'weight' => 17,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'entityconnect_unload_add' => '0',
+      'entityconnect_unload_edit' => '0',
+      'field_name' => 'field_identification_references',
+      'label' => 'Identification References',
+      'required' => 0,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'node_reference',
+        'settings' => array(
+          'autocomplete_match' => 'contains',
+          'autocomplete_path' => 'node_reference/autocomplete',
+          'size' => '60',
+        ),
+        'type' => 'node_reference_autocomplete',
+        'weight' => '2',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_identification_verificatio'
+  $fields['node-specimen_observation-field_identification_verificatio'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_identification_verificatio',
+      'foreign keys' => array(),
+      'indexes' => array(
+        'value' => array(
+          0 => 'value',
+        ),
+      ),
+      'module' => 'list',
+      'settings' => array(
+        'allowed_values' => array(
+          0 => 'The name of the record has not been checked by any authority',
+          1 => 'The name of the record determined by comparison with other named organisms',
+          2 => 'The name of the record determined by a taxonomist or by other competent persons using herbarium/museum and/or library and/or documented living material',
+          3 => 'The name of the plant determined by taxonomist engaged in systematic revision of the group',
+          4 => 'The record is part of type gathering or propagated from type material by asexual methods',
+        ),
+        'allowed_values_function' => '',
+      ),
+      'translatable' => '0',
+      'type' => 'list_text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'A categorical indicator of the extent to which the taxonomic identification has been verified to be correct. Values taken from http://www.bgbm.org/tdwg/codata/schema/Mappings/HISPID3.htm#__Toc363917665',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'list',
+          'settings' => array(),
+          'type' => 'list_default',
+          'weight' => 19,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_identification_verificatio',
+      'label' => 'Identification verification',
+      'required' => 0,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'options',
+        'settings' => array(),
+        'type' => 'options_select',
+        'weight' => '3',
       ),
     ),
   );
@@ -2193,7 +3390,7 @@ function darwincore_field_default_fields() {
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_select',
-        'weight' => '5',
+        'weight' => '0',
       ),
     ),
   );
@@ -2430,7 +3627,7 @@ function darwincore_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '13',
+        'weight' => '28',
       ),
     ),
   );
@@ -2514,6 +3711,71 @@ function darwincore_field_default_fields() {
         'settings' => array(),
         'type' => 'options_select',
         'weight' => '18',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_measurements'
+  $fields['node-specimen_observation-field_measurements'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '-1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_measurements',
+      'foreign keys' => array(),
+      'indexes' => array(),
+      'module' => 'field_collection',
+      'settings' => array(
+        'path' => '',
+      ),
+      'translatable' => '0',
+      'type' => 'field_collection',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'deleted' => '0',
+      'description' => '',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'field_collection',
+          'settings' => array(
+            'add' => 'Add',
+            'delete' => 'Delete',
+            'description' => TRUE,
+            'edit' => 'Edit',
+            'view_mode' => 'full',
+          ),
+          'type' => 'field_collection_view',
+          'weight' => 29,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_measurements',
+      'label' => 'Measurements',
+      'required' => 0,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 0,
+        'module' => 'field_collection',
+        'settings' => array(),
+        'type' => 'field_collection_embed',
+        'weight' => '42',
       ),
     ),
   );
@@ -2608,7 +3870,7 @@ function darwincore_field_default_fields() {
           'progress_indicator' => 'throbber',
         ),
         'type' => 'media_multiselect',
-        'weight' => '2',
+        'weight' => '31',
       ),
     ),
   );
@@ -2680,7 +3942,7 @@ function darwincore_field_default_fields() {
           'rows' => '5',
         ),
         'type' => 'text_textarea',
-        'weight' => '26',
+        'weight' => '27',
       ),
     ),
   );
@@ -2759,6 +4021,154 @@ function darwincore_field_default_fields() {
     ),
   );
 
+  // Exported field: 'node-specimen_observation-field_occurence_remarks'
+  $fields['node-specimen_observation-field_occurence_remarks'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_occurence_remarks',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(),
+      'translatable' => '0',
+      'type' => 'text_long',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Comments or notes about the Occurrence. e.g. "found dead on road" ',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 24,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_occurence_remarks',
+      'label' => 'Occurence remarks',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'rows' => '5',
+        ),
+        'type' => 'text_textarea',
+        'weight' => '38',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_occurrence_status'
+  $fields['node-specimen_observation-field_occurrence_status'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_occurrence_status',
+      'foreign keys' => array(),
+      'indexes' => array(
+        'value' => array(
+          0 => 'value',
+        ),
+      ),
+      'module' => 'list',
+      'settings' => array(
+        'allowed_values' => array(
+          'Present' => 'Present',
+          'Absent' => 'Absent',
+        ),
+        'allowed_values_function' => '',
+      ),
+      'translatable' => '0',
+      'type' => 'list_text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => array(
+        0 => array(
+          'value' => 'Present',
+        ),
+      ),
+      'deleted' => '0',
+      'description' => 'A statement about the presence or absence of a Taxon.',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'list',
+          'settings' => array(),
+          'type' => 'list_default',
+          'weight' => 25,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_occurrence_status',
+      'label' => 'Occurrence status',
+      'required' => 0,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'options',
+        'settings' => array(),
+        'type' => 'options_select',
+        'weight' => '39',
+      ),
+    ),
+  );
+
   // Exported field: 'node-specimen_observation-field_other_catalogue_numbers'
   $fields['node-specimen_observation-field_other_catalogue_numbers'] = array(
     'field_config' => array(
@@ -2826,7 +4236,252 @@ function darwincore_field_default_fields() {
           'rows' => '5',
         ),
         'type' => 'text_textarea',
-        'weight' => '16',
+        'weight' => '33',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_preparations'
+  $fields['node-specimen_observation-field_preparations'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_preparations',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '0',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'e.g. "skin; skull; skeleton", "whole animal (ETOH); tissue (EDTA)", "fossil", "cast", "photograph", "DNA extract" ',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 26,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_preparations',
+      'label' => 'Preparations',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '40',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_previous_identifications'
+  $fields['node-specimen_observation-field_previous_identifications'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '-1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_previous_identifications',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '0',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'e.g. "Anthus sp., field ID by G. Iglesias; Anthus correndera, expert ID by C. Cicero 2009-02-12 based on morphology" ',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 28,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_previous_identifications',
+      'label' => 'Previous identifications',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '41',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_references'
+  $fields['node-specimen_observation-field_references'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '-1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_references',
+      'foreign keys' => array(
+        'nid' => array(
+          'columns' => array(
+            'nid' => 'nid',
+          ),
+          'table' => 'node',
+        ),
+      ),
+      'indexes' => array(
+        'nid' => array(
+          0 => 'nid',
+        ),
+      ),
+      'module' => 'node_reference',
+      'settings' => array(
+        'referenceable_types' => array(
+          'biblio' => 'biblio',
+          'location' => 0,
+          'media_gallery' => 0,
+          'page' => 0,
+          'specimen_observation' => 0,
+          'spm' => 0,
+        ),
+        'view' => array(
+          'args' => array(),
+          'display_name' => '',
+          'view_name' => '',
+        ),
+      ),
+      'translatable' => '0',
+      'type' => 'node_reference',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Literature associated with the Occurrence',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'node_reference',
+          'settings' => array(),
+          'type' => 'node_reference_default',
+          'weight' => 20,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'entityconnect_unload_add' => '0',
+      'entityconnect_unload_edit' => '0',
+      'field_name' => 'field_references',
+      'label' => 'References',
+      'required' => 0,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'node_reference',
+        'settings' => array(
+          'autocomplete_match' => 'contains',
+          'autocomplete_path' => 'node_reference/autocomplete',
+          'size' => '60',
+        ),
+        'type' => 'node_reference_autocomplete',
+        'weight' => '34',
       ),
     ),
   );
@@ -2898,7 +4553,85 @@ function darwincore_field_default_fields() {
           'rows' => '5',
         ),
         'type' => 'text_textarea',
-        'weight' => '17',
+        'weight' => '7',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_reproductive_condition'
+  $fields['node-specimen_observation-field_reproductive_condition'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_reproductive_condition',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '0',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'e.g. "non-reproductive", "pregnant", "in bloom", "fruit-bearing" ',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 27,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_reproductive_condition',
+      'label' => 'Reproductive condition',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '29',
       ),
     ),
   );
@@ -3124,7 +4857,7 @@ function darwincore_field_default_fields() {
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_select',
-        'weight' => '12',
+        'weight' => '27',
       ),
     ),
   );
@@ -3286,26 +5019,114 @@ function darwincore_field_default_fields() {
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_select',
-        'weight' => '2',
+        'weight' => '-2',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-specimen_observation-field_verbatim_date'
+  $fields['node-specimen_observation-field_verbatim_date'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_verbatim_date',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '0',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'specimen_observation',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'he verbatim original representation of the date and time information',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => 16,
+        ),
+        'linked_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_verbatim_date',
+      'label' => 'Verbatim Date',
+      'required' => 0,
+      'settings' => array(
+        'linkit' => array(
+          'enable' => 0,
+          'insert_plugin' => '',
+        ),
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '26',
       ),
     ),
   );
 
   // Translatables
   // Included for use with string extractors like potx.
+  t('"45", "20", "1", "14.5", "UV-light" ');
+  t('A categorical indicator of the extent to which the taxonomic identification has been verified to be correct. Values taken from http://www.bgbm.org/tdwg/codata/schema/Mappings/HISPID3.htm#__Toc363917665');
+  t('A description of the behaviour shown by the subject at the time the Occurrence was recorded. e.g. "roosting", "foraging", "running".');
   t('A description of the locality from which the catalogued item was collected, sans geographic information provided in other geographic fields.');
   t('A descriptive term indicating whether the record represents an object or observation.');
   t('A list of previous or alternative fully qualified catalog numbers for the same object or observation, whether in the current collection or in any other.  One per line');
   t('A reference to the methods used for determining the coordinates and uncertainties. Example: "http://manisnet.org/GeorefGuide.html".');
   t('A standard term to qualify the identification of the organism when doubts have arisen as to its identity. Examples: "cf.", "aff.", "subspecies in question"');
+  t('A statement about the presence or absence of a Taxon.');
   t('An identifying string applied to a set of material that resulted from a single collecting event.');
   t('An identifying string applied to the object or observation at the time of collection. Serves as a link between field notes and the object or observation.');
+  t('Associated taxa');
+  t('Associated taxon');
+  t('Association type');
   t('Basis of record');
+  t('Behaviour');
   t('Catalogue number');
   t('Collection code');
   t('Collector');
   t('Collector number');
   t('Comments about the spatial description determination, explaining assumptions made in addition or opposition to the those formalized in the method referred to in GeoreferenceProtocol.');
+  t('Comments or notes about the Occurrence. e.g. "found dead on road" ');
+  t('Comments or notes about the event, e.g. "after the recent rains the river is nearly at flood stage" ');
   t('Continent/Ocean');
   t('Coordinate uncertainty in meters');
   t('Count');
@@ -3313,6 +5134,9 @@ function darwincore_field_default_fields() {
   t('County');
   t('Date collected');
   t('Date identified');
+  t('Date on which the measurement was made');
+  t('Establishment Means');
+  t('Event remarks');
   t('Example: "40 trap-nights", "10 observer-hours; 10 km by foot; 30 km by car".');
   t('Example: "oak savanna", "pre-cordilleran steppe".');
   t('Field notes');
@@ -3323,24 +5147,43 @@ function darwincore_field_default_fields() {
   t('Georeference protocol');
   t('Georeference remarks');
   t('Habitat');
+  t('Identification References');
   t('Identification qualifier');
+  t('Identification verification');
   t('Identified by');
   t('Inherit values from');
   t('Institution code');
   t('Island');
   t('Island group');
   t('Lifestage');
+  t('Literature associated with the Occurrence');
   t('Locality');
   t('Location');
   t('Map');
   t('Maximum depth');
   t('Maximum elevation');
+  t('Measurement Accuracy');
+  t('Measurement By');
+  t('Measurement Date');
+  t('Measurement Method');
+  t('Measurement Remarks');
+  t('Measurement Type');
+  t('Measurement Unit');
+  t('Measurement Value');
+  t('Measurements');
   t('Media');
   t('Minimum depth');
   t('Minimum elevation');
   t('Notes taken in the field for the catalogued item.');
+  t('Occurence remarks');
+  t('Occurrence status');
   t('Other catalogue numbers');
+  t('Preparations');
+  t('Previous identifications');
+  t('References');
+  t('References used for making the identification.');
   t('Remarks');
+  t('Reproductive condition');
   t('Sampling Effort');
   t('Sampling Protocol');
   t('Select a location that this specimen was collected from.');
@@ -3368,8 +5211,20 @@ function darwincore_field_default_fields() {
   t('The name(s) of the collector(s) of the original data for the cataloged item.');
   t('The name(s) of the person(s) who applied the ScientificName to the object or observation. Example: James Earl Jones.');
   t('The number of individuals present in the lot or container. Not to be used for observations.');
+  t('The process by which the biological individual(s) represented in the Occurrence became established at the location. Recommended best practice is to use a controlled vocabulary. e.g. "cultivated", "invasive", "escaped from captivity", "wild", "native" ');
   t('Type status');
   t('Verbatim Coordinate System');
+  t('Verbatim Date');
+  t('e.g. "0.01", "normal distribution with variation of 2 m"');
+  t('e.g. "Anthus sp., field ID by G. Iglesias; Anthus correndera, expert ID by C. Cicero 2009-02-12 based on morphology" ');
+  t('e.g. "host"');
+  t('e.g. "minimum convex polygon around burrow entrances" for a home range area, "barometric altimeter" for an elevation');
+  t('e.g. "mm", "C", "km", "ha" ');
+  t('e.g. "non-reproductive", "pregnant", "in bloom", "fruit-bearing" ');
+  t('e.g. "skin; skull; skeleton", "whole animal (ETOH); tissue (EDTA)", "fossil", "cast", "photograph", "DNA extract" ');
+  t('e.g. "tail length", "temperature", "trap line length", "survey area", "trap type" ');
+  t('e.g. "tip of tail missing" ');
+  t('he verbatim original representation of the date and time information');
   t('xamples: "UV light trap", "mist net", "bottom trawl", "ad hoc observation", "point count", "Penguins from space: faecal stains reveal the location of emperor penguin colonies, http://dx.doi.org/10.1111/j.1466-8238.2009.00467.x", "Takats et al. 2001. Guidelines for Nocturnal Owl Monitoring in North America. Beaverhill Bird Observatory and Bird Studies Canada, Edmonton, Alberta. 32 pp.", "http://www.bsc-eoc.org/download/Owl.pdf"');
 
   return $fields;

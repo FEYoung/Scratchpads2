@@ -157,3 +157,9 @@ function darwincore_update_7010(){
     }
   }
 }
+
+
+
+function darwincore_update_7011() {
+ features_revert(array('darwincore' => array('darwincore')));
+}
