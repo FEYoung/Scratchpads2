@@ -49,13 +49,13 @@ function darwincore_field_group_info() {
     'label' => 'Event',
     'weight' => '22',
     'children' => array(
-      0 => 'field_dwc_habitat',
-      1 => 'field_notes',
-      2 => 'field_number',
-      3 => 'field_sampling_effort',
-      4 => 'field_sampling_protocol',
-      5 => 'field_verbatim_date',
-      6 => 'field_event_remarks',
+      0 => 'field_notes',
+      1 => 'field_number',
+      2 => 'field_dwc_habitat',
+      3 => 'field_event_remarks',
+      4 => 'field_sampling_effort',
+      5 => 'field_sampling_protocol',
+      6 => 'field_verbatim_date',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
@@ -142,6 +142,48 @@ function darwincore_field_group_info() {
   $field_group = new stdClass;
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
+  $field_group->identifier = 'group_genetic_sample|node|specimen_observation|form';
+  $field_group->group_name = 'group_genetic_sample';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'specimen_observation';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_tabs';
+  $field_group->data = array(
+    'label' => 'Sample (Tissue/DNA)',
+    'weight' => '27',
+    'children' => array(
+      0 => 'field_concentration',
+      1 => 'field_concentration_unit',
+      2 => 'field_extraction_method',
+      3 => 'field_extraction_date',
+      4 => 'field_extracted_by',
+      5 => 'field_person_provided_by',
+      6 => 'field_instiruion_provided_by',
+      7 => 'field_purification_method',
+      8 => 'field_quality',
+      9 => 'field_quality_check_date',
+      10 => 'field_quality_check_method',
+      11 => 'field_ratio_of_absorbance_260_23',
+      12 => 'field_ratio_of_absorbance_260_28',
+      13 => 'field_sample_type',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'label' => 'Sample (Tissue/DNA)',
+      'instance_settings' => array(
+        'display_mode' => '',
+        'required_fields' => 1,
+        'classes' => '',
+        'description' => '',
+      ),
+      'formatter' => 'closed',
+    ),
+  );
+  $export['group_genetic_sample|node|specimen_observation|form'] = $field_group;
+
+  $field_group = new stdClass;
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
   $field_group->identifier = 'group_height|node|location|form';
   $field_group->group_name = 'group_height';
   $field_group->entity_type = 'node';
@@ -170,6 +212,38 @@ function darwincore_field_group_info() {
     ),
   );
   $export['group_height|node|location|form'] = $field_group;
+
+  $field_group = new stdClass;
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_legal|node|specimen_observation|form';
+  $field_group->group_name = 'group_legal';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'specimen_observation';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_tabs';
+  $field_group->data = array(
+    'label' => 'Legal',
+    'weight' => '29',
+    'children' => array(
+      0 => 'field_collecting_permit',
+      1 => 'field_collecting_permit_url',
+      2 => 'field_collecting_permit_file',
+      3 => 'field_benefit_sharing',
+      4 => 'field_benefit_sharing_document_u',
+      5 => 'field_benefit_sharing_document',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_legal|node|specimen_observation|form'] = $field_group;
 
   $field_group = new stdClass;
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -395,7 +469,7 @@ function darwincore_field_group_info() {
   $field_group->parent_name = 'group_tabs';
   $field_group->data = array(
     'label' => 'Miscellaneous',
-    'weight' => '28',
+    'weight' => '31',
     'children' => array(),
     'format_type' => 'tab',
     'format_settings' => array(
@@ -423,24 +497,24 @@ function darwincore_field_group_info() {
     'label' => 'Occurence',
     'weight' => '26',
     'children' => array(
-      0 => 'field_collector',
-      1 => 'field_collector_number',
-      2 => 'field_count',
-      3 => 'field_date_collected',
-      4 => 'field_genbank_number',
-      5 => 'field_lifestage',
-      6 => 'field_media',
+      0 => 'field_media',
+      1 => 'field_collector',
+      2 => 'field_collector_number',
+      3 => 'field_count',
+      4 => 'field_date_collected',
+      5 => 'field_genbank_number',
+      6 => 'field_lifestage',
       7 => 'field_other_catalogue_numbers',
       8 => 'field_sex',
-      9 => 'field_references',
-      10 => 'field_associated_taxa',
-      11 => 'field_dwc_behaviour',
-      12 => 'field_establishment_means',
-      13 => 'field_occurence_remarks',
-      14 => 'field_occurrence_status',
-      15 => 'field_preparations',
-      16 => 'field_reproductive_condition',
-      17 => 'field_previous_identifications',
+      9 => 'field_associated_taxa',
+      10 => 'field_dwc_behaviour',
+      11 => 'field_establishment_means',
+      12 => 'field_occurence_remarks',
+      13 => 'field_occurrence_status',
+      14 => 'field_preparations',
+      15 => 'field_previous_identifications',
+      16 => 'field_references',
+      17 => 'field_reproductive_condition',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
@@ -457,6 +531,37 @@ function darwincore_field_group_info() {
   $field_group = new stdClass;
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
+  $field_group->identifier = 'group_preparation|node|specimen_observation|form';
+  $field_group->group_name = 'group_preparation';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'specimen_observation';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_tabs';
+  $field_group->data = array(
+    'label' => 'Preparation & Preservation',
+    'weight' => '28',
+    'children' => array(
+      0 => 'field_preparation_process',
+      1 => 'field_preparation_materials',
+      2 => 'field_prepared_by',
+      3 => 'field_preparation_date',
+      4 => 'field_preservation_medium',
+      5 => 'field_preservation_temperature_c',
+      6 => 'field_preservation_date',
+    ),
+    'format_type' => 'tabs',
+    'format_settings' => array(
+      'formatter' => '',
+      'instance_settings' => array(
+        'classes' => '',
+      ),
+    ),
+  );
+  $export['group_preparation|node|specimen_observation|form'] = $field_group;
+
+  $field_group = new stdClass;
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
   $field_group->identifier = 'group_related_materials|node|specimen_observation|form';
   $field_group->group_name = 'group_related_materials';
   $field_group->entity_type = 'node';
@@ -465,7 +570,7 @@ function darwincore_field_group_info() {
   $field_group->parent_name = 'group_tabs';
   $field_group->data = array(
     'label' => 'Related Materials',
-    'weight' => '27',
+    'weight' => '30',
     'children' => array(),
     'format_type' => 'tab',
     'format_settings' => array(
@@ -520,8 +625,8 @@ function darwincore_field_group_info() {
       0 => 'field_basis_of_record',
       1 => 'field_catalogue_number',
       2 => 'field_collection_code',
-      3 => 'field_inherit_values_from',
-      4 => 'field_institution_code',
+      3 => 'field_institution_code',
+      4 => 'field_inherit_values_from',
       5 => 'title',
     ),
     'format_type' => 'tab',
@@ -580,14 +685,17 @@ function darwincore_field_group_info() {
     'label' => 'Tabs',
     'weight' => '0',
     'children' => array(
-      0 => 'group_collection',
-      1 => 'group_location',
-      2 => 'group_miscellaneous',
-      3 => 'group_related_materials',
-      4 => 'group_required',
-      5 => 'group_taxonomy',
-      6 => 'group_occurrence',
-      7 => 'group_measurements',
+      0 => 'group_genetic_sample',
+      1 => 'group_collection',
+      2 => 'group_location',
+      3 => 'group_measurements',
+      4 => 'group_miscellaneous',
+      5 => 'group_occurrence',
+      6 => 'group_related_materials',
+      7 => 'group_required',
+      8 => 'group_taxonomy',
+      9 => 'group_legal',
+      10 => 'group_preparation',
     ),
     'format_type' => 'tabs',
     'format_settings' => array(
