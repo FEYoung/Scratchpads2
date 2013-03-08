@@ -192,8 +192,11 @@ function darwincore_update_7011(){
     );
     field_update_instance($field_instance);
   }
+}
 
-
+/**
+ * Rebuild the darwincore content type.
+ */
 function darwincore_update_7012() {
  features_revert(array('darwincore' => array('darwincore')));
 }
