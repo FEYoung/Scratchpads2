@@ -196,7 +196,10 @@ function darwincore_update_7011(){
 
 /**
  * Rebuild the darwincore content type.
- */
+ *
+ * FIXME - This MUST be rewritten as a manual update.  Users are able to edit content types and fields,
+ * so leaving it like this could be very bad!
 function darwincore_update_7012() {
  features_revert(array('darwincore' => array('darwincore')));
 }
+ */
