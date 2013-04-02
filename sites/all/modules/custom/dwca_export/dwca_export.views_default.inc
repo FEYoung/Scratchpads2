@@ -248,6 +248,31 @@ function dwca_export_views_default_views(){
   $handler->display->display_options['fields']['citation']['export_links'] = 0;
   $handler->display->display_options['fields']['citation']['file_attachments'] = 0;
   $handler->display->display_options['fields']['citation']['open_url_link'] = 0;
+  /* Field: Content: Path */
+  $handler->display->display_options['fields']['path']['id'] = 'path';
+  $handler->display->display_options['fields']['path']['table'] = 'node';
+  $handler->display->display_options['fields']['path']['field'] = 'path';
+  $handler->display->display_options['fields']['path']['relationship'] = 'field_reference_nid';
+  $handler->display->display_options['fields']['path']['label'] = 'NamePublishedInID';
+  $handler->display->display_options['fields']['path']['alter']['alter_text'] = 0;
+  $handler->display->display_options['fields']['path']['alter']['make_link'] = 0;
+  $handler->display->display_options['fields']['path']['alter']['absolute'] = 0;
+  $handler->display->display_options['fields']['path']['alter']['external'] = 0;
+  $handler->display->display_options['fields']['path']['alter']['replace_spaces'] = 0;
+  $handler->display->display_options['fields']['path']['alter']['trim_whitespace'] = 0;
+  $handler->display->display_options['fields']['path']['alter']['nl2br'] = 0;
+  $handler->display->display_options['fields']['path']['alter']['word_boundary'] = 1;
+  $handler->display->display_options['fields']['path']['alter']['ellipsis'] = 1;
+  $handler->display->display_options['fields']['path']['alter']['more_link'] = 0;
+  $handler->display->display_options['fields']['path']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['path']['alter']['trim'] = 0;
+  $handler->display->display_options['fields']['path']['alter']['html'] = 0;
+  $handler->display->display_options['fields']['path']['element_label_colon'] = 1;
+  $handler->display->display_options['fields']['path']['element_default_classes'] = 1;
+  $handler->display->display_options['fields']['path']['hide_empty'] = 0;
+  $handler->display->display_options['fields']['path']['empty_zero'] = 0;
+  $handler->display->display_options['fields']['path']['hide_alter_empty'] = 1;
+  $handler->display->display_options['fields']['path']['absolute'] = 1;
   /* Field: Taxonomy term: Taxonomy term UUID */
   $handler->display->display_options['fields']['uuid_1']['id'] = 'uuid_1';
   $handler->display->display_options['fields']['uuid_1']['table'] = 'taxonomy_term_data';
@@ -324,11 +349,12 @@ function dwca_export_views_default_views(){
   $handler->display->display_options['style_options']['parent_sort'] = 0;
   $handler->display->display_options['style_options']['quote'] = 1;
   $handler->display->display_options['style_options']['trim'] = 1;
+  $handler->display->display_options['style_options']['keep_html'] = 1;
   $handler->display->display_options['style_options']['replace_newlines'] = 1;
   $handler->display->display_options['style_options']['newline_replacement'] = '\\r';
   $handler->display->display_options['style_options']['header'] = 0;
   $handler->display->display_options['path'] = 'dwca_export/classification/csv';
-  $handler->display->display_options['use_batch'] = '0';
+  $handler->display->display_options['use_batch'] = 'no_batch';
   $views[$view->name] = $view;
   //----------------------------------------------------------------------------
   // REFERENCE
@@ -862,12 +888,13 @@ function dwca_export_views_default_views(){
   $handler->display->display_options['style_options']['parent_sort'] = 0;
   $handler->display->display_options['style_options']['quote'] = 1;
   $handler->display->display_options['style_options']['trim'] = 1;
+  $handler->display->display_options['style_options']['keep_html'] = 1;
   $handler->display->display_options['style_options']['replace_newlines'] = 1;
   $handler->display->display_options['style_options']['newline_replacement'] = '\\r';
   $handler->display->display_options['style_options']['header'] = 0;
   $handler->display->display_options['path'] = 'dwca-export/reference/csv';
   $handler->display->display_options['sitename_title'] = 0;
-  $handler->display->display_options['use_batch'] = '0';
+  $handler->display->display_options['use_batch'] = 'no_batch';
   $views[$view->name] = $view;
   //----------------------------------------------------------------------------
   // IMAGE
@@ -1211,11 +1238,12 @@ function dwca_export_views_default_views(){
   $handler->display->display_options['style_options']['parent_sort'] = 0;
   $handler->display->display_options['style_options']['quote'] = 1;
   $handler->display->display_options['style_options']['trim'] = 0;
+  $handler->display->display_options['style_options']['keep_html'] = 1;
   $handler->display->display_options['style_options']['replace_newlines'] = 1;
   $handler->display->display_options['style_options']['newline_replacement'] = '\\r';
   $handler->display->display_options['style_options']['header'] = 0;
   $handler->display->display_options['path'] = 'dwca-export/image/page';
-  $handler->display->display_options['use_batch'] = '0';
+  $handler->display->display_options['use_batch'] = 'no_batch';
   $views[$view->name] = $view;
   //----------------------------------------------------------------------------
   // SPECIMEN
@@ -1384,11 +1412,12 @@ function dwca_export_views_default_views(){
   $handler->display->display_options['style_options']['parent_sort'] = 0;
   $handler->display->display_options['style_options']['quote'] = 1;
   $handler->display->display_options['style_options']['trim'] = 1;
+  $handler->display->display_options['style_options']['keep_html'] = 1;
   $handler->display->display_options['style_options']['replace_newlines'] = 1;
   $handler->display->display_options['style_options']['newline_replacement'] = '\\r';
   $handler->display->display_options['style_options']['header'] = 0;
   $handler->display->display_options['path'] = 'dwca_export/specimen/csv';
-  $handler->display->display_options['use_batch'] = '0';
+  $handler->display->display_options['use_batch'] = 'no_batch';
   $views[$view->name] = $view;
   //----------------------------------------------------------------------------
   // EoL AGENTS
@@ -1575,11 +1604,12 @@ function dwca_export_views_default_views(){
   $handler->display->display_options['style_options']['parent_sort'] = 0;
   $handler->display->display_options['style_options']['quote'] = 1;
   $handler->display->display_options['style_options']['trim'] = 1;
+  $handler->display->display_options['style_options']['keep_html'] = 1;
   $handler->display->display_options['style_options']['replace_newlines'] = 1;
   $handler->display->display_options['style_options']['newline_replacement'] = '\\r';
   $handler->display->display_options['style_options']['header'] = 0;
   $handler->display->display_options['path'] = 'dwca_export/eol_agents/csv';
-  $handler->display->display_options['use_batch'] = '0';
+  $handler->display->display_options['use_batch'] = 'no_batch';
   ;
   $views[$view->name] = $view;
   //----------------------------------------------------------------------------
@@ -1707,11 +1737,12 @@ function dwca_export_views_default_views(){
   $handler->display->display_options['style_options']['parent_sort'] = 0;
   $handler->display->display_options['style_options']['quote'] = 1;
   $handler->display->display_options['style_options']['trim'] = 1;
+  $handler->display->display_options['style_options']['keep_html'] = 1;
   $handler->display->display_options['style_options']['replace_newlines'] = 1;
   $handler->display->display_options['style_options']['newline_replacement'] = '\\r';
   $handler->display->display_options['style_options']['header'] = 0;
   $handler->display->display_options['path'] = 'dwca-export/distribution/csv';
-  $handler->display->display_options['use_batch'] = '0';
+  $handler->display->display_options['use_batch'] = 'no_batch';
   $views[$view->name] = $view;
   //--------------------------------------------------------------------------------
   // Vernacular Names
@@ -1805,10 +1836,11 @@ function dwca_export_views_default_views(){
   $handler->display->display_options['style_options']['parent_sort'] = 0;
   $handler->display->display_options['style_options']['quote'] = 1;
   $handler->display->display_options['style_options']['trim'] = 0;
+  $handler->display->display_options['style_options']['keep_html'] = 1;
   $handler->display->display_options['style_options']['replace_newlines'] = 0;
   $handler->display->display_options['style_options']['header'] = 0;
   $handler->display->display_options['path'] = 'dwca_export/vernacular_names/csv';
-  $handler->display->display_options['use_batch'] = '0';
+  $handler->display->display_options['use_batch'] = 'no_batch';
   $views[$view->name] = $view;
   //----------------------------------------------------------------------------
   // DESCRIPTION VIEWS
@@ -2301,12 +2333,13 @@ function _dwca_export_view_description($desc_type){
   $handler->display->display_options['style_options']['parent_sort'] = 0;
   $handler->display->display_options['style_options']['quote'] = 1;
   $handler->display->display_options['style_options']['trim'] = 1;
+  $handler->display->display_options['style_options']['keep_html'] = 1;
   $handler->display->display_options['style_options']['replace_newlines'] = 1;
   $handler->display->display_options['style_options']['newline_replacement'] = '<br/>';
   $handler->display->display_options['style_options']['header'] = 0;
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['path'] = t('dwca-export/description-' . $desc_type . '/csv');
-  $handler->display->display_options['use_batch'] = '0';
+  $handler->display->display_options['use_batch'] = 'no_batch';
   return $view;
 }

@@ -2829,9 +2829,13 @@ function darwincore_field_default_fields() {
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'options',
-        'settings' => array(),
-        'type' => 'options_select',
+        'module' => 'user_reference',
+        'settings' => array(
+          'autocomplete_match' => 'contains',
+          'autocomplete_path' => 'user_reference/autocomplete',
+          'size' => '60'
+        ),
+        'type' => 'user_reference_autocomplete',
         'weight' => '24',
       ),
     ),
@@ -4252,9 +4256,13 @@ function darwincore_field_default_fields() {
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'options',
-        'settings' => array(),
-        'type' => 'options_select',
+        'module' => 'user_reference',
+        'settings' => array(
+          'autocomplete_match' => 'contains',
+          'autocomplete_path' => 'user_reference/autocomplete',
+          'size' => '60'
+        ),
+        'type' => 'user_reference_autocomplete',
         'weight' => '0',
       ),
     ),

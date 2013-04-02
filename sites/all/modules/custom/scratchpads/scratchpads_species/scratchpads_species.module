@@ -100,7 +100,7 @@ function scratchpads_species_form_taxonomy_form_vocabulary_alter(&$form, &$form_
     '#description' => t('Check this box to include data from synonyms on valid taxon name pages.'),
     '#type' => 'checkbox',
     '#weight' => 1,
-    '#default_value' => $form['#vocabulary']->show_synonym_data ? 1 : 0,
+    '#default_value' => empty($form['#vocabulary']->show_synonym_data) ? 0 : 1,
     '#states' => array(
       'invisible' => array(
         ':input[name="biological_classification"]' => array(
@@ -551,8 +551,9 @@ function theme_scratchpads_species_name($vars){
   switch($rank){
     case 'genus':
       if($unit1){
-        $name = t('<em>!unit1</em>', array(
-          '!unit1' => $unit1
+        $name = t('!ind1<em>!unit1</em>', array(
+          '!unit1' => $unit1,
+          '!ind1' => $unit_ind1
         ));
       }
       break;
