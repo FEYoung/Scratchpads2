@@ -7215,7 +7215,7 @@ function darwincore_field_default_fields() {
       'bundle' => 'specimen_observation',
       'default_value' => NULL,
       'deleted' => '0',
-      'description' => 'he verbatim original representation of the date and time information',
+      'description' => 'The verbatim original representation of the date and time information',
       'display' => array(
         'default' => array(
           'label' => 'above',
