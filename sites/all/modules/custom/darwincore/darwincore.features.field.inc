@@ -4413,7 +4413,7 @@ function darwincore_field_default_fields() {
       ),
       'entity_type' => 'node',
       'field_name' => 'field_instiruion_provided_by',
-      'label' => 'Instituion Provided By',
+      'label' => 'Institution Provided By',
       'required' => 0,
       'settings' => array(
         'linkit' => array(
@@ -7215,7 +7215,7 @@ function darwincore_field_default_fields() {
       'bundle' => 'specimen_observation',
       'default_value' => NULL,
       'deleted' => '0',
-      'description' => 'he verbatim original representation of the date and time information',
+      'description' => 'The verbatim original representation of the date and time information',
       'display' => array(
         'default' => array(
           'label' => 'above',
@@ -7323,7 +7323,7 @@ function darwincore_field_default_fields() {
   t('Identification verification');
   t('Identified by');
   t('Inherit values from');
-  t('Instituion Provided By');
+  t('Institution Provided By');
   t('Institution code');
   t('Island');
   t('Island group');
