@@ -7073,7 +7073,7 @@ function darwincore_field_default_fields() {
             'wrapper_option' => '- None -',
           ),
           'type' => 'taxonomy_term_reference_csv',
-          'weight' => '1',
+          'weight' => '1000',
         ),
         'linked_node' => array(
           'label' => 'above',
