@@ -8,18 +8,20 @@ $plugin = array(
   'callback' => 'itis_term_map_unacceptibility_callback',
   'name' => 'Map unacceptibility',
   'multi' => 'loop',
-  'category' => 'Taxonomy',
-  'description' => 'This will allow you to map incoming pattern to ITIS unacceptibility term. For example incoming "nn" = ITIS "invalidly published, nomen nudum"'
+  'category' => 'ITIS',
+  'description' => 'This will allow you to map incoming patterns to ITIS unacceptibility terms. For example incoming "nn" could be mapped to ITIS "invalidly published, nomen nudum"'
 );
 
 /**
  * Form for building the Brahms to Scratchpad unacceptibility term mapping
  */
 function itis_term_map_unacceptibility_form($importer, $element_key, $settings){
+  $vocabulary = taxonomy_vocabulary_machine_name_load($importer->processor->config['vocabulary']);
+  $biological_classification = $vocabulary->biological_classification;
   $form = array();
   $allowed_values = itis_term_allowed_values(array(
     'field_name' => 'field_unacceptability_reason'
-  ), 2);
+  ), $biological_classification);
   foreach($allowed_values as $key){
     $form['scratch_map_' . $key] = array(
       '#type' => 'textfield',
@@ -27,6 +29,10 @@ function itis_term_map_unacceptibility_form($importer, $element_key, $settings){
       '#default_value' => isset($settings['scratch_map_' . $key]) ? $settings['scratch_map_' . $key] : ''
     );
   }
+  $form['scratch_map_biological_classification'] = array(
+    '#type' => 'hidden',
+    '#value' => isset($biological_classification) ? $biological_classification : ''
+  );
   return $form;
 }
 
@@ -37,7 +43,7 @@ function itis_term_map_unacceptibility_form($importer, $element_key, $settings){
 function itis_term_map_unacceptibility_callback($result, $item_key, $element_key, &$field, $settings){
   $allowed_values = itis_term_allowed_values(array(
     'field_name' => 'field_unacceptability_reason'
-  ), 2);
+  ), $settings['scratch_map_biological_classification']);
   foreach($allowed_values as $key){
     if($settings['scratch_map_' . $key]){
       $scratch_map_array = explode(",", $settings['scratch_map_' . $key]);
