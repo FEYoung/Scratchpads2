@@ -4,18 +4,18 @@
  * Allow for mapping values from an incoming term to an itis term
  */
 $plugin = array(
-  'form' => 'itis_term_map_unit_indicator_form',
-  'callback' => 'itis_term_map_unit_indicator_callback',
+  'form' => 'itis_term_map_unit_indicator_3_form',
+  'callback' => 'itis_term_map_unit_indicator_3_callback',
   'name' => 'Map unit indicator 3',
   'multi' => 'loop',
   'category' => 'Taxonomy',
-  'description' => 'This will allow you to map an incoming unit indicator reasons to Scratchpad unit indicator 3. For example incoming term "var" = Scratchpads "var."'
+  'description' => 'This will allow you to map an incoming pattern to an ITIS unit indicator 3. For example incoming term "var" = ITIS "var."'
 );
 
 /**
  * Form for building the Brahms to Scratchpad unit indicator term mapping
  */
-function itis_term_map_unit_indicator_form($importer, $element_key, $settings){
+function itis_term_map_unit_indicator_3_form($importer, $element_key, $settings){
   $form = array();
   $allowed_values = itis_term_allowed_values(array(
     'field_name' => 'field_unit_indicator3'
@@ -34,7 +34,7 @@ function itis_term_map_unit_indicator_form($importer, $element_key, $settings){
  * Function to process the value conversion
  * Called by the feed (via Feed Tamper) to modify data.
  */
-function itis_term_map_unit_indicator_callback($result, $item_key, $element_key, &$field, $settings){
+function itis_term_map_unit_indicator_3_callback($result, $item_key, $element_key, &$field, $settings){
   $allowed_values = itis_term_allowed_values(array(
     'field_name' => 'field_unit_indicator3'
   ), 2);

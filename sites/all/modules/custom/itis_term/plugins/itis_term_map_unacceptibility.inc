@@ -9,7 +9,7 @@ $plugin = array(
   'name' => 'Map unacceptibility',
   'multi' => 'loop',
   'category' => 'Taxonomy',
-  'description' => 'This will allow you to map incoming pattern ITIS unacceptibility. For example incoming "nn" = ITIS "invalidly published, nomen nudum"'
+  'description' => 'This will allow you to map incoming pattern to ITIS unacceptibility term. For example incoming "nn" = ITIS "invalidly published, nomen nudum"'
 );
 
 /**

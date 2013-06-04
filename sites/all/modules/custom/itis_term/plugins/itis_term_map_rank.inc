@@ -9,7 +9,7 @@ $plugin = array(
   'name' => 'Map rank',
   'multi' => 'loop',
   'category' => 'Taxonomy',
-  'description' => 'This will allow you to map an incoming pattern to a ITIS rank. For example incoming pattern "forma" mapped to ITIS rank "Form"'
+  'description' => 'This will allow you to map an incoming pattern to an ITIS rank. For example incoming pattern "forma" mapped to ITIS rank "Form"'
 );
 
 /**
