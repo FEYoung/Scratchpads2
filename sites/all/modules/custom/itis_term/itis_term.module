@@ -555,6 +555,7 @@ function scratchpads_species_taxonomy_term_view_alter(&$build){
 
 /**
  * Implements hook_ctools_plugin_directory().
+ * 
  * Contains a single hook based on MYMODULE_ctools_plugin_directory,
  * which lets us tell Feed Tamper (via CTools) where our plugins are going to be.
  * In this case they will be in a sub-folder of the module, itis_term/plugins.
