@@ -203,10 +203,12 @@ function darwincore_update_7011(){
  */
 function darwincore_update_7012(){
   $field_instance = field_info_instance('node', 'field_genbank_number', 'specimen_observation');
-  $field_instance['label'] = 'GenBank number(s)';
-  $field_instance['description'] = t('Enter a comma separated list of numbers. For example: FN554775, FR694013');
-  $field_instance['display']['default']['type'] = 'darwincore_link_to_ncbi';
-  field_update_instance($field_instance);
+  if($field_instance){
+    $field_instance['label'] = 'GenBank number(s)';
+    $field_instance['description'] = t('Enter a comma separated list of numbers. For example: FN554775, FR694013');
+    $field_instance['display']['default']['type'] = 'darwincore_link_to_ncbi';
+    field_update_instance($field_instance);
+  }
 }
 
 /**
@@ -214,7 +216,7 @@ function darwincore_update_7012(){
  *
  * FIXME - This MUST be rewritten as a manual update.  Users are able to edit content types and fields,
  * so leaving it like this could be very bad!
-function darwincore_update_7012() {
+function darwincore_update_7013() {
  features_revert(array('darwincore' => array('darwincore')));
 }
  */
