@@ -1,0 +1,8 @@
+name = "Simplenews"
+description = "Send newsletters to subscribed email addresses, with the option to select which content to send"
+core = "7.x"
+dependencies[] = simplenews
+dependencies[] = scs
+dependencies[] = scs_views
+tool=true
+configure = admin/config/services/simplenews

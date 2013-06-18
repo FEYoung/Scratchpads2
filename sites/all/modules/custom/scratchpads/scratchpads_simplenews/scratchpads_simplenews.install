@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * Implements hook_disable()
+ */
+function scratchpads_simplenews_disable(){
+  drupal_register_shutdown_function('module_disable', array(
+    'scs'
+  ));
+  drupal_register_shutdown_function('module_disable', array(
+    'simplenews'
+  ));
+  /* 
+   * disable related view
+   * https://drupal.org/node/1733808#comment-7254988 
+   */
+  // a list of views (their view name) to disable
+  $viewnames = array(
+    'newsletter_creation'
+  );
+  // grab list of views that are already disabled
+  $views_status = variable_get('views_defaults', array());
+  // add our views to be disabled to the list
+  foreach($viewnames as $key => $viewname){
+    $views_status[$viewname] = TRUE;
+  }
+  // reset the variable with the new list
+  variable_set('views_defaults', $views_status);
+  // empty cache now
+  if(function_exists('views_invalidate_cache')){
+    views_invalidate_cache();
+  }
+}
