@@ -1,4 +1,4 @@
-name = "Simplenews"
+name = "Simplenews with select"
 description = "Send newsletters to subscribed email addresses, with the option to select which content to send"
 core = "7.x"
 dependencies[] = simplenews
