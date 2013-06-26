@@ -4,18 +4,6 @@
  * Simplenews module
  *
  * Implements hook_scratchpads_default_permissions().
+ * 
+ * Permission set in scratchpads_roles_and_permissions
  */
-function simplenews_scratchpads_default_permissions(){
-  return array(
-      'maintainer' => array(
-          'administer newsletters',
-          'administer simplenews subscriptions',
-          'administer simplenews settings',
-          'send newsletter',
-          'administer scs'
-      ),
-      'anonymous user' => array(
-          'subscribe to newsletters'
-      )
-  );
-}
