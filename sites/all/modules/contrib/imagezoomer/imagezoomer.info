@@ -1,0 +1,15 @@
+name = ImageZoomer
+description = Integrates some image zoom jquery plugins to Drupal 7. Once installed, it will provide field formatters for zooming images.
+package = User interface
+core = 7.x
+scripts[] = imagezoomer.js
+dependencies[] = image
+dependencies[] = jquery_update
+configure = admin/config/user-interface/imagezoomer
+
+; Information added by drupal.org packaging script on 2013-01-31
+version = "7.x-1.0"
+core = "7.x"
+project = "imagezoomer"
+datestamp = "1359635468"
+

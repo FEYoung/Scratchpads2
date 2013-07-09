@@ -1,0 +1,582 @@
+<?php
+/**
+ * @file
+ * Integrate Powerzoomer / Featuredzoom jquery plugins to Drupal 7
+ */
+
+/**
+ * Implements hook_permission().
+ */
+function imagezoomer_permission() {
+  return array(
+    'administer imagezoomer' => array(
+      'title' => t('Administer image zoomer'),
+      'description' => t('Configure the Image zoomer settings.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_library().
+ */
+function imagezoomer_library() {
+  $libraries['ddpowerzoomer'] = array(
+    'title' => 'Powerzoomer', 
+    'website' => 'http://www.dynamicdrive.com/dynamicindex4/powerzoomer.htm', 
+    'version' => '1.1',
+    'js' => array(
+      'sites/all/libraries/imagezoomer/ddpowerzoomer.js' => array(),
+    ),
+  );
+
+  $libraries['featuredzoomer'] = array(
+    'title' => 'Featured Image Zoomer', 
+    'website' => 'http://www.dynamicdrive.com/dynamicindex4/featuredzoomer.htm', 
+    'version' => '2.1',
+    'js' => array(
+      'sites/all/libraries/imagezoomer/multizoom.js' => array(),
+    ),
+  );
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function imagezoomer_field_formatter_info() {
+  return array(
+    'powerzoomer' => array(
+      'label' => t('Power Zoomer'), 
+      'field types' => array('image'),
+      'settings' => array(
+        'imagezoomer_power_image_style_display' => 'medium',
+        'imagezoomer_power_image_style_zooming' => 'original',
+      ),
+    ),
+    'featuredzoomer' => array(
+      'label' => t('Featured Zoomer'), 
+      'field types' => array('image'),
+      'settings' => array(
+        'imagezoomer_featured_image_style_display' => 'medium',
+        'imagezoomer_featured_image_style_zooming' => 'original',
+      ),
+    ),
+  ); 
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function imagezoomer_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $element = array();
+
+  switch ($display['type']) {
+    case 'powerzoomer':
+      $image_style_list = array('original' => t('Original'));
+      foreach (array_keys(image_styles()) as $image_style) {
+        $image_style_list[$image_style] = ucfirst($image_style);
+      }
+
+      $element['imagezoomer_power_image_style_display'] = array(
+        '#title' => t('Select image-style for displaying'),
+        '#type' => 'select',
+        '#options' => $image_style_list,
+        '#default_value' => $settings['imagezoomer_power_image_style_display'],
+        '#description' => t('Normal size for displaying on node view.'),
+      );
+
+      $element['imagezoomer_power_image_style_zooming'] = array(
+        '#title' => t('Select image-style for zooming'),
+        '#type' => 'select',
+        '#options' => $image_style_list,
+        '#default_value' => $settings['imagezoomer_power_image_style_zooming'],
+        '#description' => t('The larger size for zooming when mouseover.'),
+      );
+      break;
+
+    case 'featuredzoomer':
+      $image_style_list = array('original' => t('Original'));
+      foreach (array_keys(image_styles()) as $image_style) {
+        $image_style_list[$image_style] = ucfirst($image_style);
+      }
+
+      $element['imagezoomer_featured_image_style_display'] = array(
+        '#title' => t('Select image-style for displaying'),
+        '#type' => 'select',
+        '#options' => $image_style_list,
+        '#default_value' => $settings['imagezoomer_featured_image_style_display'],
+        '#description' => t('Normal size for displaying on node view.'),
+      );
+
+      $element['imagezoomer_featured_image_style_zooming'] = array(
+        '#title' => t('Select image-style for zooming'),
+        '#type' => 'select',
+        '#options' => $image_style_list,
+        '#default_value' => $settings['imagezoomer_featured_image_style_zooming'],
+        '#description' => t('The larger size for zooming when mouseover.'),
+      );
+      break;
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function imagezoomer_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $summary = '';
+
+  switch ($display['type']) {
+    case 'powerzoomer':
+      $summary = t('Displayed style: @displayed_style<br /> Zoomed style: @zoomed_style', array('@displayed_style' => $settings['imagezoomer_power_image_style_display'], '@zoomed_style' => $settings['imagezoomer_power_image_style_zooming']));
+      break;
+
+    case 'featuredzoomer':
+      $summary = t('Displayed style: @displayed_style<br /> Zoomed style: @zoomed_style', array('@displayed_style' => $settings['imagezoomer_featured_image_style_display'], '@zoomed_style' => $settings['imagezoomer_featured_image_style_zooming']));
+      break;
+  }
+
+  return $summary;
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function imagezoomer_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $settings = $display['settings'];
+
+  switch ($display['type']) {
+    case 'powerzoomer':
+      foreach ($items as $delta => $item) {
+        // Prepare variables for inputting into the theme.
+        $variables = array(
+          'file' => $item,
+          'image_style_display' => $settings['imagezoomer_power_image_style_display'],
+          'image_style_zooming' => $settings['imagezoomer_power_image_style_zooming'],
+          'imagezoomer_power_options' => array(),
+        );
+
+        $element[$delta] = array(
+          '#markup' => theme('imagezoomer_power_image', $variables), 
+        );
+      }
+      break;
+
+    case 'featuredzoomer':
+      foreach ($items as $delta => $item) {
+        // Prepare variables for inputting into the theme.
+        $variables = array(
+          'file' => $item,
+          'image_style_display' => $settings['imagezoomer_featured_image_style_display'],
+          'image_style_zooming' => $settings['imagezoomer_featured_image_style_zooming'],
+          'imagezoomer_featured_options' => array(),
+        );
+
+        $element[$delta] = array(
+          '#markup' => theme('imagezoomer_featured_image', $variables), 
+        );
+      }
+      break;
+  }
+
+  return $element;
+}
+
+/**
+ * Provides a theme function to return an image with powerzoomer attached.
+ * @params: $file - Drupal file object.
+ * $image_style: The imagecache style name for showing the image on the page.
+ * $image_zoom_style: The imagecache style name for zoomming when mouseover.
+ * (leave empty for not using bigger zooming image).
+ */
+function theme_imagezoomer_featured_image($variables) {
+  // Validate inputs.
+  if (is_null($variables['file']) or is_null($variables['image_style_display'])) {
+    drupal_set_message(t('Power featured zoomer image cannot be set. Please double check input data.'), 'error');
+    return '';
+  }
+
+  // Get variables.
+  $file = $variables['file'];
+  $image_style_display = $variables['image_style_display'];
+  $image_style_zooming = $variables['image_style_zooming'];
+  $featuredzoomer_options = !is_array($variables['imagezoomer_featured_options']) ? array() : $variables['imagezoomer_featured_options'];
+
+  // Convert $file object.
+  if (!is_object($file)) {
+    $file = (object) $file;
+  }
+
+  // Adding our required js files.
+  drupal_add_js(drupal_get_path('module', 'imagezoomer') . '/imagezoomer.js');
+  drupal_add_library('imagezoomer', 'featuredzoomer');
+
+  // Adding options to Drupal.settings for JQuery script uses.
+  if (empty($featuredzoomer_options)) {
+    $featuredzoomer_options = array(
+      'imagezoomer_featured_power_range_low' => variable_get('imagezoomer_featured_power_range_low', 2),
+      'imagezoomer_featured_power_range_high' => variable_get('imagezoomer_featured_power_range_high', 7),
+      'imagezoomer_featured_magnifier_size_width' => variable_get('imagezoomer_featured_magnifier_size_width', 200),
+      'imagezoomer_featured_magnifier_size_height' => variable_get('imagezoomer_featured_magnifier_size_height', 200),
+      'imagezoomer_featured_magnifier_position' => variable_get('imagezoomer_featured_magnifier_position'. 'right'),
+    );
+  }
+
+  $featuredzoomer_options = array(
+    'imagezoomer_featured_power_range_low' => isset($featuredzoomer_options['imagezoomer_featured_power_range_low']) ? $featuredzoomer_options['imagezoomer_featured_power_range_low'] : variable_get('imagezoomer_featured_power_range_low', 2),
+    'imagezoomer_featured_power_range_high' => isset($featuredzoomer_options['imagezoomer_featured_power_range_high']) ? $featuredzoomer_options['imagezoomer_featured_power_range_high'] : variable_get('imagezoomer_featured_power_range_high', 7),
+    'imagezoomer_featured_magnifier_size_width' => isset($featuredzoomer_options['imagezoomer_featured_magnifier_size_width']) ? $featuredzoomer_options['imagezoomer_featured_magnifier_size_width'] : variable_get('imagezoomer_featured_magnifier_size_width', 200),
+    'imagezoomer_featured_magnifier_size_height' => isset($featuredzoomer_options['imagezoomer_featured_magnifier_size_height']) ? $featuredzoomer_options['imagezoomer_featured_magnifier_size_height'] : variable_get('imagezoomer_featured_magnifier_size_height', 200),
+    'imagezoomer_featured_magnifier_position' => isset($featuredzoomer_options['imagezoomer_featured_magnifier_position']) ? $featuredzoomer_options['imagezoomer_featured_magnifier_position'] : variable_get('imagezoomer_featured_magnifier_position', 'right'),
+  );
+  
+  drupal_add_js(array('imagezoomer_featured' => $featuredzoomer_options), 'setting');
+
+  // Get image path for displaying and zooming image.
+  $displaying_image_path = $image_style_display == 'original' ? file_create_url($file->uri) : image_style_url($image_style_display, $file->uri);
+  $zooming_image_path = $image_style_zooming == 'original' ? file_create_url($file->uri) : image_style_url($image_style_zooming, $file->uri);
+  
+  // Theme both images for showing.
+  $output = '';
+  $output .= '<img src="' . $displaying_image_path . '" border="0" class="imagezoomer-featured-image" id="imagezoomer-featured-image-' . $file->fid . '" alt="' . $file->filename . '" title="' . $file->filename . '" zoomingpath="' . $zooming_image_path . '" />';
+
+  return $output;
+}
+
+/**
+ * Provides a theme function to return an image with powerzoomer attached.
+ * @params: $file - Drupal file object.
+ * $image_style: The imagecache style name for showing the image on the page.
+ * $image_zoom_style: The imagecache style name for zoomming when mouseover.
+ * (leave empty for not using bigger zooming image).
+ */
+function theme_imagezoomer_power_image($variables) {
+  // Validate inputs.
+  if (is_null($variables['file']) or is_null($variables['image_style_display'])) {
+    drupal_set_message(t('Powerzoomer image cannot be set. Please double check input data.'), 'error');
+    return '';
+  }
+
+  // Get variables.
+  $file = $variables['file'];
+  $image_style_display = $variables['image_style_display'];
+  $image_style_zooming = $variables['image_style_zooming'];
+  $imagezoomer_options = !is_array($variables['imagezoomer_power_options']) ? array() : $variables['imagezoomer_power_options'];
+
+  // Convert $file object.
+  if (!is_object($file)) {
+    $file = (object) $file;
+  }
+
+  // Adding our required js files.
+  drupal_add_js(drupal_get_path('module', 'imagezoomer') . '/imagezoomer.js');
+  drupal_add_library('imagezoomer', 'ddpowerzoomer');
+
+  // Adding options to Drupal.settings for JQuery script uses.
+  if (empty($imagezoomer_options)) {
+    $imagezoomer_options = array(
+      'imagezoomer_power_default_power' => variable_get('imagezoomer_power_default_power', 2),
+      'imagezoomer_power_power_range_low' => variable_get('imagezoomer_power_power_range_low', 2),
+      'imagezoomer_power_power_range_high' => variable_get('imagezoomer_power_power_range_high', 7),
+      'imagezoomer_power_magnifier_size_width' => variable_get('imagezoomer_power_magnifier_size_width', 75),
+      'imagezoomer_power_magnifier_size_height' => variable_get('imagezoomer_power_magnifier_size_height', 75),
+    );
+  }
+
+  $imagezoomer_options = array(
+    'image-id-' . $file->fid => array(
+      'imagezoomer_power_default_power' => isset($imagezoomer_options['imagezoomer_power_default_power']) ? $imagezoomer_options['imagezoomer_power_default_power'] : variable_get('imagezoomer_power_default_power', 2),
+      'imagezoomer_power_power_range_low' => isset($imagezoomer_options['imagezoomer_power_power_range_low']) ? $imagezoomer_options['imagezoomer_power_power_range_low'] : variable_get('imagezoomer_power_power_range_low', 2),
+      'imagezoomer_power_power_range_high' => isset($imagezoomer_options['imagezoomer_power_power_range_high']) ? $imagezoomer_options['imagezoomer_power_power_range_high'] : variable_get('imagezoomer_power_power_range_high', 7),
+      'imagezoomer_power_magnifier_size_width' => isset($imagezoomer_options['imagezoomer_power_magnifier_size_width']) ? $imagezoomer_options['imagezoomer_power_magnifier_size_width'] : variable_get('imagezoomer_power_magnifier_size_width', 75),
+      'imagezoomer_power_magnifier_size_height' => isset($imagezoomer_options['imagezoomer_power_magnifier_size_height']) ? $imagezoomer_options['imagezoomer_power_magnifier_size_height'] : variable_get('imagezoomer_power_magnifier_size_height', 75),
+    ),
+  );
+  
+  drupal_add_js(array('imagezoomer_power' => $imagezoomer_options), 'setting');
+
+  // Get image path for displaying and zooming image.
+  $displaying_image_path = $image_style_display == 'original' ? file_create_url($file->uri) : image_style_url($image_style_display, $file->uri);
+  $zooming_image_path = NULL;
+  if (!is_null($image_style_zooming)) {
+    $zooming_image_path = $image_style_zooming == 'original' ? file_create_url($file->uri) : image_style_url($image_style_zooming, $file->uri);
+  }
+  
+  // Theme both images for showing.
+  $output = '';
+  $output .= '<img src="' . $displaying_image_path . '" border="0" class="imagezoomer-power-image" id="imagezoomer-power-image-' . $file->fid . '" alt="' . $file->filename . '" title="' . $file->filename . '" />';
+  if (!is_null($zooming_image_path)) {
+    $output .= '<img src="' . $zooming_image_path . '" border="0" class="imagezoomer-power-zoomer-image" id="imagezoomer-power-zoom-image-' . $file->fid . '" alt="' . $file->filename . '" title="' . $file->filename . '" style="display:none" />';
+  }
+
+  return $output;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function imagezoomer_menu() {
+  $items = array();
+
+  // Setup a menu system in admin page for the module.
+  $items['admin/config/user-interface/imagezoomer'] = array(
+    'title' => 'Image Zoomer',
+    'description' => 'Manage the image zoomer settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('imagezoomer_settings_form'),
+    'access arguments' => array('administer imagezoomer'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function imagezoomer_theme($existing, $type, $theme, $path) {
+  return array(
+    'imagezoomer_power_image' => array(
+      'variables' => array(
+        'file' => NULL,
+        'image_style_display' => NULL,
+        'image_style_zooming' => NULL,
+        'imagezoomer_power_options' => array(),
+      ),
+    ),
+    'imagezoomer_featured_image' => array(
+      'variables' => array(
+        'file' => NULL,
+        'image_style_display' => NULL,
+        'image_style_zooming' => NULL,
+        'imagezoomer_featured_options' => array(),
+      ),
+    ),
+  );
+}
+
+/**
+ * Build powerzoomer settings form.
+ */
+function imagezoomer_settings_form($form, &$form_state) {
+  $form = array();
+
+  // We check libraries (Powerzoomer and Featurezoomer).
+  // If doesn't exist, we recommend user to download these plugins.
+  $powerzoomer_up = TRUE;
+  $featuredzoomer_up = TRUE;
+  if (!is_readable('sites/all/libraries/imagezoomer/ddpowerzoomer.js')) {
+    $powerzoomer_link = l('http://www.dynamicdrive.com/dynamicindex4/powerzoomer.htm', 'http://www.dynamicdrive.com/dynamicindex4/powerzoomer.htm', array('external' => true));
+    drupal_set_message(t('JQuery plugin for Powerzoomer is not found. Please download at ' . $powerzoomer_link . ' then upload it to under this folder /sites/all/libraries/imagezoomer'), 'warning');
+    $powerzoomer_up = FALSE;
+  }
+
+  if (!is_readable('sites/all/libraries/imagezoomer/multizoom.js')) {
+    $featuredzoomer_link = l('http://www.dynamicdrive.com/dynamicindex4/featuredzoomer.htm', 'http://www.dynamicdrive.com/dynamicindex4/featuredzoomer.htm', array('external' => true));
+    drupal_set_message(t('JQuery plugin for Featuredzoomer is not found. Please download at ' . $featuredzoomer_link . ' then upload it to under this folder /sites/all/libraries/imagezoomer'), 'warning');
+    $featuredzoomer_up = FALSE;
+  }
+
+  // Return blank page if none plugins were setup.
+  if (!$powerzoomer_up and !$featuredzoomer_up) {
+    return $form;
+  }
+
+  // For Powerzoomer.
+  if ($powerzoomer_up) {
+    $form['imagezoomer_power_plugin_options'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Powerzoomer JQuery plug-in options'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#description' => t('More details for the options, please visit this original website at ') . l('http://www.dynamicdrive.com/dynamicindex4/powerzoomer.htm', 'http://www.dynamicdrive.com/dynamicindex4/powerzoomer.htm', array('external' => true)),
+    );
+
+    $form['imagezoomer_power_plugin_options']['imagezoomer_power_default_power'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Default power value'),
+      '#description' => t('Sets the default magnification power when the mouse rolls over the image. Value should be an integer greater / equal 1 and less / equal to 10.'),
+      '#default_value' => variable_get('imagezoomer_power_default_power', 2),
+      '#required' => TRUE,
+    );
+
+    $form['imagezoomer_power_plugin_options']['imagezoomer_power_power_range'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Power range'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#description' => t('Sets the range of possible magnification powers when the user scrolls the mouse wheel while over the target image. Be sure this range covers the defaultpower setting above.'),
+    );
+
+    $form['imagezoomer_power_plugin_options']['imagezoomer_power_power_range']['imagezoomer_power_power_range_low'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Power range low value'),
+      '#default_value' => variable_get('imagezoomer_power_power_range_low', 2),
+      '#description' => t('Value should be greater than 0.'),
+      '#required' => TRUE,
+    );
+
+    $form['imagezoomer_power_plugin_options']['imagezoomer_power_power_range']['imagezoomer_power_power_range_high'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Power range high value'),
+      '#default_value' => variable_get('imagezoomer_power_power_range_high', 7),
+      '#description' => t('Value should be greater than the low range value.'),
+      '#required' => TRUE,
+    );
+
+    $form['imagezoomer_power_plugin_options']['imagezoomer_power_magnifier_size'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Magnifier size'),
+      '#collapsible' => TRUE,
+      '#description' => t('Sets the dimensions of the magnifier that appears over the target image. For large images it makes sense to take advantage of that real estate by also increasing the magnifier\'s size.'),
+      '#collapsed' => FALSE,
+    );
+
+    $form['imagezoomer_power_plugin_options']['imagezoomer_power_magnifier_size']['imagezoomer_power_magnifier_size_width'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Magnifier size width'),
+      '#default_value' => variable_get('imagezoomer_power_magnifier_size_width', 75),
+      '#description' => t('Value should be greater than 0.'),
+      '#required' => TRUE,
+    );
+
+    $form['imagezoomer_power_plugin_options']['imagezoomer_power_magnifier_size']['imagezoomer_power_magnifier_size_height'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Magnifier size height'),
+      '#default_value' => variable_get('imagezoomer_power_magnifier_size_height', 75),
+      '#description' => t('Value should be greater than 0.'),
+      '#required' => TRUE,
+    );
+  }
+
+  // For Featuredzoomer.
+  if ($featuredzoomer_up) {
+    $form['imagezoomer_featured_plugin_options'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Featuredzoomer JQuery plug-in options'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#description' => t('More details for the options, please visit this original website at ') . l('http://www.dynamicdrive.com/dynamicindex4/featuredzoomer.htm', 'http://www.dynamicdrive.com/dynamicindex4/featuredzoomer.htm', array('external' => true)),
+    );
+
+    $form['imagezoomer_featured_plugin_options']['imagezoomer_featured_power_range'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Power range'),
+      '#collapsible' => TRUE,
+      '#description' => t('Sets the range of possible magnification powers when the user scrolls the mouse wheel while over the target image.'),
+      '#collapsed' => FALSE,
+    );
+
+    $form['imagezoomer_featured_plugin_options']['imagezoomer_featured_power_range']['imagezoomer_featured_power_range_low'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Power range low value'),
+      '#default_value' => variable_get('imagezoomer_featured_power_range_low', 2),
+      '#description' => t('Value should be greater than 0.'),
+      '#required' => TRUE,
+    );
+
+    $form['imagezoomer_featured_plugin_options']['imagezoomer_featured_power_range']['imagezoomer_featured_power_range_high'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Power range high value'),
+      '#default_value' => variable_get('imagezoomer_featured_power_range_high', 7),
+      '#description' => t('Value should be greater than the low range value.'),
+      '#required' => TRUE,
+    );
+
+    $form['imagezoomer_featured_plugin_options']['imagezoomer_featured_magnifier_size'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Magnifier size'),
+      '#collapsible' => TRUE,
+      '#description' => t('Sets the dimensions of the magnifier that appears over the target image.'),
+      '#collapsed' => FALSE,
+    );
+  
+    $form['imagezoomer_featured_plugin_options']['imagezoomer_featured_magnifier_size']['imagezoomer_featured_magnifier_size_width'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Magnifier size width'),
+      '#default_value' => variable_get('imagezoomer_featured_magnifier_size_width', 200),
+      '#description' => t('Value should be greater than 0.'),
+      '#required' => TRUE,
+    );
+
+    $form['imagezoomer_featured_plugin_options']['imagezoomer_featured_magnifier_size']['imagezoomer_featured_magnifier_size_height'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Magnifier size height'),
+      '#default_value' => variable_get('imagezoomer_featured_magnifier_size_height', 200),
+      '#description' => t('Value should be greater than 0.'),
+      '#required' => TRUE,
+    );
+
+    $form['imagezoomer_featured_plugin_options']['imagezoomer_featured_magnifier_position'] = array(
+      '#type' => 'radios',
+      '#title' => t('Position for the magnifier'),
+      '#options' => array('left' => 'Left', 'right' => 'Right'),
+      '#default_value' => variable_get('imagezoomer_featured_magnifier_position', 'right'),
+      '#description' => t('Currently supports for only left and right position.'),
+      '#required' => TRUE,
+    );
+  }
+
+  return system_settings_form($form);
+}
+
+/**
+ * Validate the imagezoomer_settings_form.
+ */
+function imagezoomer_settings_form_validate($form, &$form_state) {
+  // Powerzoomer validation
+  // Limit the power defaul value to range 1-10.
+  if ($form_state['values']['imagezoomer_power_default_power'] < 1 OR $form_state['values']['imagezoomer_power_default_power'] > 10) {
+    form_set_error('imagezoomer_power_default_power', t('The default power value should be greater than 0 and less than or equal to 10 only.'));
+  }
+
+  // Low range value should be greater than 0.
+  if ($form_state['values']['imagezoomer_power_power_range_low'] < 1) {
+    form_set_error('imagezoomer_power_power_range_low', t('The power low range value should be greater than 0.'));
+  }
+
+  // High range value should be greater than Low range value.
+  if ($form_state['values']['imagezoomer_power_power_range_low'] >= $form_state['values']['imagezoomer_power_power_range_high']) {
+    form_set_error('imagezoomer_power_power_range_high', t('The power hight range value should be greater than the power low range value.'));
+  }
+
+  // Magnifier size width should be greater than 0.
+  if ($form_state['values']['imagezoomer_power_magnifier_size_width'] < 1) {
+    form_set_error('imagezoomer_power_magnifier_size_width', t('The magnifier size width value should be greater than 0.'));
+  }
+
+  // Magnifier size height should be greater than 0.
+  if ($form_state['values']['imagezoomer_power_magnifier_size_height'] < 1) {
+    form_set_error('imagezoomer_power_magnifier_size_height', t('The magnifier size height value should be greater than 0.'));
+  }
+  
+  // Featured zoomer validation
+  // Low range value should be greater than 0.
+  if ($form_state['values']['imagezoomer_featured_power_range_low'] < 1) {
+    form_set_error('imagezoomer_featured_power_range_low', t('The featured zoomer power low range value should be greater than 0.'));
+  }
+
+  // High range value should be greater than Low range value.
+  if ($form_state['values']['imagezoomer_featured_power_range_low'] >= $form_state['values']['imagezoomer_featured_power_range_high']) {
+    form_set_error('imagezoomer_featured_power_range_high', t('The featured zoomer power hight range value should be greater than the power low range value.'));
+  }
+
+  // Magnifier size width should be greater than 0.
+  if ($form_state['values']['imagezoomer_featured_magnifier_size_width'] < 1) {
+    form_set_error('imagezoomer_featured_magnifier_size_width', t('The magnifier size width value should be greater than 0.'));
+  }
+
+  // Magnifier size height should be greater than 0.
+  if ($form_state['values']['imagezoomer_featured_magnifier_size_height'] < 1) {
+    form_set_error('imagezoomer_featured_magnifier_size_height', t('The magnifier size height value should be greater than 0.'));
+  }
+}
