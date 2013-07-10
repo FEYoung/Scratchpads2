@@ -83,7 +83,8 @@ function bigimage_field_formatter_info(){
         'minimum_dimensions' => '500',
         'image_style' => '',
         'bigimage_show_scale_control' => 0,
-        'bigimage_show_overview_control' => 0
+        'bigimage_show_overview_control' => 0,
+        'bigimage_use_bigimage_css' => 0
       )
     )
   );
@@ -139,9 +140,21 @@ function bigimage_field_formatter_settings_form($field, $instance, $view_mode, $
         '0' => 'Do not show overview',
         '1' => 'Show overview'
       )
+    ),
+	'bigimage_use_bigimage_css' => array(
+      '#title' => t('Show border arouond image'),
+      '#description' => t('Showing a border around the image'),
+      '#type' => 'radios',
+      '#default_value' => $instance['display'][$view_mode]['settings']['bigimage_use_bigimage_css'],
+      '#options' => array(
+        '1' => 'Do not show border', // standard gm3 css shows border on map
+        '0' => 'Show border'
+      )
     )
   );
 }
+
+
 
 /**
  * Implements hook_field_formatter_settings_summary().
@@ -179,6 +192,14 @@ function bigimage_field_formatter_settings_summary($field, $instance, $view_mode
 		$summary[] = t('Do not show overview.');
 	  }
 	  
+	   if(isset($instance['display'][$view_mode]['settings']['bigimage_use_bigimage_css']) && $instance['display'][$view_mode]['settings']['bigimage_use_bigimage_css']){
+		$summary[] = t('Show border.');
+	  } else {
+		$summary[] = t('Do not show border.');
+	  }
+	  
+	  
+	  
       return implode('<br />', $summary);
   }
 }
@@ -197,6 +218,7 @@ function bigimage_field_formatter_view($entity_type, $entity, $field, $instance,
             '#theme' => 'bigimage',
 			'#show_scale_control' => (int)$display['settings']['bigimage_show_scale_control'],
 			'#show_overview_control' => $display['settings']['bigimage_show_overview_control'],
+			'#use_bigimage_css' => $display['settings']['bigimage_use_bigimage_css'],
             '#item' => $item
           );
         }else{
@@ -205,6 +227,7 @@ function bigimage_field_formatter_view($entity_type, $entity, $field, $instance,
             '#item' => $item,
 			'#show_scale_control' => $display['settings']['bigimage_show_scale_control'],
 			'#show_overview_control' => $display['settings']['bigimage_show_overview_control'],
+			'#use_bigimage_css' => $display['settings']['bigimage_use_bigimage_css'],
             '#image_style' => $display['settings']['image_style']
           );
         }
@@ -223,7 +246,8 @@ function bigimage_theme(){
       'variables' => array(
         'item' => array(),
 		'show_scale_control' => NULL,
-		'show_overview_control' => NULL
+		'show_overview_control' => NULL,
+		'use_bigimage_css'=> NULL
       )
     )
   );
@@ -366,6 +390,7 @@ function theme_bigimage($variables){
     $latitude = rad2deg(atan(sinh(pi() * (1 - ($image->info['height'] / $max_dimension)))));
 	$show_scale_control = $variables['show_scale_control'];
 	$show_overview_control = $variables['show_overview_control'];
+	$use_bigimage_css = $variables['use_bigimage_css'];
 	
 
     $image = null;
@@ -387,7 +412,10 @@ function theme_bigimage($variables){
             'mapTypeIds' => array()
           )
         ),
-        'libraries' => array(
+        'bigimage_css' => array(
+          'use_bigimage_css' => $use_bigimage_css
+        ),
+		'libraries' => array(
           'bigimage' => array(
             'fid' => $variables['item']['fid'],
             'module' => 'bigimage'
