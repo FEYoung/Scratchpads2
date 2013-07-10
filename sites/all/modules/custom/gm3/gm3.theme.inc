@@ -73,10 +73,16 @@ function gm3_get_map($variables){
     if(isset($variables['map']['tools'])){
       $tools = '<div class="gm3-tools"><ul id="toolbar-' . $variables['map']['id'] . '"><li class="gm3-clicked"><div data-gm3-class="default" class="gm3-tools-button"><p>' . t('Move') . '</p></div></li><li>' . implode("</li><li>", $variables['map']['tools']) . '</li></ul></div>';
     }
+	
+	 if(isset($variables['map']['bigimage_css']['use_bigimage_css'])){
+	   $css_file = 'bigimage_gm3.css';
+	} else {
+		$css_file = 'gm3.css';
+	}
     return array(
       '#attached' => array(
         'css' => array(
-          drupal_get_path('module', 'gm3') . '/css/gm3.css'
+          drupal_get_path('module', 'gm3') . '/css/'.$css_file
         )
       ),
       '#markup' => '<div class="gm3-container">' . $tools . '<div class="gm3-map-wrapper"><div id="' . $variables['map']['id'] . '"></div></div></div>'
