@@ -82,7 +82,8 @@ function bigimage_field_formatter_info(){
       'settings' => array(
         'minimum_dimensions' => '500',
         'image_style' => '',
-        'bigimage_show_scale_control' => 0
+        'bigimage_show_scale_control' => 0,
+        'bigimage_show_overview_control' => 0
       )
     )
   );
@@ -123,10 +124,20 @@ function bigimage_field_formatter_settings_form($field, $instance, $view_mode, $
       '#title' => t('Show scale bar'),
       '#description' => t('Showing the scale bar for an image is not really relevant'),
       '#type' => 'radios',
-      '#default_value' => $instance['display'][$view_mode]['settings']['bigimage_show_scale_control'] ? 1 : 0,
+      '#default_value' => $instance['display'][$view_mode]['settings']['bigimage_show_scale_control'],
       '#options' => array(
         '0' => 'Do not show scale bar',
         '1' => 'Show scale bar'
+      )
+    ),
+	'bigimage_show_overview_control' => array(
+      '#title' => t('Show overview'),
+      '#description' => t('Showing the overview box to indicate where you are on the image'),
+      '#type' => 'radios',
+      '#default_value' => $instance['display'][$view_mode]['settings']['bigimage_show_overview_control'],
+      '#options' => array(
+        '0' => 'Do not show overview',
+        '1' => 'Show overview'
       )
     )
   );
@@ -161,6 +172,12 @@ function bigimage_field_formatter_settings_summary($field, $instance, $view_mode
 	  } else {
 		$summary[] = t('Do not show a scale bar.');
 	  }
+
+      if(isset($instance['display'][$view_mode]['settings']['bigimage_show_overview_control']) && $instance['display'][$view_mode]['settings']['bigimage_show_overview_control']){
+		$summary[] = t('Show overview.');
+	  } else {
+		$summary[] = t('Do not show overview.');
+	  }
 	  
       return implode('<br />', $summary);
   }
@@ -179,6 +196,7 @@ function bigimage_field_formatter_view($entity_type, $entity, $field, $instance,
           $elements[$delta] = array(
             '#theme' => 'bigimage',
 			'#show_scale_control' => (int)$display['settings']['bigimage_show_scale_control'],
+			'#show_overview_control' => $display['settings']['bigimage_show_overview_control'],
             '#item' => $item
           );
         }else{
@@ -186,6 +204,7 @@ function bigimage_field_formatter_view($entity_type, $entity, $field, $instance,
             '#theme' => 'image_formatter',
             '#item' => $item,
 			'#show_scale_control' => $display['settings']['bigimage_show_scale_control'],
+			'#show_overview_control' => $display['settings']['bigimage_show_overview_control'],
             '#image_style' => $display['settings']['image_style']
           );
         }
@@ -203,7 +222,8 @@ function bigimage_theme(){
     'bigimage' => array(
       'variables' => array(
         'item' => array(),
-		'show_scale_control' => NULL
+		'show_scale_control' => NULL,
+		'show_overview_control' => NULL
       )
     )
   );
@@ -345,6 +365,9 @@ function theme_bigimage($variables){
     // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#tile_numbers_to_lon.2Flat_4
     $latitude = rad2deg(atan(sinh(pi() * (1 - ($image->info['height'] / $max_dimension)))));
 	$show_scale_control = $variables['show_scale_control'];
+	$show_overview_control = $variables['show_overview_control'];
+	
+
     $image = null;
     return theme('gm3_map', array(
       'map' => array(
@@ -359,6 +382,7 @@ function theme_bigimage($variables){
             'longitude' => $longitude
           ),
 		  'scaleControl' => $show_scale_control,
+		  'overviewMapControl' => $show_overview_control,
           'mapTypeControlOptions' => array(
             'mapTypeIds' => array()
           )
