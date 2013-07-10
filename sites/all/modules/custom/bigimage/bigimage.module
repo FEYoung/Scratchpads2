@@ -75,7 +75,7 @@ function bigimage_field_formatter_info(){
   return array(
     'bigimage_bigimage_formatter' => array(
       'label' => t('Bigimage'),
-      'description' => t('Displays a bigmiage as a tile.'),
+      'description' => t('Displays a bigmimage as a tile.'),
       'field types' => array(
         'image'
       ),
