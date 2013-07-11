@@ -44,6 +44,15 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor {
   public function configForm(&$form_state) {
     $form = parent::configForm($form_state);
     unset($form['content_type']);
+    $types = node_type_get_names();
+    array_walk($types, 'check_plain');
+    $form['content_types'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Content types'),
+      '#description' => t('Select the content types for the nodes to be created. <strong>Note:</strong> Users with "import !feed_id feeds" permissions will be able to <strong>import</strong> nodes of the content types selected here regardless of the node level permissions. Further, users with "clear !feed_id permissions" will be able to <strong>delete</strong> imported nodes regardless of their node level permissions.', array('!feed_id' => $this->id)),
+      '#options' => $types,
+      '#default_value' => $this->config['content_types'],
+    );
     return $form;
   }
 
@@ -52,33 +61,13 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor {
    */
   public function getMappingTargets() {
     $targets = array();
-    $targets['content_type'] = array(
-      'name' => t('Content Type'),
-      'description' => t('The content type for this item.'), 
-    );
     $types = node_type_get_names();
-    foreach ($types as $type => $name) {
+    foreach ($this->config['content_types'] as $type) {
       $this->config['content_type'] = $type;
       $type_targets = parent::getMappingTargets();
       foreach ($type_targets as $key => $value) {
-        if (isset($value['name'])) { // Not everything has a name, e.g. JSONPathParser creates a temporary mapping field with no name.
-          if (!isset($targets[$key])) {
-            $targets[$key] = $value;
-            $targets[$key]['content_types'] = array();
-          }
-          $targets[$key]['content_types'][] = $types[$type];
-        }
-      }
-    }
-    foreach ($targets as $key => $target) {
-      if (isset($target['content_types'])) {
-        if (count($target['content_types']) == count($types)) {
-          $targets[$key]['name'] .= ' (' . t('All content types') . ')';
-        }
-        else {
-          $targets[$key]['name'] .= ' (' . t('Appears in:') . ' ' . implode(', ', $target['content_types']) . ')';
-        }
-        unset($target['content_types']);
+        $value['name'] = $types[$type] . ': ' . $value['name'];
+        $targets[$type . ':' . $key] = $value;
       }
     }
     return $targets;
@@ -124,69 +113,59 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor {
     }
     return 0;
   }
-  private function mapContentType(FeedsSource $source, FeedsParserResult $result) {
-    foreach($this->config['mappings'] as $mapping) {
-      if ($mapping['target'] == 'content_type') {
-        $parser = feeds_importer($this->id)->parser;
-        unset($this->config['mappings']['content_type']);
-        return $parser->getSourceElement($source, $result, $mapping['source']);
-      }
-    }
-    return FALSE;
-  }
+
   /**
    * Override parent::process().
    */
   public function process(FeedsSource $source, FeedsParserResult $parser_result) {
     $state = $source->state(FEEDS_PROCESS);
     while ($item = $parser_result->shiftItem()) {
-      $this->config['content_type'] = $this->mapContentType($source, $parser_result);
-      if (!$this->config['content_type']) {
-        continue;
-      }
-      $hash = $this->hash($item);
-      if (!($entity_id = $this->existingEntityId($source, $parser_result)) ||
-           ($this->config['update_existing'] != FEEDS_SKIP_EXISTING)) {
+      foreach ($this->config['content_types'] as $type) {
+        $this->config['content_type'] = $type;
+        $hash = $this->hash($item);
+        if (!($entity_id = $this->existingEntityId($source, $parser_result)) ||
+             ($this->config['update_existing'] != FEEDS_SKIP_EXISTING)) {
 
-        // Only proceed if item has actually changed.
-        if (!empty($entity_id) && $hash == $this->getHash($entity_id)) {
-          continue;
-        }
+          // Only proceed if item has actually changed.
+          if (!empty($entity_id) && $hash == $this->getHash($entity_id)) {
+            continue;
+          }
 
-        try {
-          // Assemble node, map item to it, save.
-          if (empty($entity_id)) {
-            $entity = $this->newEntity($source);
-            $this->newItemInfo($entity, $source->feed_nid, $hash);
-          }
-          else {
-            $entity = $this->entityLoad($source, $entity_id);
-            // The feeds_item table is always updated with the info for the most recently processed entity.
-            // The only carryover is the entity_id.
-            $this->newItemInfo($entity, $source->feed_nid, $hash);
-            $entity->feeds_item->entity_id = $entity_id;
-          }
-          $this->map($source, $parser_result, $entity);
-          $this->entityValidate($entity);
-          $this->entitySave($entity);
+          try {
+            // Assemble node, map item to it, save.
+            if (empty($entity_id)) {
+              $entity = $this->newEntity($source);
+              $this->newItemInfo($entity, $source->feed_nid, $hash);
+            }
+            else {
+              $entity = $this->entityLoad($source, $entity_id);
+              // The feeds_item table is always updated with the info for the most recently processed entity.
+              // The only carryover is the entity_id.
+              $this->newItemInfo($entity, $source->feed_nid, $hash);
+              $entity->feeds_item->entity_id = $entity_id;
+            }
+            $this->map($source, $parser_result, $entity);
+            $this->entityValidate($entity);
+            $this->entitySave($entity);
 
-          // Track progress.
-          if (empty($entity_id)) {
-            $state->created++;
+            // Track progress.
+            if (empty($entity_id)) {
+              $state->created++;
+            }
+            else {
+              $state->updated++;
+            }
           }
-          else {
-            $state->updated++;
+          catch (Exception $e) {
+            $state->failed++;
+            drupal_set_message($e->getMessage(), 'warning');
+            $message = $e->getMessage();
+            $message .= '<h3>Original item</h3>';
+            $message .= '<pre>' . var_export($item, true) . '</pre>';
+            $message .= '<h3>Entity</h3>';
+            $message .= '<pre>' . var_export($entity, true) . '</pre>';
+            $source->log('import', $message, array(), WATCHDOG_ERROR);
           }
-        }
-        catch (Exception $e) {
-          $state->failed++;
-          drupal_set_message($e->getMessage(), 'warning');
-          $message = $e->getMessage();
-          $message .= '<h3>Original item</h3>';
-          $message .= '<pre>' . var_export($item, true) . '</pre>';
-          $message .= '<h3>Entity</h3>';
-          $message .= '<pre>' . var_export($entity, true) . '</pre>';
-          $source->log('import', $message, array(), WATCHDOG_ERROR);
         }
       }
     }
@@ -240,6 +219,84 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor {
       drupal_set_message($message['message']);
       $source->log('import', $message, array(), isset($message['level']) ? $message['level'] : WATCHDOG_INFO);
     }
+  }
+
+  /**
+   * Override parent::map().
+   */
+  protected function map(FeedsSource $source, FeedsParserResult $result, $target_item = NULL) {
+
+    // Static cache $targets as getMappingTargets() may be an expensive method.
+    static $sources;
+    if (!isset($sources[$this->id])) {
+      $sources[$this->id] = feeds_importer($this->id)->parser->getMappingSources();
+    }
+    static $targets;
+    if (!isset($targets[$this->id])) {
+      $targets[$this->id] = $this->getMappingTargets();
+    }
+    $parser = feeds_importer($this->id)->parser;
+    if (empty($target_item)) {
+      $target_item = array();
+    }
+
+    // Filter mappings to the current content type.
+    $mappings = array();
+    foreach ($this->config['mappings'] as $mapping) {
+      if (strpos($mapping['target'], $this->config['content_type'] . ':') === 0) {
+        $mappings[] = $mapping;
+      }
+    }
+
+    // Many mappers add to existing fields rather than replacing them. Hence we
+    // need to clear target elements of each item before mapping in case we are
+    // mapping on a prepopulated item such as an existing node.
+    foreach ($mappings as $mapping) {
+      $target = $this->trimPrefix($mapping['target']);
+      if (isset($targets[$mapping['target']]['real_target'])) {
+        unset($target_item->{$targets[$mapping['target']]['real_target']});
+      }
+      elseif (isset($target_item->{$target})) {
+        unset($target_item->{$target});
+      }
+    }
+
+    /*
+    This is where the actual mapping happens: For every mapping we envoke
+    the parser's getSourceElement() method to retrieve the value of the source
+    element and pass it to the processor's setTargetElement() to stick it
+    on the right place of the target item.
+
+    If the mapping specifies a callback method, use the callback instead of
+    setTargetElement().
+    */
+    self::loadMappers();
+    foreach ($mappings as $mapping) {
+      // Retrieve source element's value from parser.
+      if (isset($sources[$this->id][$mapping['source']]) &&
+          is_array($sources[$this->id][$mapping['source']]) &&
+          isset($sources[$this->id][$mapping['source']]['callback']) &&
+          function_exists($sources[$this->id][$mapping['source']]['callback'])) {
+        $callback = $sources[$this->id][$mapping['source']]['callback'];
+        $value = $callback($source, $result, $mapping['source']);
+      }
+      else {
+        $value = $parser->getSourceElement($source, $result, $mapping['source']);
+      }
+
+      // Map the source element's value to the target.
+      if (isset($targets[$this->id][$mapping['target']]) &&
+          is_array($targets[$this->id][$mapping['target']]) &&
+          isset($targets[$this->id][$mapping['target']]['callback']) &&
+          function_exists($targets[$this->id][$mapping['target']]['callback'])) {
+        $callback = $targets[$this->id][$mapping['target']]['callback'];
+        $callback($source, $target_item, $this->trimPrefix($mapping['target']), $value);
+      }
+      else {
+        $this->setTargetElement($source, $target_item, $this->trimPrefix($mapping['target']), $value);
+      }
+    }
+    return $target_item;
   }
 
   /**
