@@ -1,5 +1,4 @@
 <?php
-
 /* @file
  * Class definition of FeedsMultiNodeProcessor.
  */
