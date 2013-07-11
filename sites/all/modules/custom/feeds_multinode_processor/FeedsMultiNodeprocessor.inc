@@ -1,6 +1,7 @@
 <?php
 /* @file
  * Class definition of FeedsMultiNodeProcessor.
+ * kab
  */
 
 class FeedsMultiNodeProcessor extends FeedsNodeProcessor {
