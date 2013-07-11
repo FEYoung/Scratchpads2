@@ -122,14 +122,18 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
   }
 
   /**
+   * Process the result of the parsing stage.
    * Override parent::process().
    */
   public function process(FeedsSource $source, FeedsParserResult $parser_result){
     $state = $source->state(FEEDS_PROCESS);
+    
     while($item = $parser_result->shiftItem()){
       foreach($this->config['content_types'] as $type){
+
         $this->config['content_type'] = $type;
         $hash = $this->hash($item);
+        
         if(!($entity_id = $this->existingEntityId($source, $parser_result)) || ($this->config['update_existing'] != FEEDS_SKIP_EXISTING)){
           // Only proceed if item has actually changed.
           if(!empty($entity_id) && $hash == $this->getHash($entity_id)){
@@ -149,12 +153,25 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
             }
             $this->map($source, $parser_result, $entity);
             $this->entityValidate($entity);
-            $this->entitySave($entity);
-            // Track progress.
-            if(empty($entity_id)){
-              $state->created++;
-            }else{
-              $state->updated++;
+            
+            // Allow modules to alter the entity before saving.
+            module_invoke_all('feeds_presave', $source, $entity);
+            if (module_exists('rules')) {
+              rules_invoke_event('feeds_import_'. $source->importer()->id, $entity);
+            }
+            
+            
+            
+            // Enable modules to skip saving at all.
+            if (empty($entity->feeds_item->skip)) {
+              $this->entitySave($entity);
+              // Track progress.
+              if (empty($entity_id)) {
+                $state->created++;
+              }
+              else {
+                $state->updated++;
+              }
             }
           }
           catch(Exception $e){
@@ -167,49 +184,58 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
             $message .= '<pre>' . var_export($entity, true) . '</pre>';
             $source->log('import', $message, array(), WATCHDOG_ERROR);
           }
-        }
+        }      
       }
     }
     // Set messages if we're done.
-    if($source->progressImporting() != FEEDS_BATCH_COMPLETE){return;}
+  if ($source->progressImporting() != FEEDS_BATCH_COMPLETE) {
+      return;
+    }
     $info = $this->entityInfo();
     $tokens = array(
       '@entity' => strtolower($info['label']),
-      '@entities' => strtolower($info['label plural'])
+      '@entities' => strtolower($info['label plural']),
     );
     $messages = array();
-    if($state->created){
+    if ($state->created) {
       $messages[] = array(
-        'message' => format_plural($state->created, 'Created @number @entity', 'Created @number @entities', array(
-          '@number' => $state->created
-        ) + $tokens)
+       'message' => format_plural(
+          $state->created,
+          'Created @number @entity.',
+          'Created @number @entities.',
+          array('@number' => $state->created) + $tokens
+        ),
       );
     }
-    if($state->updated){
+    if ($state->updated) {
       $messages[] = array(
-        'message' => format_plural($state->updated, 'Updated @number @entity', 'Updated @number @entities', array(
-          '@number' => $state->updated
-        ) + $tokens)
+       'message' => format_plural(
+          $state->updated,
+          'Updated @number @entity.',
+          'Updated @number @entities.',
+          array('@number' => $state->updated) + $tokens
+        ),
       );
     }
-    if($state->failed){
+    if ($state->failed) {
       $messages[] = array(
-        'message' => format_plural($state->failed, 'Failed importing @number @entity', 'Failed importing @number @entities', array(
-          '@number' => $state->failed
-        ) + $tokens),
-        'level' => WATCHDOG_ERROR
+       'message' => format_plural(
+          $state->failed,
+          'Failed importing @number @entity.',
+          'Failed importing @number @entities.',
+          array('@number' => $state->failed) + $tokens
+        ),
+        'level' => WATCHDOG_ERROR,
       );
     }
-    if(empty($messages)){
+    if (empty($messages)) {
       $messages[] = array(
-        'message' => t('There are no new @entities.', array(
-          '@entities' => strtolower($info['label plural'])
-        ))
+        'message' => t('There are no new @entities.', array('@entities' => strtolower($info['label plural']))),
       );
     }
-    foreach($messages as $message){
+    foreach ($messages as $message) {
       drupal_set_message($message['message']);
-      $source->log('import', $message, array(), isset($message['level']) ? $message['level'] : WATCHDOG_INFO);
+      $source->log('import', $message['message'], array(), isset($message['level']) ? $message['level'] : WATCHDOG_INFO);
     }
   }
 
