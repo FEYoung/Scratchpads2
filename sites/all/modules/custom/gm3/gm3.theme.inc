@@ -73,15 +73,10 @@ function gm3_get_map($variables){
     if(isset($variables['map']['tools'])){
       $tools = '<div class="gm3-tools"><ul id="toolbar-' . $variables['map']['id'] . '"><li class="gm3-clicked"><div data-gm3-class="default" class="gm3-tools-button"><p>' . t('Move') . '</p></div></li><li>' . implode("</li><li>", $variables['map']['tools']) . '</li></ul></div>';
     }
-    if(isset($variables['map']['bigimage_css']['use_bigimage_css'])){
-      $css_file = 'bigimage_gm3.css';
-    }else{
-      $css_file = 'gm3.css';
-    }
     return array(
       '#attached' => array(
         'css' => array(
-          drupal_get_path('module', 'gm3') . '/css/' . $css_file
+          drupal_get_path('module', 'gm3') . '/css/gm3.css'
         )
       ),
       '#markup' => '<div class="gm3-container">' . $tools . '<div class="gm3-map-wrapper"><div id="' . $variables['map']['id'] . '"></div></div></div>'
@@ -268,7 +263,7 @@ function theme_gm3_view_gm3($variables){
           break;
         case 'gm3_combination':
           foreach($row->_field_data as $id => $values){
-            if(empty($values['entity']->{$key})){
+            if(empty($values['entity']->{$key})) {
               continue;
             }
             foreach($values['entity']->{$key}[LANGUAGE_NONE] as $item){
