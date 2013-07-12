@@ -82,7 +82,6 @@ function bigimage_field_formatter_info(){
       'settings' => array(
         'minimum_dimensions' => '500',
         'image_style' => '',
-        'bigimage_show_scale_control' => 0,
         'bigimage_show_overview_control' => 0,
         'bigimage_use_bigimage_css' => 0
       )
@@ -120,16 +119,6 @@ function bigimage_field_formatter_settings_form($field, $instance, $view_mode, $
       '#default_value' => $instance['display'][$view_mode]['settings']['image_style'],
       '#empty_option' => t('None (original image)'),
       '#options' => image_style_options(FALSE)
-    ),
-    'bigimage_show_scale_control' => array(
-      '#title' => t('Show scale bar'),
-      '#description' => t('Showing the scale bar for an image is not really relevant'),
-      '#type' => 'radios',
-      '#default_value' => $instance['display'][$view_mode]['settings']['bigimage_show_scale_control'],
-      '#options' => array(
-        '0' => 'Do not show scale bar',
-        '1' => 'Show scale bar'
-      )
     ),
     'bigimage_show_overview_control' => array(
       '#title' => t('Show overview'),
@@ -177,11 +166,6 @@ function bigimage_field_formatter_settings_summary($field, $instance, $view_mode
         }
         $summary[] = $this_summary;
       }
-      if(isset($instance['display'][$view_mode]['settings']['bigimage_show_scale_control']) && $instance['display'][$view_mode]['settings']['bigimage_show_scale_control']){
-        $summary[] = t('Show a scale bar.');
-      }else{
-        $summary[] = t('Do not show a scale bar.');
-      }
       if(isset($instance['display'][$view_mode]['settings']['bigimage_show_overview_control']) && $instance['display'][$view_mode]['settings']['bigimage_show_overview_control']){
         $summary[] = t('Show overview.');
       }else{
@@ -208,7 +192,6 @@ function bigimage_field_formatter_view($entity_type, $entity, $field, $instance,
         if($item['height'] > $min_dimension || $item['width'] > $min_dimension){
           $elements[$delta] = array(
             '#theme' => 'bigimage',
-            '#show_scale_control' => (int)$display['settings']['bigimage_show_scale_control'],
             '#show_overview_control' => $display['settings']['bigimage_show_overview_control'],
             '#use_bigimage_css' => $display['settings']['bigimage_use_bigimage_css'],
             '#item' => $item
@@ -217,7 +200,6 @@ function bigimage_field_formatter_view($entity_type, $entity, $field, $instance,
           $elements[$delta] = array(
             '#theme' => 'image_formatter',
             '#item' => $item,
-            '#show_scale_control' => $display['settings']['bigimage_show_scale_control'],
             '#show_overview_control' => $display['settings']['bigimage_show_overview_control'],
             '#use_bigimage_css' => $display['settings']['bigimage_use_bigimage_css'],
             '#image_style' => $display['settings']['image_style']
@@ -237,7 +219,6 @@ function bigimage_theme(){
     'bigimage' => array(
       'variables' => array(
         'item' => array(),
-        'show_scale_control' => NULL,
         'show_overview_control' => NULL,
         'use_bigimage_css' => NULL
       )
@@ -380,8 +361,6 @@ function theme_bigimage($variables){
     // Latitude - Mercator complications.  Thanks to the code from 
     // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#tile_numbers_to_lon.2Flat_4
     $latitude = rad2deg(atan(sinh(pi() * (1 - ($image->info['height'] / $max_dimension)))));
-    $show_scale_control = $variables['show_scale_control'];
-    $show_overview_control = $variables['show_overview_control'];
     $use_bigimage_css = $variables['use_bigimage_css'];
     $image = null;
     return theme('gm3_map', array(
@@ -396,8 +375,8 @@ function theme_bigimage($variables){
             'latitude' => $latitude,
             'longitude' => $longitude
           ),
-          'scaleControl' => $show_scale_control,
-          'overviewMapControl' => $show_overview_control,
+          'scaleControl' => 0,
+          'overviewMapControl' => $variables['show_overview_control'],
           'mapTypeControlOptions' => array(
             'mapTypeIds' => array()
           )
