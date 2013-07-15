@@ -80,11 +80,11 @@ function bigimage_field_formatter_info(){
         'image'
       ),
       'settings' => array(
-        'minimum_dimensions' => '500',
+        'minimum_dimensions' => '800',
         'image_style' => '',
-        'bigimage_show_scale_control' => 0,
         'bigimage_show_overview_control' => 0,
-        'bigimage_use_bigimage_css' => 0
+        'bigimage_use_bigimage_css' => 1,
+        'widget_width' => 500
       )
     )
   );
@@ -121,14 +121,22 @@ function bigimage_field_formatter_settings_form($field, $instance, $view_mode, $
       '#empty_option' => t('None (original image)'),
       '#options' => image_style_options(FALSE)
     ),
-    'bigimage_show_scale_control' => array(
-      '#title' => t('Show scale bar'),
-      '#description' => t('Showing the scale bar for an image is not really relevant'),
-      '#type' => 'radios',
-      '#default_value' => $instance['display'][$view_mode]['settings']['bigimage_show_scale_control'],
+    'widget_width' => array(
+      '#title' => t('Widget width'),
+      '#type' => 'select',
+      '#default_value' => $instance['display'][$view_mode]['settings']['widget_width'],
+      '#empty_option' => t('Full width (100%)'),
       '#options' => array(
-        '0' => 'Do not show scale bar',
-        '1' => 'Show scale bar'
+        '300' => '300',
+        '400' => '400',
+        '500' => '500',
+        '600' => '600',
+        '700' => '700',
+        '800' => '800',
+        '900' => '900',
+        '1000' => '1000',
+        '1100' => '1100',
+        '1200' => '1200'
       )
     ),
     'bigimage_show_overview_control' => array(
@@ -177,11 +185,6 @@ function bigimage_field_formatter_settings_summary($field, $instance, $view_mode
         }
         $summary[] = $this_summary;
       }
-      if(isset($instance['display'][$view_mode]['settings']['bigimage_show_scale_control']) && $instance['display'][$view_mode]['settings']['bigimage_show_scale_control']){
-        $summary[] = t('Show a scale bar.');
-      }else{
-        $summary[] = t('Do not show a scale bar.');
-      }
       if(isset($instance['display'][$view_mode]['settings']['bigimage_show_overview_control']) && $instance['display'][$view_mode]['settings']['bigimage_show_overview_control']){
         $summary[] = t('Show overview.');
       }else{
@@ -191,6 +194,13 @@ function bigimage_field_formatter_settings_summary($field, $instance, $view_mode
         $summary[] = t('Show border.');
       }else{
         $summary[] = t('Do not show border.');
+      }
+      if(isset($instance['display'][$view_mode]['settings']['widget_width']) && $instance['display'][$view_mode]['settings']['widget_width']){
+        $summary[] = t('Widget !pixels pixels wide.', array(
+          '!pixels' => $instance['display'][$view_mode]['settings']['widget_width']
+        ));
+      }else{
+        $summary[] = t('Widget full width.');
       }
       return implode('<br />', $summary);
   }
@@ -208,18 +218,21 @@ function bigimage_field_formatter_view($entity_type, $entity, $field, $instance,
         if($item['height'] > $min_dimension || $item['width'] > $min_dimension){
           $elements[$delta] = array(
             '#theme' => 'bigimage',
-            '#show_scale_control' => (int)$display['settings']['bigimage_show_scale_control'],
             '#show_overview_control' => $display['settings']['bigimage_show_overview_control'],
-            '#use_bigimage_css' => $display['settings']['bigimage_use_bigimage_css'],
+            '#widget_width' => $display['settings']['widget_width'],
             '#item' => $item
           );
+          if($display['settings']['bigimage_use_bigimage_css']){
+            $elements[$delta]['#attached'] = array(
+              'css' => array(
+                drupal_get_path('module', 'bigimage') . '/css/bigimage.css'
+              )
+            );
+          }
         }else{
           $elements[$delta] = array(
             '#theme' => 'image_formatter',
             '#item' => $item,
-            '#show_scale_control' => $display['settings']['bigimage_show_scale_control'],
-            '#show_overview_control' => $display['settings']['bigimage_show_overview_control'],
-            '#use_bigimage_css' => $display['settings']['bigimage_use_bigimage_css'],
             '#image_style' => $display['settings']['image_style']
           );
         }
@@ -237,9 +250,8 @@ function bigimage_theme(){
     'bigimage' => array(
       'variables' => array(
         'item' => array(),
-        'show_scale_control' => NULL,
-        'show_overview_control' => NULL,
-        'use_bigimage_css' => NULL
+        'show_overview_control' => 0,
+        'widget_width' => 500
       )
     )
   );
@@ -371,33 +383,47 @@ function theme_bigimage($variables){
     }
   }else{
     $file = file_load($variables['item']['fid']);
-    $image = image_load($file->uri);
-    $max_dimension = $image->info['width'] > $image->info['height'] ? $image->info['width'] : $image->info['height'];
+    if(empty($file->image_dimensions['width'])){
+      $image = image_load($file->uri);
+      $image_info = $image->info;
+      $image = null;
+    }else{
+      $image_info = $file->image_dimensions;
+    }
+    $height = '500';
+    if($variables['widget_width']){
+      // We can set the heigh of the widget based on the width
+      $height = ($image_info['height'] / $image_info['width']) * $variables['widget_width'];
+    }
+    $max_dimension = $image_info['width'] > $image_info['height'] ? $image_info['width'] : $image_info['height'];
     $max_zoom = ceil(log($max_dimension / 256) / log(2));
     $max_dimension = pow(2, $max_zoom) * 256;
     // Longitude is easy - linear.
-    $longitude = (($image->info['width'] / ($max_dimension * 2)) * 360) - 180;
+    $longitude = (($image_info['width'] / ($max_dimension * 2)) * 360) - 180;
     // Latitude - Mercator complications.  Thanks to the code from 
     // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#tile_numbers_to_lon.2Flat_4
-    $latitude = rad2deg(atan(sinh(pi() * (1 - ($image->info['height'] / $max_dimension)))));
-    $show_scale_control = $variables['show_scale_control'];
-    $show_overview_control = $variables['show_overview_control'];
+    $latitude = rad2deg(atan(sinh(pi() * (1 - ($image_info['height'] / $max_dimension)))));
     $use_bigimage_css = $variables['use_bigimage_css'];
-    $image = null;
+    $min_zoom = floor(min(array(
+      $height,
+      $variables['widget_width']
+    )) / 256);
     return theme('gm3_map', array(
       'map' => array(
         'id' => 'bigimage-' . $variables['item']['fid'],
         'settings' => array(
+          'height' => $height,
+          'width' => $variables['widget_width'] ? $variables['widget_width'] : '100%',
           'backgroundColor' => 'white', // Could set this as an option if we include other blank tiles.
-          'zoom' => 2,
-          'minZoom' => 2,
+          'zoom' => $min_zoom,
+          'minZoom' => $min_zoom,
           'maxZoom' => $max_zoom,
           'center' => array(
             'latitude' => $latitude,
             'longitude' => $longitude
           ),
-          'scaleControl' => $show_scale_control,
-          'overviewMapControl' => $show_overview_control,
+          'scaleControl' => 0,
+          'overviewMapControl' => $variables['show_overview_control'],
           'mapTypeControlOptions' => array(
             'mapTypeIds' => array()
           )
