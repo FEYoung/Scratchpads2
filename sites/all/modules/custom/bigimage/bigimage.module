@@ -74,13 +74,13 @@ function bigimage_admin_settings(){
 function bigimage_field_formatter_info(){
   return array(
     'bigimage_bigimage_formatter' => array(
-      'label' => t('Bigimage'),
-      'description' => t('Displays a bigmimage as a tile.'),
+      'label' => t('Image: Bigimage'),
+      'description' => t('Displays a high resolution image as tiles and zoom-able.'),
       'field types' => array(
-        'image'
+        'file'
       ),
       'settings' => array(
-        'minimum_dimensions' => '800',
+        'minimum_dimensions' => 1200,
         'image_style' => '',
         'bigimage_show_overview_control' => 0,
         'bigimage_use_bigimage_css' => 1,
@@ -97,6 +97,7 @@ function bigimage_field_formatter_settings_form($field, $instance, $view_mode, $
   return array(
     'minimum_dimensions' => array(
       '#title' => t('Minimum dimensions'),
+      '#description' => t('Select the minimum dimensions of the image you want tiled and zoomable. Images smaller than this will display as the image style below.'),
       '#type' => 'select',
       '#default_value' => $instance['display'][$view_mode]['settings']['minimum_dimensions'],
       '#empty_option' => t('Always use'),
@@ -116,32 +117,34 @@ function bigimage_field_formatter_settings_form($field, $instance, $view_mode, $
     ),
     'image_style' => array(
       '#title' => t('Image style'),
+      '#description' => t('Choose which image style to use as the display if the image is smaller than the minimum dimensions. This image will not be tiled and will not zoom.'),
       '#type' => 'select',
       '#default_value' => $instance['display'][$view_mode]['settings']['image_style'],
       '#empty_option' => t('None (original image)'),
       '#options' => image_style_options(FALSE)
     ),
     'widget_width' => array(
-      '#title' => t('Widget width'),
+      '#title' => t('Zoomed image width'),
+      '#description' => t('Enter the width of box to zoom inside. The height will be automatically set.'),
       '#type' => 'select',
       '#default_value' => $instance['display'][$view_mode]['settings']['widget_width'],
       '#empty_option' => t('Full width (100%)'),
       '#options' => array(
-        '300' => '300',
-        '400' => '400',
-        '500' => '500',
-        '600' => '600',
-        '700' => '700',
-        '800' => '800',
-        '900' => '900',
-        '1000' => '1000',
-        '1100' => '1100',
-        '1200' => '1200'
+        300 => 300,
+        400 => 400,
+        500 => 500,
+        600 => 600,
+        700 => 700,
+        800 => 800,
+        900 => 900,
+        1000 => 1000,
+        1100 => 1100,
+        1200 => 1200
       )
     ),
     'bigimage_show_overview_control' => array(
-      '#title' => t('Show overview'),
-      '#description' => t('Showing the overview box to indicate where you are on the image'),
+      '#title' => t('Show overview map'),
+      '#description' => t('Show a small overview on the bottom right of the image to help indicate where you are on the larger zoomed image'),
       '#type' => 'radios',
       '#default_value' => $instance['display'][$view_mode]['settings']['bigimage_show_overview_control'],
       '#options' => array(
@@ -150,8 +153,8 @@ function bigimage_field_formatter_settings_form($field, $instance, $view_mode, $
       )
     ),
     'bigimage_use_bigimage_css' => array(
-      '#title' => t('Show border arouond image'),
-      '#description' => t('Showing a border around the image'),
+      '#title' => t('Show border'),
+      '#description' => t('Show a shaded border around the image'),
       '#type' => 'radios',
       '#default_value' => $instance['display'][$view_mode]['settings']['bigimage_use_bigimage_css'],
       '#options' => array(
@@ -191,12 +194,12 @@ function bigimage_field_formatter_settings_summary($field, $instance, $view_mode
         $summary[] = t('Do not show overview.');
       }
       if(isset($instance['display'][$view_mode]['settings']['bigimage_use_bigimage_css']) && $instance['display'][$view_mode]['settings']['bigimage_use_bigimage_css']){
-        $summary[] = t('Show border.');
-      }else{
         $summary[] = t('Do not show border.');
+      }else{
+        $summary[] = t('Show border.');
       }
       if(isset($instance['display'][$view_mode]['settings']['widget_width']) && $instance['display'][$view_mode]['settings']['widget_width']){
-        $summary[] = t('Widget !pixels pixels wide.', array(
+        $summary[] = t('Widget !pixels pixels wide. The height will be automatically set.', array(
           '!pixels' => $instance['display'][$view_mode]['settings']['widget_width']
         ));
       }else{
@@ -215,7 +218,7 @@ function bigimage_field_formatter_view($entity_type, $entity, $field, $instance,
     case 'bigimage_bigimage_formatter':
       $min_dimension = isset($display['settings']['minimum_dimensions']) ? $display['settings']['minimum_dimensions'] : 0;
       foreach($items as $delta => $item){
-        if($item['height'] > $min_dimension || $item['width'] > $min_dimension){
+        if($item['image_dimensions']['height'] > $min_dimension || $item['image_dimensions']['width'] > $min_dimension){
           $elements[$delta] = array(
             '#theme' => 'bigimage',
             '#show_overview_control' => $display['settings']['bigimage_show_overview_control'],
@@ -251,6 +254,7 @@ function bigimage_theme(){
       'variables' => array(
         'item' => array(),
         'show_overview_control' => 0,
+        'use_bigimage_css' => 1,
         'widget_width' => 500
       )
     )
