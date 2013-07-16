@@ -212,11 +212,33 @@ function darwincore_update_7012(){
 }
 
 /**
+ * Ensure all fields exist, and lock them!
+ */
+function darwincore_update_7013(){
+  $fields_to_lock = array();
+  module_load_include('features.field.inc', 'darwincore');
+  foreach(darwincore_field_default_fields() as $field){
+    $fields_to_lock[] = $field['field_config']['field_name'];
+    if(!field_info_field($field['field_config']['field_name'])){
+      field_create_field($field['field_config']);
+    }
+    try{
+      field_create_instance($field['field_instance']);
+    }
+    catch(Exception $e){
+    }
+  }
+  db_update('field_config')->fields(array(
+    'locked' => 1
+  ))->condition('field_name', $fields_to_lock)->execute();
+}
+
+/**
  * Rebuild the darwincore content type.
  *
  * FIXME - This MUST be rewritten as a manual update.  Users are able to edit content types and fields,
  * so leaving it like this could be very bad!
-function darwincore_update_7013() {
+function darwincore_update_7014() {
  features_revert(array('darwincore' => array('darwincore')));
 }
  */
