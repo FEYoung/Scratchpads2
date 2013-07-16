@@ -2,3 +2,8 @@
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
 }
+
+
+.gm3-map-wrapper{
+   border-radius: 0px;
+}
