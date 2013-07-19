@@ -9,6 +9,7 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
    * Override parent::newEntity().
    */
   protected function newEntity(FeedsSource $source){
+    watchdog('newentity', '<pre>' . print_r($source, TRUE) . '</pre>');
     $node = parent::newEntity($source);
     $node->log = 'Created by FeedsMultiNodeProcessor';
     return $node;
@@ -92,7 +93,7 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
     // Iterate through all unique targets and test whether they do already
     // exist in the database.
     foreach($this->uniqueTargets($source, $result) as $target => $value){
-      switch($this->trimPrefix($target)){
+      switch($this->trimPrefix($target, 1)){
         case 'url':
           $nid = $query->condition('url', $value)->execute()->fetchField();
           break;
@@ -135,6 +136,7 @@ return $nid;}
         $this->config['content_type'] = $type;
         $hash = $this->hash($item);
         if(!($entity_id = $this->existingEntityId($source, $parser_result)) || ($this->config['update_existing'] != FEEDS_SKIP_EXISTING)){
+          watchdog('entity_id1', '<pre>' . print_r($entity_id, TRUE) . '</pre>');
           // Only proceed if item has actually changed.
           if(!empty($entity_id) && $hash == $this->getHash($entity_id)){
             continue;
@@ -144,12 +146,14 @@ return $nid;}
             if(empty($entity_id)){
               $entity = $this->newEntity($source);
               $this->newItemInfo($entity, $source->feed_nid, $hash);
+              watchdog('entity1', '<pre>' . print_r($entity, TRUE) . '</pre>');
             }else{
               $entity = $this->entityLoad($source, $entity_id);
               // The feeds_item table is always updated with the info for the most recently processed entity.
               // The only carryover is the entity_id.
               $this->newItemInfo($entity, $source->feed_nid, $hash);
               $entity->feeds_item->entity_id = $entity_id;
+              watchdog('entity2', '<pre>' . print_r($entity, TRUE) . '</pre>');
             }
             $this->map($source, $parser_result, $entity);
             $this->entityValidate($entity);
@@ -266,10 +270,9 @@ return $nid;}
     // need to clear target elements of each item before mapping in case we are
     // mapping on a prepopulated item such as an existing node.
     foreach($this->config['content_types'] as $type){
-      watchdog('type', '<pre>' . print_r($type, TRUE) . '</pre>');
       if(array_key_exists($type, $mappings)){
         foreach($mappings[$type] as $mapping){
-          $target = $this->trimPrefix($mapping['target']);
+          $target = $this->trimPrefix($mapping['target'], 1);
           if(isset($targets[$mapping['target']]['real_target'])){
             unset($target_item->{$targets[$mapping['target']]['real_target']});
           }elseif(isset($target_item->{$target})){
@@ -291,31 +294,32 @@ return $nid;}
     foreach($this->config['content_types'] as $type){
       watchdog('mappings3', '<pre>' . print_r($mappings, TRUE) . '</pre>');
       if(array_key_exists($type, $mappings)){
-        foreach($mappings[$type] as $mapping){           
+        foreach($mappings[$type] as $mapping){
+          watchdog('mappings4', '<pre>' . print_r($mapping, TRUE) . '</pre>');
           // Retrieve source element's value from parser.
           if(isset($sources[$this->id][$mapping['source']]) && is_array($sources[$this->id][$mapping['source']]) && isset($sources[$this->id][$mapping['source']]['callback']) && function_exists($sources[$this->id][$mapping['source']]['callback'])){
             $callback = $sources[$this->id][$mapping['source']]['callback'];
             $value = $callback($source, $result, $mapping['source']);
-            watchdog('value1', '<pre>' . print_r($value, TRUE) . '</pre>');
+            watchdog('value from parser 1', '<pre>' . print_r($value, TRUE) . '</pre>');
           }else{
             $value = $parser->getSourceElement($source, $result, $mapping['source']);
-            watchdog('value2', '<pre>' . print_r($value, TRUE) . '</pre>');
+            watchdog('value from parser 2', '<pre>' . print_r($value, TRUE) . '</pre>');
           }
-          
-          
           // Map the source element's value to the target.
           if(isset($targets[$this->id][$mapping['target']]) && is_array($targets[$this->id][$mapping['target']]) && isset($targets[$this->id][$mapping['target']]['callback']) && function_exists($targets[$this->id][$mapping['target']]['callback'])){
             $callback = $targets[$this->id][$mapping['target']]['callback'];
-            $callback($source, $target_item, $this->trimPrefix($mapping['target']), $value);
+            $callback($source, $target_item, $this->trimPrefix($mapping['target'], 1), $value);
             watchdog('value3', '<pre>' . print_r($value, TRUE) . '</pre>');
           }else{
-            $this->setTargetElement($source, $target_item, $this->trimPrefix($mapping['target']), $value);
-            watchdog('value4', '<pre>' . print_r($value, TRUE) . '</pre>');
+            if($target_item->type == $type){
+              $this->setTargetElement($source, $target_item, $this->trimPrefix($mapping['target'], 1), $value);
+              watchdog('value5', '<pre>' . print_r($value, TRUE) . '</pre>');
+            }
           }
         }
       }
     }
-    watchdog('target_item', '<pre>' . print_r($target_item, TRUE) . '</pre>');
+    watchdog('target_item2', '<pre>' . print_r($target_item, TRUE) . '</pre>');
     return $target_item;
   }
 
@@ -327,9 +331,9 @@ return $nid;}
     $entity->feeds_item->bundle = $this->config['content_type'];
   }
 
-  private function trimPrefix($string){
+  private function trimPrefix($string, $position){
     $parts = explode(':', $string, 2);
-    return $parts[1];
+    return $parts[$position];
   }
 
   protected function hash($item){
