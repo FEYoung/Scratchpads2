@@ -1,6 +1,7 @@
 <?php
 /* @file
  * Class definition of FeedsMultiNodeProcessor.
+ * http://drupalcode.org/sandbox/twistor/1135898.git/blob_plain/refs/heads/7.x-1.x:/FeedsMultiNodeProcessor.inc
  */
 class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
 
@@ -69,8 +70,10 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
       $this->config['content_type'] = $type;
       $type_targets = parent::getMappingTargets();
       foreach($type_targets as $key => $value){
-        $value['name'] = $types[$type] . ': ' . $value['name'];
-        $targets[$type . ':' . $key] = $value;
+        if(isset($value['name'])){
+          $value['name'] = $types[$type] . ': ' . $value['name'];
+          $targets[$type . ':' . $key] = $value;
+        }
       }
     }
     return $targets;
@@ -101,11 +104,6 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
             ':nid' => $value
           ))->fetchField();
           break;
-        case 'title':
-          $nid = db_query("SELECT nid FROM {node} WHERE title = :title", array(
-            ':title' => $value
-          ))->fetchField();
-          break;
         case 'feeds_source':
           if($id = feeds_get_importer_id($this->config['content_type'])){
             $nid = db_query("SELECT fs.feed_nid FROM {node} n JOIN {feeds_source} fs ON n.nid = fs.feed_nid WHERE fs.id = :id AND fs.source = :source", array(
@@ -116,24 +114,26 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
           break;
       }
       if(isset($nid)){        // Return with the content id found.
-        return $nid;}
+return $nid;}
     }
     return 0;
   }
 
   /**
-   * Process the result of the parsing stage.
    * Override parent::process().
    */
   public function process(FeedsSource $source, FeedsParserResult $parser_result){
     $state = $source->state(FEEDS_PROCESS);
-    
+    // $this->config['content_types'] comes in with zero set even if not selected. Remove it.
+    $selectedTypes = array_diff($this->config['content_types'], array(
+      0
+    ));
+    unset($this->config['content_types']);
+    $this->config['content_types'] = $selectedTypes;
     while($item = $parser_result->shiftItem()){
       foreach($this->config['content_types'] as $type){
-
         $this->config['content_type'] = $type;
         $hash = $this->hash($item);
-        
         if(!($entity_id = $this->existingEntityId($source, $parser_result)) || ($this->config['update_existing'] != FEEDS_SKIP_EXISTING)){
           // Only proceed if item has actually changed.
           if(!empty($entity_id) && $hash == $this->getHash($entity_id)){
@@ -153,25 +153,12 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
             }
             $this->map($source, $parser_result, $entity);
             $this->entityValidate($entity);
-            
-            // Allow modules to alter the entity before saving.
-            module_invoke_all('feeds_presave', $source, $entity);
-            if (module_exists('rules')) {
-              rules_invoke_event('feeds_import_'. $source->importer()->id, $entity);
-            }
-            
-            
-            
-            // Enable modules to skip saving at all.
-            if (empty($entity->feeds_item->skip)) {
-              $this->entitySave($entity);
-              // Track progress.
-              if (empty($entity_id)) {
-                $state->created++;
-              }
-              else {
-                $state->updated++;
-              }
+            $this->entitySave($entity);
+            // Track progress.
+            if(empty($entity_id)){
+              $state->created++;
+            }else{
+              $state->updated++;
             }
           }
           catch(Exception $e){
@@ -184,58 +171,49 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
             $message .= '<pre>' . var_export($entity, true) . '</pre>';
             $source->log('import', $message, array(), WATCHDOG_ERROR);
           }
-        }      
+        }
       }
     }
     // Set messages if we're done.
-  if ($source->progressImporting() != FEEDS_BATCH_COMPLETE) {
-      return;
-    }
+    if($source->progressImporting() != FEEDS_BATCH_COMPLETE){return;}
     $info = $this->entityInfo();
     $tokens = array(
       '@entity' => strtolower($info['label']),
-      '@entities' => strtolower($info['label plural']),
+      '@entities' => strtolower($info['label plural'])
     );
     $messages = array();
-    if ($state->created) {
+    if($state->created){
       $messages[] = array(
-       'message' => format_plural(
-          $state->created,
-          'Created @number @entity.',
-          'Created @number @entities.',
-          array('@number' => $state->created) + $tokens
-        ),
+        'message' => format_plural($state->created, 'Created @number @entity', 'Created @number @entities', array(
+          '@number' => $state->created
+        ) + $tokens)
       );
     }
-    if ($state->updated) {
+    if($state->updated){
       $messages[] = array(
-       'message' => format_plural(
-          $state->updated,
-          'Updated @number @entity.',
-          'Updated @number @entities.',
-          array('@number' => $state->updated) + $tokens
-        ),
+        'message' => format_plural($state->updated, 'Updated @number @entity', 'Updated @number @entities', array(
+          '@number' => $state->updated
+        ) + $tokens)
       );
     }
-    if ($state->failed) {
+    if($state->failed){
       $messages[] = array(
-       'message' => format_plural(
-          $state->failed,
-          'Failed importing @number @entity.',
-          'Failed importing @number @entities.',
-          array('@number' => $state->failed) + $tokens
-        ),
-        'level' => WATCHDOG_ERROR,
+        'message' => format_plural($state->failed, 'Failed importing @number @entity', 'Failed importing @number @entities', array(
+          '@number' => $state->failed
+        ) + $tokens),
+        'level' => WATCHDOG_ERROR
       );
     }
-    if (empty($messages)) {
+    if(empty($messages)){
       $messages[] = array(
-        'message' => t('There are no new @entities.', array('@entities' => strtolower($info['label plural']))),
+        'message' => t('There are no new @entities.', array(
+          '@entities' => strtolower($info['label plural'])
+        ))
       );
     }
-    foreach ($messages as $message) {
+    foreach($messages as $message){
       drupal_set_message($message['message']);
-      $source->log('import', $message['message'], array(), isset($message['level']) ? $message['level'] : WATCHDOG_INFO);
+      $source->log('import', $message, array(), isset($message['level']) ? $message['level'] : WATCHDOG_INFO);
     }
   }
 
@@ -245,33 +223,59 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
   protected function map(FeedsSource $source, FeedsParserResult $result, $target_item = NULL){
     // Static cache $targets as getMappingTargets() may be an expensive method.
     static $sources;
+    // watchdog('source', '<pre>' . print_r($source, TRUE) . '</pre>');
     if(!isset($sources[$this->id])){
       $sources[$this->id] = feeds_importer($this->id)->parser->getMappingSources();
+      //  watchdog('one', '<pre>' . print_r($sources, TRUE) . '</pre>');
     }
     static $targets;
+    $firstRow = FALSE;
     if(!isset($targets[$this->id])){
       $targets[$this->id] = $this->getMappingTargets();
+      //  watchdog('no mapped targets - go get id', '<pre>' . print_r($targets, TRUE) . '</pre>');
+      $firstRow = TRUE;
     }
     $parser = feeds_importer($this->id)->parser;
     if(empty($target_item)){
       $target_item = array();
+      //   watchdog('three', '<pre>' . print_r($target_item, TRUE) . '</pre>');
     }
     // Filter mappings to the current content type.
     $mappings = array();
-    foreach($this->config['mappings'] as $mapping){
-      if(strpos($mapping['target'], $this->config['content_type'] . ':') === 0){
-        $mappings[] = $mapping;
+    //  watchdog('config', '<pre>' . print_r($this->config, TRUE) . '</pre>');
+    //  watchdog('mappings1', '<pre>' . print_r($this->config['mappings'], TRUE) . '</pre>');
+    if($firstRow){
+      foreach($this->config['content_types'] as $type){
+        foreach($this->config['mappings'] as $mapping){
+          if(strpos($mapping['target'], $type . ':') === 0){
+            $mappings[$type][] = $mapping;
+          }
+        }
       }
+      //OK have to do locations first 
+      //  watchdog('first row mappings', '<pre>' . print_r($mappings, TRUE) . '</pre>');
+    }else{
+      foreach($this->config['mappings'] as $mapping){
+        if(strpos($mapping['target'], $this->config['content_type'] . ':') === 0){
+          $mappings[$this->config['content_type']][] = $mapping;
+        }
+      }
+      //     watchdog('mappings3', '<pre>' . print_r($mappings, TRUE) . '</pre>');
     }
     // Many mappers add to existing fields rather than replacing them. Hence we
     // need to clear target elements of each item before mapping in case we are
     // mapping on a prepopulated item such as an existing node.
-    foreach($mappings as $mapping){
-      $target = $this->trimPrefix($mapping['target']);
-      if(isset($targets[$mapping['target']]['real_target'])){
-        unset($target_item->{$targets[$mapping['target']]['real_target']});
-      }elseif(isset($target_item->{$target})){
-        unset($target_item->{$target});
+    foreach($this->config['content_types'] as $type){
+      watchdog('type', '<pre>' . print_r($type, TRUE) . '</pre>');
+      if(array_key_exists($type, $mappings)){
+        foreach($mappings[$type] as $mapping){
+          $target = $this->trimPrefix($mapping['target']);
+          if(isset($targets[$mapping['target']]['real_target'])){
+            unset($target_item->{$targets[$mapping['target']]['real_target']});
+          }elseif(isset($target_item->{$target})){
+            unset($target_item->{$target});
+          }
+        }
       }
     }
     /*
@@ -284,22 +288,34 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
     setTargetElement().
     */
     self::loadMappers();
-    foreach($mappings as $mapping){
-      // Retrieve source element's value from parser.
-      if(isset($sources[$this->id][$mapping['source']]) && is_array($sources[$this->id][$mapping['source']]) && isset($sources[$this->id][$mapping['source']]['callback']) && function_exists($sources[$this->id][$mapping['source']]['callback'])){
-        $callback = $sources[$this->id][$mapping['source']]['callback'];
-        $value = $callback($source, $result, $mapping['source']);
-      }else{
-        $value = $parser->getSourceElement($source, $result, $mapping['source']);
-      }
-      // Map the source element's value to the target.
-      if(isset($targets[$this->id][$mapping['target']]) && is_array($targets[$this->id][$mapping['target']]) && isset($targets[$this->id][$mapping['target']]['callback']) && function_exists($targets[$this->id][$mapping['target']]['callback'])){
-        $callback = $targets[$this->id][$mapping['target']]['callback'];
-        $callback($source, $target_item, $this->trimPrefix($mapping['target']), $value);
-      }else{
-        $this->setTargetElement($source, $target_item, $this->trimPrefix($mapping['target']), $value);
+    foreach($this->config['content_types'] as $type){
+      watchdog('mappings3', '<pre>' . print_r($mappings, TRUE) . '</pre>');
+      if(array_key_exists($type, $mappings)){
+        foreach($mappings[$type] as $mapping){           
+          // Retrieve source element's value from parser.
+          if(isset($sources[$this->id][$mapping['source']]) && is_array($sources[$this->id][$mapping['source']]) && isset($sources[$this->id][$mapping['source']]['callback']) && function_exists($sources[$this->id][$mapping['source']]['callback'])){
+            $callback = $sources[$this->id][$mapping['source']]['callback'];
+            $value = $callback($source, $result, $mapping['source']);
+            watchdog('value1', '<pre>' . print_r($value, TRUE) . '</pre>');
+          }else{
+            $value = $parser->getSourceElement($source, $result, $mapping['source']);
+            watchdog('value2', '<pre>' . print_r($value, TRUE) . '</pre>');
+          }
+          
+          
+          // Map the source element's value to the target.
+          if(isset($targets[$this->id][$mapping['target']]) && is_array($targets[$this->id][$mapping['target']]) && isset($targets[$this->id][$mapping['target']]['callback']) && function_exists($targets[$this->id][$mapping['target']]['callback'])){
+            $callback = $targets[$this->id][$mapping['target']]['callback'];
+            $callback($source, $target_item, $this->trimPrefix($mapping['target']), $value);
+            watchdog('value3', '<pre>' . print_r($value, TRUE) . '</pre>');
+          }else{
+            $this->setTargetElement($source, $target_item, $this->trimPrefix($mapping['target']), $value);
+            watchdog('value4', '<pre>' . print_r($value, TRUE) . '</pre>');
+          }
+        }
       }
     }
+    watchdog('target_item', '<pre>' . print_r($target_item, TRUE) . '</pre>');
     return $target_item;
   }
 
