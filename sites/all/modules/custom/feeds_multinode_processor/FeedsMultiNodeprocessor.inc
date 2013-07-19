@@ -9,7 +9,6 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
    * Override parent::newEntity().
    */
   protected function newEntity(FeedsSource $source){
-    watchdog('newentity', '<pre>' . print_r($source, TRUE) . '</pre>');
     $node = parent::newEntity($source);
     $node->log = 'Created by FeedsMultiNodeProcessor';
     return $node;
@@ -136,9 +135,9 @@ return $nid;}
         $this->config['content_type'] = $type;
         $hash = $this->hash($item);
         if(!($entity_id = $this->existingEntityId($source, $parser_result)) || ($this->config['update_existing'] != FEEDS_SKIP_EXISTING)){
-          watchdog('entity_id1', '<pre>' . print_r($entity_id, TRUE) . '</pre>');
           // Only proceed if item has actually changed.
           if(!empty($entity_id) && $hash == $this->getHash($entity_id)){
+            watchdog('entity_id1', '<pre>' . print_r($entity_id, TRUE) . '</pre>');
             continue;
           }
           try{
@@ -146,7 +145,6 @@ return $nid;}
             if(empty($entity_id)){
               $entity = $this->newEntity($source);
               $this->newItemInfo($entity, $source->feed_nid, $hash);
-              watchdog('entity1', '<pre>' . print_r($entity, TRUE) . '</pre>');
             }else{
               $entity = $this->entityLoad($source, $entity_id);
               // The feeds_item table is always updated with the info for the most recently processed entity.
@@ -236,18 +234,14 @@ return $nid;}
     $firstRow = FALSE;
     if(!isset($targets[$this->id])){
       $targets[$this->id] = $this->getMappingTargets();
-      //  watchdog('no mapped targets - go get id', '<pre>' . print_r($targets, TRUE) . '</pre>');
       $firstRow = TRUE;
     }
     $parser = feeds_importer($this->id)->parser;
     if(empty($target_item)){
       $target_item = array();
-      //   watchdog('three', '<pre>' . print_r($target_item, TRUE) . '</pre>');
     }
     // Filter mappings to the current content type.
     $mappings = array();
-    //  watchdog('config', '<pre>' . print_r($this->config, TRUE) . '</pre>');
-    //  watchdog('mappings1', '<pre>' . print_r($this->config['mappings'], TRUE) . '</pre>');
     if($firstRow){
       foreach($this->config['content_types'] as $type){
         foreach($this->config['mappings'] as $mapping){
@@ -256,15 +250,12 @@ return $nid;}
           }
         }
       }
-      //OK have to do locations first 
-      //  watchdog('first row mappings', '<pre>' . print_r($mappings, TRUE) . '</pre>');
     }else{
       foreach($this->config['mappings'] as $mapping){
         if(strpos($mapping['target'], $this->config['content_type'] . ':') === 0){
           $mappings[$this->config['content_type']][] = $mapping;
         }
       }
-      //     watchdog('mappings3', '<pre>' . print_r($mappings, TRUE) . '</pre>');
     }
     // Many mappers add to existing fields rather than replacing them. Hence we
     // need to clear target elements of each item before mapping in case we are
