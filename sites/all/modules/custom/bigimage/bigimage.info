@@ -1,7 +1,9 @@
 name = Big Image
-description = Uses the Google Maps Javascript API V3 to display large images as tiles.
+description = Enables panning and zooming on very large images using a basic Javascript library.
+package = Images
 core = 7.x
 dependencies[] = imagemagick
 dependencies[] = gm3
 dependencies[] = image
 configure = admin/config/media/bigimage
+tool = true
