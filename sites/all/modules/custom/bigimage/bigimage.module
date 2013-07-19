@@ -91,6 +91,27 @@ function bigimage_field_formatter_info(){
 }
 
 /**
+ * Implements hook_file_displays_alter().
+ * 
+ * Ensure that an image is displayed on the file/[fid] page.
+ */
+function bigimage_file_displays_alter(&$displays, $file, $view_mode){
+  if($view_mode == 'full' && arg(0) == 'file'){
+    $displays['file_field_bigimage_bigimage_formatter'] = array(
+      'status' => 1,
+      'settings' => array(
+        'minimum_dimensions' => 2000,
+        'image_style' => 'large',
+        'widget_width' => 500,
+        'bigimage_show_overview_control' => 0,
+        'bigimage_use_bigimage_css' => 1
+      ),
+      'weight' => -2000
+    );
+  }
+}
+
+/**
  * Implements hook_file_default_displays().
  */
 function bigimage_file_default_displays(){
@@ -101,7 +122,7 @@ function bigimage_file_default_displays(){
   ) as $display_name){
     $file_display = new stdClass();
     $file_display->api_version = 1;
-    $file_display->weight = -1000;
+    $file_display->weight = -2000;
     $file_display->status = TRUE;
     $file_display->settings = array(
       'minimum_dimensions' => 2000,
