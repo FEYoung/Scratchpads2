@@ -91,6 +91,10 @@ function scratchpads_file_colorboxed_contextual_links_view_alter(&$element, $ite
         'overlay-exclude'
       );
     }
+  }else if(arg(0) == 'file-bigimage'){
+    // We remove the contextual links from the bigimage view, as they would
+    // result in the edit page being opened in the iframe.
+    unset($element['#links']);
   }
 }
 
