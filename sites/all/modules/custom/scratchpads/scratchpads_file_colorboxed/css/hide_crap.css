@@ -1,0 +1,13 @@
+#zone-header-wrapper,#region-page-top,#section-header,#section-footer,#breadcrumb,#region-content>.region-inner>h1,.blockexpose,.stripy-div-group,.contextual-links
+  {
+  display: none;
+}
+
+#region-content {
+  margin-bottom: 0 !important;
+}
+
+#section-content,#zone-content {
+  margin: 0 !important;
+  padding: 0 !important;
+}
