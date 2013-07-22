@@ -56,6 +56,17 @@ function scratchpads_file_colorboxed_menu(){
       'access arguments' => array(
         'view'
       )
+    ),
+    'file-bigimage/%' => array(
+      'title' => 'Scratchpads Bigimage colorbox',
+      'page callback' => 'scratchpads_file_colorboxed_bigimage_entity_simple_view',
+      'page arguments' => array(
+        1
+      ),
+      'access callback' => 'file_entity_access',
+      'access arguments' => array(
+        'view'
+      )
     )
   );
 }
@@ -80,6 +91,29 @@ function scratchpads_file_colorboxed_contextual_links_view_alter(&$element, $ite
         'overlay-exclude'
       );
     }
+  }
+}
+
+/**
+ * Callback to view a file with an added CSS file
+ */
+function scratchpads_file_colorboxed_bigimage_entity_simple_view($fid){
+  $entity = entity_load_single('file', $fid);
+  drupal_add_css(drupal_get_path('module', 'scratchpads_file_colorboxed') . '/css/hide_crap.css');
+  drupal_add_js(drupal_get_path('module', 'scratchpads_file_colorboxed') . '/js/enlarge_bigimage.js');
+  return entity_view('file', array(
+    $entity
+  ), 'file_styles_colorbox');
+}
+
+/**
+ * Implements hook_gm3_map_alter()
+ */
+function scratchpads_file_colorboxed_gm3_map_alter(&$map){
+  if(arg(0) == 'file-bigimage'){
+    $map['settings']['width'] = 1000;
+    $map['settings']['height'] = 750;
+    $map['settings']['zoom'] = 3;
   }
 }
 
@@ -129,6 +163,11 @@ function scratchpads_file_colorboxed_entity_simple_view($fid){
       )
     )) . ' ' . t('uploaded by:') . ' ' . l($image_user->name, 'user/' . $image_user->uid) . '</p>';
   }
-  echo scratchpads_tweaks_translate_after_check_plain('<div style="' . $width . 'padding:10px">' . drupal_render($content) . $image_links . '</div>');
+  $content = scratchpads_tweaks_translate_after_check_plain('<div style="' . $width . 'padding:10px">' . drupal_render($content) . $image_links . '</div>');
+  if(strpos($content, 'gm3')){
+    echo '<iframe src="' . url('file-bigimage/' . $fid) . '" height="800px" width="1000px"></iframe>';
+  }else{
+    echo $content;
+  }
   drupal_exit();
 }
