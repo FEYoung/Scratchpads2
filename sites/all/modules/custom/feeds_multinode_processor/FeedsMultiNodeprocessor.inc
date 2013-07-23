@@ -290,14 +290,12 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
           }else{
             $value = $parser->getSourceElement($source, $result, $mapping['source']);
           }
-          // Map the source element's value to the target.
-          if(isset($targets[$this->id][$mapping['target']]) && is_array($targets[$this->id][$mapping['target']]) && isset($targets[$this->id][$mapping['target']]['callback']) && function_exists($targets[$this->id][$mapping['target']]['callback'])){
-            if($target_item->type == $type){
+          if($target_item->type == $type){
+            // Map the source element's value to the target.
+            if(isset($targets[$this->id][$mapping['target']]) && is_array($targets[$this->id][$mapping['target']]) && isset($targets[$this->id][$mapping['target']]['callback']) && function_exists($targets[$this->id][$mapping['target']]['callback'])){
               $callback = $targets[$this->id][$mapping['target']]['callback'];
               $callback($source, $target_item, $this->trimPrefix($mapping['target'], 1), $value);
-            }
-          }else{
-            if($target_item->type == $type){
+            }else{
               $this->setTargetElement($source, $target_item, $this->trimPrefix($mapping['target'], 1), $value);
             }
           }
