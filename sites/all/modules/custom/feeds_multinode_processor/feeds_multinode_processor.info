@@ -1,5 +1,6 @@
 name = Feeds Multi-node Processor
-description = Import to multiple content types
+description = Import to multiple content types currently defaulting to specimen and location only
 package = Feeds
 dependencies[] = feeds
+files[] = FeedsMultiNodeprocessor.inc
 core = 7.x
