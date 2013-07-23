@@ -157,13 +157,25 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
             }
             $this->map($source, $parser_result, $entity);
             $this->entityValidate($entity);
-            $this->entitySave($entity);
-            // Track progress.
-            if(empty($entity_id)){
-              $state->created++;
-            }else{
-              $state->updated++;
+            
+            // Allow modules to alter the entity before saving.
+            module_invoke_all('feeds_presave', $source, $entity);
+            if (module_exists('rules')) {
+              rules_invoke_event('feeds_import_'. $source->importer()->id, $entity);
             }
+            
+            
+            // Enable modules to skip saving at all.
+            if (empty($entity->feeds_item->skip)) {
+              $this->entitySave($entity);
+              // Track progress.
+              if (empty($entity_id)) {
+                $state->created++;
+              }
+              else {
+                $state->updated++;
+              }
+            } 
           }
           catch(Exception $e){
             $state->failed++;
@@ -294,10 +306,6 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
           }else{
             $value = $parser->getSourceElement($source, $result, $mapping['source']);
           }
-          $mapping_source = $mapping['source'];
-          $mapping_target = $mapping['target'];
-          $mapping_unique = $mapping['unique'];
-          $debug = $mapping_source . " target = " . $mapping_target . " value= " . $value;
           // Map the source element's value to the target.
           if(isset($targets[$this->id][$mapping['target']]) && is_array($targets[$this->id][$mapping['target']]) && isset($targets[$this->id][$mapping['target']]['callback']) && function_exists($targets[$this->id][$mapping['target']]['callback'])){
             if($target_item->type == $type){
