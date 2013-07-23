@@ -157,25 +157,21 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
             }
             $this->map($source, $parser_result, $entity);
             $this->entityValidate($entity);
-            
             // Allow modules to alter the entity before saving.
             module_invoke_all('feeds_presave', $source, $entity);
-            if (module_exists('rules')) {
-              rules_invoke_event('feeds_import_'. $source->importer()->id, $entity);
+            if(module_exists('rules')){
+              rules_invoke_event('feeds_import_' . $source->importer()->id, $entity);
             }
-            
-            
             // Enable modules to skip saving at all.
-            if (empty($entity->feeds_item->skip)) {
+            if(empty($entity->feeds_item->skip)){
               $this->entitySave($entity);
               // Track progress.
-              if (empty($entity_id)) {
+              if(empty($entity_id)){
                 $state->created++;
-              }
-              else {
+              }else{
                 $state->updated++;
               }
-            } 
+            }
           }
           catch(Exception $e){
             $state->failed++;
@@ -243,10 +239,8 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
       $sources[$this->id] = feeds_importer($this->id)->parser->getMappingSources();
     }
     static $targets;
-    $firstRow = FALSE;
     if(!isset($targets[$this->id])){
       $targets[$this->id] = $this->getMappingTargets();
-      $firstRow = TRUE;
     }
     $parser = feeds_importer($this->id)->parser;
     if(empty($target_item)){
@@ -254,20 +248,10 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
     }
     // Filter mappings to the current content type.
     $mappings = array();
-    if($firstRow){
-      foreach($this->config['content_types'] as $type){
-        foreach($this->config['mappings'] as $mapping){
-          if(strpos($mapping['target'], $type . ':') === 0){
-            $mappings[$type][] = $mapping;
-          }
-        }
-      }
-    }else{
-      foreach($this->config['content_types'] as $type){
-        foreach($this->config['mappings'] as $mapping){
-          if(strpos($mapping['target'], $type . ':') === 0){
-            $mappings[$type][] = $mapping;
-          }
+    foreach($this->config['content_types'] as $type){
+      foreach($this->config['mappings'] as $mapping){
+        if(strpos($mapping['target'], $type . ':') === 0){
+          $mappings[$type][] = $mapping;
         }
       }
     }
