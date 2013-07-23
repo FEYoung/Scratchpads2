@@ -51,10 +51,11 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
     $form['content_types'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Content types'),
-      '#description' => t('Select the content types for the nodes to be created. <strong>Note:</strong> Users with "import !feed_id feeds" permissions will be able to <strong>import</strong> nodes of the content types selected here regardless of the node level permissions. Further, users with "clear !feed_id permissions" will be able to <strong>delete</strong> imported nodes regardless of their node level permissions.', array(
+      '#description' => t('The content types of the nodes to be created.', array(
         '!feed_id' => $this->id
       )),
       '#options' => $types,
+      '#disabled' => TRUE,
       '#default_value' => $this->config['content_types']
     );
     return $form;
