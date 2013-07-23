@@ -90,8 +90,7 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
     $query = db_select('feeds_item')->fields('feeds_item', array(
       'entity_id'
     ))->condition('feed_nid', $source->feed_nid)->condition('entity_type', $this->entityType())->condition('bundle', $this->config['content_type'])->condition('id', $source->id);
-    // Iterate through all unique targets and test whether they do already
-    // exist in the database.
+    // Iterate through all unique targets and test whether they do already exist in the database.
     $unique_targets = $this->uniqueTargets($source, $result);
     foreach($unique_targets as $target => $value){
       $target_content = $this->trimPrefix($target, 0); //specimen_observation, location
@@ -128,12 +127,6 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
    */
   public function process(FeedsSource $source, FeedsParserResult $parser_result){
     $state = $source->state(FEEDS_PROCESS);
-    // $this->config['content_types'] comes in with zero set even if not selected. Remove it.
-    $selectedTypes = array_diff($this->config['content_types'], array(
-      0
-    ));
-    unset($this->config['content_types']);
-    $this->config['content_types'] = $selectedTypes;
     while($item = $parser_result->shiftItem()){
       foreach($this->config['content_types'] as $type){
         $this->config['content_type'] = $type;
