@@ -31,8 +31,8 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
    * Override parent::configDefaults().
    */
   public function configDefaults(){
-    $defaults = parent::configDefaults();
-    $types = node_type_get_names();
+    $defaults = parent::configDefaults();    
+    $types = $this->multiNodeContentTypes();  
     $type = isset($types['article']) ? 'article' : key($types);
     $defaults['content_types'] = array(
       $type
@@ -46,7 +46,7 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
   public function configForm(&$form_state){
     $form = parent::configForm($form_state);
     unset($form['content_type']);
-    $types = node_type_get_names();
+    $types = $this->multiNodeContentTypes();  
     array_walk($types, 'check_plain');
     $form['content_types'] = array(
       '#type' => 'checkboxes',
@@ -65,7 +65,8 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
    */
   public function getMappingTargets(){
     $targets = array();
-    $types = node_type_get_names();
+    $types = $this->multiNodeContentTypes();  
+    
     foreach($this->config['content_types'] as $type){
       $this->config['content_type'] = $type;
       $type_targets = parent::getMappingTargets();
@@ -318,6 +319,11 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
     return $parts[$position];
   }
 
+  private function multiNodeContentTypes(){
+    $types = array('location'=>'Location','specimen_observation'=>'Specimen/Observation');    
+    return $types;
+  }
+  
   protected function hash($item){
     static $serialized_mappings = array();
     if(!isset($serialized_mappings[$this->config['content_type']])){
