@@ -138,16 +138,15 @@ function feeds_multinode_processor_create_csv_of_data($feeds_importer, &$context
     $ids_to_load[] = $id;
     $loop++;
   }
-  $specimen_entities = entity_load($context['sandbox']['entity'], $ids_to_load);
+  $entities = entity_load($context['sandbox']['entity'], $ids_to_load);
   $merged = array();
   // Loop through each of the entities
-  foreach($specimen_entities as $entity_id => $entity){
-    // Get the node reference items attached to this specimen
-    if($items = field_get_items('node', $entity, 'field_location')){
+  foreach($entities as $entity_id => $entity){
+    // Get the location node reference items attached to this specimen
+    if($location = field_get_items('node', $entity, 'field_location')){
       $location_node = entity_load('node', array(
-        $items[0]['nid']
+        $location[0]['nid']
       ));
-      //PROBELM HERE AS WORNG SPECIMEN
       $specimen_node[$entity_id] = $entity;
       $merged['location'] = $location_node;
       $merged['specimen_observation'] = $specimen_node;
@@ -155,8 +154,15 @@ function feeds_multinode_processor_create_csv_of_data($feeds_importer, &$context
     }
     // Create a row array for each entity.
     $row_values = array();
+    
+    watchdog('mappings', '<pre>' . print_r($feeds_importer->processor->config['mappings'], TRUE) . '</pre>');
+    
+    
     foreach($feeds_importer->processor->config['mappings'] as $key => $mapping){
       $row_values[$key] = '';
+      
+      
+      
       $target = _trimPrefix($mapping['target'], 1);
       $content_type = _trimPrefix($mapping['target'], 0);
       $entity = $merged[$content_type];
@@ -229,7 +235,6 @@ function feeds_multinode_processor_create_csv_of_data($feeds_importer, &$context
             $row_values[$key] = _feeds_multinode_processor_get_value($feeds_item['guid']);
             break;
           default:
-            watchdog('entity[entity_id]', '<pre>' . print_r($entity[$entity_id], TRUE) . '</pre>');
             if(isset($entity[$entity_id]->{$target})){
               if(is_array($entity[$entity_id]->{$target}) && count($entity[$entity_id]->{$target})){
                 $cell_values = array();
