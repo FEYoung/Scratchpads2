@@ -154,19 +154,14 @@ function feeds_multinode_processor_create_csv_of_data($feeds_importer, &$context
     }
     // Create a row array for each entity.
     $row_values = array();
-    
-    watchdog('mappings', '<pre>' . print_r($feeds_importer->processor->config['mappings'], TRUE) . '</pre>');
-    
-    
+   
     foreach($feeds_importer->processor->config['mappings'] as $key => $mapping){
       $row_values[$key] = '';
-      
-      
-      
       $target = _trimPrefix($mapping['target'], 1);
       $content_type = _trimPrefix($mapping['target'], 0);
       $entity = $merged[$content_type];
       $entity_id = key($merged[$content_type]);
+     
       if(strpos($target, ':')){
         $target = explode(':', $target);
         // The country field is a little awkward, so we strip off the first
@@ -233,6 +228,7 @@ function feeds_multinode_processor_create_csv_of_data($feeds_importer, &$context
             }
             $feeds_item = feeds_multinode_processor_get_or_generate_feeds_item_entry($context['sandbox']['entity'], $entity_id, $feeds_importer->id, $guid);
             $row_values[$key] = _feeds_multinode_processor_get_value($feeds_item['guid']);
+            dd($row_values);
             break;
           default:
             if(isset($entity[$entity_id]->{$target})){

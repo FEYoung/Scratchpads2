@@ -289,7 +289,22 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
             if(isset($targets[$this->id][$mapping['target']]) && is_array($targets[$this->id][$mapping['target']]) && isset($targets[$this->id][$mapping['target']]['callback']) && function_exists($targets[$this->id][$mapping['target']]['callback'])){
               $callback = $targets[$this->id][$mapping['target']]['callback'];
               $callback($source, $target_item, $this->trimPrefix($mapping['target'], 1), $value);
+              //dd('type callback= '. $mapping['target']. ' '. $targets[$this->id][$mapping['target']]['callback']);
+              /*type callback= location:field_max_depth feeds_xls_feeds_set_target_numeric
+              type callback= location:field_min_depth feeds_xls_feeds_set_target_numeric
+              type callback= location:field_max_elevation feeds_xls_feeds_set_target_numeric
+              type callback= location:field_min_elevation feeds_xls_feeds_set_target_numeric
+              type callback= location:field_coordinate_uncertainty feeds_xls_feeds_set_target_numeric
+              type callback= specimen_observation:field_count feeds_xls_feeds_set_target_numeric
+              type callback= specimen_observation:field_collector:uid references_feeds_set_target
+              type callback= specimen_observation:field_collector:uid references_feeds_set_target
+              type callback= specimen_observation:field_identified_by:uid references_feeds_set_target
+              type callback= specimen_observation:field_identified_by:uid references_feeds_set_target
+              */              
+              
             }else{
+            //  dd('type target= ' . $type);
+              
               $this->setTargetElement($source, $target_item, $this->trimPrefix($mapping['target'], 1), $value);
             }
           }
