@@ -318,6 +318,10 @@ function scratchpads_tweaks_install(){
   variable_set('apachesolr_optimize_interval', PHP_INT_MAX);
   // Allow insecure derivatives
   variable_set('image_allow_insecure_derivatives', TRUE);
+  // Set that we should use Durden if bigimage is being used.  Note, I'm putting
+  // this here so that bigimage can still be released without custom code.
+  variable_set('bigimage_durden_installed', TRUE);
+  variable_set('bigimage_durden_path', '/usr/local/bin/durden');
 }
 
 /**
@@ -1136,4 +1140,12 @@ function scratchpads_tweaks_update_7055(){
  */
 function scratchpads_tweaks_update_7056(){
   variable_set('apachesolr_optimize_interval', PHP_INT_MAX);
+}
+
+/**
+ * Set the Durden variables so that bigimage works with Durden when enabled.
+ */
+function scratchpads_tweaks_update_7057(){
+  variable_set('bigimage_durden_installed', TRUE);
+  variable_set('bigimage_durden_path', '/usr/local/bin/durden');
 }
