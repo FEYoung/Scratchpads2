@@ -154,14 +154,12 @@ function feeds_multinode_processor_create_csv_of_data($feeds_importer, &$context
     }
     // Create a row array for each entity.
     $row_values = array();
-   
     foreach($feeds_importer->processor->config['mappings'] as $key => $mapping){
       $row_values[$key] = '';
       $target = _trimPrefix($mapping['target'], 1);
       $content_type = _trimPrefix($mapping['target'], 0);
       $entity = $merged[$content_type];
       $entity_id = key($merged[$content_type]);
-     
       if(strpos($target, ':')){
         $target = explode(':', $target);
         // The country field is a little awkward, so we strip off the first

@@ -300,11 +300,9 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
               type callback= specimen_observation:field_collector:uid references_feeds_set_target
               type callback= specimen_observation:field_identified_by:uid references_feeds_set_target
               type callback= specimen_observation:field_identified_by:uid references_feeds_set_target
-              */              
-              
+              */
             }else{
-            //  dd('type target= ' . $type);
-              
+              //  dd('type target= ' . $type);
               $this->setTargetElement($source, $target_item, $this->trimPrefix($mapping['target'], 1), $value);
             }
           }

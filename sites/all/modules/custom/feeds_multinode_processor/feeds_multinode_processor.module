@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Module file for feeds_multinode_processor.module.
@@ -37,15 +38,12 @@ function feeds_multinode_processor_menu_alter(&$items){
   $items['import/%feeds_importer/template']['page callback'] = 'feeds_multinode_processor_download_template';
   $items['import/%feeds_importer/template']['file'] = 'feeds_multinode_processor.template.inc';
   $items['import/%feeds_importer/template']['file path'] = drupal_get_path('module', 'feeds_multinode_processor');
-  
   $items['import/%feeds_importer/populated-template']['page callback'] = 'feeds_multinode_processor_download_populated_template';
   $items['import/%feeds_importer/populated-template']['file'] = 'feeds_multinode_processor.template.inc';
   $items['import/%feeds_importer/populated-template']['file path'] = drupal_get_path('module', 'feeds_multinode_processor');
-  
   $items['feeds_multinode_processor/getfile']['page callback'] = 'feeds_multinode_processor_get_populated_template';
   $items['feeds_multinode_processor/getfile']['file'] = 'feeds_multinode_processor.template.inc';
   $items['feeds_multinode_processor/getfile']['file path'] = drupal_get_path('module', 'feeds_multinode_processor');
-  
 }
 
 /**
@@ -53,13 +51,12 @@ function feeds_multinode_processor_menu_alter(&$items){
  */
 function feeds_multinode_processor_permission(){
   return array(
-      'feeds multinode processor allow download' => array(
-          'title' => t('Feeds multinode processor allow download'),
-          'description' => t('Allow the user to download all of the site\'s data in an Excel template.')
-      )
+    'feeds multinode processor allow download' => array(
+      'title' => t('Feeds multinode processor allow download'),
+      'description' => t('Allow the user to download all of the site\'s data in an Excel template.')
+    )
   );
 }
-
 
 /**
  * Generate an entry in the feeds_item table that can be used by the populated
@@ -75,20 +72,19 @@ function feeds_multinode_processor_get_or_generate_feeds_item_entry($entity_type
       $guid = microtime(TRUE);
     }
     $record = array(
-        'entity_type' => $entity_type,
-        'entity_id' => $entity_id,
-        'id' => $id,
-        'feed_nid' => 0,
-        'imported' => time(),
-        'url' => '',
-        'guid' => $guid,
-        'hash' => 'd41d8cd98f00b204e9800998ecf8427e'
+      'entity_type' => $entity_type,
+      'entity_id' => $entity_id,
+      'id' => $id,
+      'feed_nid' => 0,
+      'imported' => time(),
+      'url' => '',
+      'guid' => $guid,
+      'hash' => 'd41d8cd98f00b204e9800998ecf8427e'
     );
     drupal_write_record('feeds_item', $record);
     return $record;
   }
 }
-
 
 /**
  * Implements hook_feeds_processor_targets_alter().
@@ -104,12 +100,12 @@ function feeds_multinode_processor_get_or_generate_feeds_item_entry($entity_type
  */
 function feeds_multinode_processor_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name){
   $numeric_types = array(
-      'list_integer',
-      'list_float',
-      'list_boolean',
-      'number_integer',
-      'number_decimal',
-      'number_float'
+    'list_integer',
+    'list_float',
+    'list_boolean',
+    'number_integer',
+    'number_decimal',
+    'number_float'
   );
   foreach(field_info_instances($entity_type, $bundle_name) as $name => $instance){
     $info = field_info_field($name);
@@ -118,8 +114,6 @@ function feeds_multinode_processor_feeds_processor_targets_alter(&$targets, $ent
     }
   }
 }
-
-
 
 /**
  * Callback for mapping numerics.
@@ -130,7 +124,7 @@ function feeds_multinode_processor_feeds_processor_targets_alter(&$targets, $ent
 function feeds_multinode_processor_feeds_set_target_numeric($source, $entity, $target, $value){
   if(!is_array($value)){
     $value = array(
-        $value
+      $value
     );
   }
   foreach($value as $k => $v){
@@ -148,12 +142,11 @@ function feeds_multinode_processor_feeds_set_target_numeric($source, $entity, $t
   _field_feeds_set_target($source, $entity, $target, $value, FALSE);
 }
 
-
 /**
  * Overlay doesn't handle the file download path well.
  */
 function feeds_multinode_processor_admin_paths(){
   return array(
-      'import/*/template' => FALSE
+    'import/*/template' => FALSE
   );
 }
