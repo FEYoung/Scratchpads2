@@ -527,6 +527,9 @@ function _imagemagick_convert_exec($command_args, &$output = NULL, &$error = NUL
   return FALSE;
 }
 
+function _imagemagick_identify_exec(){
+  
+}
 /**
  * @} End of "ingroup image".
  */

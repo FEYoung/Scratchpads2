@@ -634,6 +634,12 @@ function scratchpads_tweaks_update_7014(){
     'theme_config_js' => 'f',
     'js_conf' => '',
     'loadPlugins' => array(
+      'scratchpads_backend_tweaks' => array(
+        'name' => 'scratchpads_backend_tweaks',
+        'desc' => 'Ensure that image width/height/align are set as attributes, not as styles when using the image editor',
+        'path' => '%base_path%sites/all/modules/custom/scratchpads/scratchpads_backend/ckeditor/',
+        'buttons' => FALSE
+      ),
       'counter' => array(
         'name' => 'counter',
         'desc' => 'Plugin to count symbols, symbols without blanks and words',
@@ -1193,9 +1199,16 @@ function scratchpads_tweaks_update_7059(){
 }
 
 /**
- * Set the Durden variables so that bigimage works with Durden when enabled.
+ * Enable the width/height/align img attribute plugin.
  */
 function scratchpads_tweaks_update_7060(){
+  scratchpads_tweaks_update_7014();
+}
+
+/**
+ * Set the Durden variables so that bigimage works with Durden when enabled.
+ */
+function scratchpads_tweaks_update_7061(){
   variable_set('bigimage_durden_installed', TRUE);
   variable_set('bigimage_durden_path', '/usr/local/bin/durden');
 }
@@ -1204,7 +1217,7 @@ function scratchpads_tweaks_update_7060(){
  * Uninstall mollom and scratchpads_mollom
  * 
  * FIXME - Please uncomment this function following the 2.1.7 release.
-function scratchpads_tweaks_update_7061(){
+function scratchpads_tweaks_update_7062(){
   drupal_uninstall_modules(array(
     'scratchpads_mollom',
     'mollom'
