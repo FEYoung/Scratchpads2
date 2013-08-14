@@ -318,12 +318,6 @@ function scratchpads_tweaks_install(){
   variable_set('apachesolr_optimize_interval', PHP_INT_MAX);
   // Allow insecure derivatives
   variable_set('image_allow_insecure_derivatives', TRUE);
-  // Set the Spambot settings.
-  variable_set('spambot_blocked_message_email', 'Your email address is blacklisted.');
-  variable_set('spambot_blocked_message_ip', 'Your IP address is blacklisted.');
-  variable_set('spambot_cron_user_limit', 1);
-  variable_set('spambot_check_blocked_accounts', 1);
-  variable_set('spambot_spam_account_action', 1);
   // Set that we should use Durden if bigimage is being used.  Note, I'm putting
   // this here so that bigimage can still be released without custom code.
   variable_set('bigimage_durden_installed', TRUE);
@@ -1218,25 +1212,11 @@ function scratchpads_tweaks_update_7061(){
   variable_set('imagemagick_use_identify', TRUE);
 }
 
-/**
- * Install Spambot, and set the settings.
- */
-function scratchpads_tweaks_update_7062(){
-  module_enable(array(
-    'spambot'
-  ));
-  // Set the Spambot settings.
-  variable_set('spambot_blocked_message_email', 'Your email address is blacklisted.');
-  variable_set('spambot_blocked_message_ip', 'Your IP address is blacklisted.');
-  variable_set('spambot_cron_user_limit', 1);
-  variable_set('spambot_check_blocked_accounts', 1);
-  variable_set('spambot_spam_account_action', 1);
-}
 
 /**
  * Set the Durden variables so that bigimage works with Durden when enabled.
  */
-function scratchpads_tweaks_update_7063(){
+function scratchpads_tweaks_update_7062(){
   variable_set('bigimage_durden_installed', TRUE);
   variable_set('bigimage_durden_path', '/usr/local/bin/durden');
 }
@@ -1244,7 +1224,7 @@ function scratchpads_tweaks_update_7063(){
  * Uninstall mollom and scratchpads_mollom
  * 
  * FIXME - Please uncomment this function following the 2.1.7 release.
-function scratchpads_tweaks_update_7064(){
+function scratchpads_tweaks_update_7063(){
   drupal_uninstall_modules(array(
     'scratchpads_mollom',
     'mollom'
