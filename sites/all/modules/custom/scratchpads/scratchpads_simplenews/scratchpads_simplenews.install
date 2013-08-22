@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * Implements hook_disable()
+ */
+function scratchpads_simplenews_disable(){
+  drupal_register_shutdown_function('module_disable', array(
+    'scs_views'
+  ), FALSE);
+  drupal_register_shutdown_function('module_disable', array(
+    'scs'
+  ), FALSE);
+  drupal_register_shutdown_function('module_disable', array(
+    'simplenews'
+  ), FALSE);
+  drupal_register_shutdown_function(drupal_flush_all_caches);
+}

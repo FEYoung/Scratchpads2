@@ -1,0 +1,9 @@
+<?php
+
+/**
+ * Simplenews module
+ *
+ * Implements hook_scratchpads_default_permissions().
+ * 
+ * Permission set in scratchpads_roles_and_permissions
+ */

@@ -457,7 +457,7 @@ function scratchpads_tweaks_system_info_alter(&$info, $file, $type){
     case 'rules':
       $info['dependencies'][] = 'trigger';
     case 'rules_admin':
-    case 'simplenews':
+   // case 'simplenews':
     case 'googleanalytics':
     case 'tracker':
       $info['tool'] = TRUE;
