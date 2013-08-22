@@ -38,10 +38,8 @@ function _scratchpads_statistics_cron($force_update = FALSE){
   foreach($results as $row){
     $user = user_load($row->uid);
     $name = $user->name;
-    $lang = field_language('user', $user, 'field_user_family_name');
-    $lang_given_names = field_language('user', $user, 'field_user_given_names');
-    if(@isset($user->field_user_family_name[$lang][0]['value']) && isset($user->field_user_given_names[$lang_given_names][0]['value'])){
-      $name = trim($user->field_user_given_names[$lang_given_names][0]['value'] . ' ' . $user->field_user_family_name[$lang][0]['value']);
+    if(@isset($user->field_user_family_name[LANGUAGE_NONE][0]['value']) && isset($user->field_user_given_names[LANGUAGE_NONE][0]['value'])){
+      $name = trim($user->field_user_given_names[LANGUAGE_NONE][0]['value'] . ' ' . $user->field_user_family_name[LANGUAGE_NONE][0]['value']);
     }
     $query = db_merge('scratchpads_statistics_user')->key(array(
       'email' => $user->mail

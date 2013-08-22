@@ -97,7 +97,6 @@ function _pathauto_existing_alias_data($source, $language = LANGUAGE_NONE) {
  * Clean up a string segment to be used in an URL alias.
  *
  * Performs the following possible alterations:
- * - Remove all HTML tags.
  * - Process the string through the transliteration module.
  * - Replace or remove punctuation with the separator character.
  * - Remove back-slashes.
@@ -117,110 +116,72 @@ function _pathauto_existing_alias_data($source, $language = LANGUAGE_NONE) {
  *   The cleaned string.
  */
 function pathauto_cleanstring($string) {
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['cache'] = &drupal_static(__FUNCTION__);
-  }
-  $cache = &$drupal_static_fast['cache'];
-
-  // Generate and cache variables used in this function so that on the second
-  // call to pathauto_cleanstring() we focus on processing.
-  if (!isset($cache)) {
-    $cache = array(
-      'separator' => variable_get('pathauto_separator', '-'),
-      'strings' => array(),
-      'transliterate' => variable_get('pathauto_transliterate', FALSE) && module_exists('transliteration'),
-      'punctuation' => array(),
-      'reduce_ascii' => (bool) variable_get('pathauto_reduce_ascii', FALSE),
-      'ignore_words_regex' => FALSE,
-      'lowercase' => (bool) variable_get('pathauto_case', PATHAUTO_CASE_LOWER),
-      'maxlength' => min(variable_get('pathauto_max_component_length', 100), _pathauto_get_schema_alias_maxlength()),
-    );
-
-    // Generate and cache the punctuation replacements for strtr().
-    $punctuation = pathauto_punctuation_chars();
-    foreach ($punctuation as $name => $details) {
-      $action = variable_get('pathauto_punctuation_' . $name, PATHAUTO_PUNCTUATION_REMOVE);
-      switch ($action) {
-        case PATHAUTO_PUNCTUATION_REMOVE:
-          $cache['punctuation'][$details['value']] = '';
-          break;
-        case PATHAUTO_PUNCTUATION_REPLACE:
-          $cache['punctuation'][$details['value']] = $cache['separator'];
-          break;
-        case PATHAUTO_PUNCTUATION_DO_NOTHING:
-          // Literally do nothing.
-          break;
-      }
-    }
-
-    // Generate and cache the ignored words regular expression.
-    $ignore_words = variable_get('pathauto_ignore_words', PATHAUTO_IGNORE_WORDS);
-    $ignore_words_regex = preg_replace(array('/^[,\s]+|[,\s]+$/', '/[,\s]+/'), array('', '\b|\b'), $ignore_words);
-    if ($ignore_words_regex) {
-      $cache['ignore_words_regex'] = '\b' . $ignore_words_regex . '\b';
-      if (function_exists('mb_eregi_replace')) {
-        $cache['ignore_words_callback'] = 'mb_eregi_replace';
-      }
-      else {
-        $cache['ignore_words_callback'] = 'preg_replace';
-        $cache['ignore_words_regex'] = '/' . $cache['ignore_words_regex'] . '/i';
-      }
-    }
-  }
-
-  // Empty strings do not need any proccessing.
-  if ($string === '' || $string === NULL) {
-    return '';
-  }
-
-  // Check if the string has already been processed, and if so return the
-  // cached result.
-  if (isset($cache['strings'][$string])) {
-    return $cache['strings'][$string];
-  }
-
-  // Remove all HTML tags from the string.
-  $output = strip_tags(decode_entities($string));
+  $output = $string;
 
   // Optionally transliterate (by running through the Transliteration module)
-  if ($cache['transliterate']) {
-    $output = transliteration_get($output);
+  if (variable_get('pathauto_transliterate', FALSE)) {
+    if (module_exists('transliteration')) {
+      $output = transliteration_get($output);
+    }
+    else {
+      drupal_set_message(t('Pathauto could not transliterate the path, as the Transliteration module has been disabled.'), 'error');
+    }
   }
 
   // Replace or drop punctuation based on user settings
-  $output = strtr($output, $cache['punctuation']);
+  $separator = variable_get('pathauto_separator', '-');
+  $punctuation = pathauto_punctuation_chars();
+  foreach ($punctuation as $name => $details) {
+    $action = variable_get('pathauto_punctuation_' . $name, PATHAUTO_PUNCTUATION_REMOVE);
+    if ($action != PATHAUTO_PUNCTUATION_DO_NOTHING) {
+      // Slightly tricky inline if which either replaces with the separator or nothing
+      $output = str_replace($details['value'], ($action ? $separator : ''), $output);
+    }
+  }
 
   // Reduce strings to letters and numbers
-  if ($cache['reduce_ascii']) {
-    $output = preg_replace('/[^a-zA-Z0-9\/]+/', $cache['separator'], $output);
+  if (variable_get('pathauto_reduce_ascii', FALSE)) {
+    $pattern = '/[^a-zA-Z0-9\/]+/';
+    $output = preg_replace($pattern, $separator, $output);
+  }
+
+  // Calculate and statically cache the ignored words regex expression.
+  $ignore_words_regex = &drupal_static('pathauto_cleanstring:ignore_words_regex');
+  if (!isset($ignore_words_regex)) {
+    $ignore_words = variable_get('pathauto_ignore_words', PATHAUTO_IGNORE_WORDS);
+    $ignore_words_regex = preg_replace(array('/^[,\s]+|[,\s]+$/', '/[,\s]+/'), array('', '\b|\b'), $ignore_words);
+    if ($ignore_words_regex) {
+      $ignore_words_regex = '\b' . $ignore_words_regex . '\b';
+    }
   }
 
   // Get rid of words that are on the ignore list
-  if ($cache['ignore_words_regex']) {
-    $words_removed = $cache['ignore_words_callback']($cache['ignore_words_regex'], '', $output);
+  if ($ignore_words_regex) {
+    if (function_exists('mb_eregi_replace')) {
+      $words_removed = mb_eregi_replace($ignore_words_regex, '', $output);
+    }
+    else {
+      $words_removed = preg_replace("/$ignore_words_regex/i", '', $output);
+    }
     if (drupal_strlen(trim($words_removed)) > 0) {
       $output = $words_removed;
     }
   }
 
   // Always replace whitespace with the separator.
-  $output = preg_replace('/\s+/', $cache['separator'], $output);
+  $output = preg_replace('/\s+/', $separator, $output);
 
   // Trim duplicates and remove trailing and leading separators.
-  $output = _pathauto_clean_separators($output, $cache['separator']);
+  $output = _pathauto_clean_separators($output);
 
   // Optionally convert to lower case.
-  if ($cache['lowercase']) {
+  if (variable_get('pathauto_case', PATHAUTO_CASE_LOWER)) {
     $output = drupal_strtolower($output);
   }
 
   // Shorten to a logical place based on word boundaries.
-  $output = truncate_utf8($output, $cache['maxlength'], TRUE);
-
-  // Cache this result in the static array.
-  $cache['strings'][$string] = $output;
+  $maxlength = min(variable_get('pathauto_max_component_length', 100), _pathauto_get_schema_alias_maxlength());
+  $output = truncate_utf8($output, $maxlength, TRUE);
 
   return $output;
 }
@@ -239,16 +200,11 @@ function pathauto_cleanstring($string) {
  * @see pathauto_clean_alias()
  */
 function _pathauto_clean_separators($string, $separator = NULL) {
-  static $default_separator;
+  $output = $string;
 
   if (!isset($separator)) {
-    if (!isset($default_separator)) {
-      $default_separator = variable_get('pathauto_separator', '-');
-    }
-    $separator = $default_separator;
+    $separator = variable_get('pathauto_separator', '-');
   }
-
-  $output = $string;
 
   // Clean duplicate or trailing separators.
   if (strlen($separator)) {
@@ -284,14 +240,6 @@ function _pathauto_clean_separators($string, $separator = NULL) {
  *   The cleaned URL alias.
  */
 function pathauto_clean_alias($alias) {
-  $cache = &drupal_static(__FUNCTION__);
-
-  if (!isset($cache)) {
-    $cache = array(
-      'maxlength' => min(variable_get('pathauto_max_length', 100), _pathauto_get_schema_alias_maxlength()),
-    );
-  }
-
   $output = $alias;
 
   // Trim duplicate, leading, and trailing back-slashes.
@@ -301,7 +249,8 @@ function pathauto_clean_alias($alias) {
   $output = _pathauto_clean_separators($output);
 
   // Shorten to a logical place based on word boundaries.
-  $output = truncate_utf8($output, $cache['maxlength'], TRUE);
+  $maxlength = min(variable_get('pathauto_max_length', 100), _pathauto_get_schema_alias_maxlength());
+  $output = truncate_utf8($output, $maxlength, TRUE);
 
   return $output;
 }
@@ -378,10 +327,10 @@ function pathauto_create_alias($module, $op, $source, $data, $type = NULL, $lang
   $context = array(
     'module' => $module,
     'op' => $op,
-    'source' => &$source,
+    'source' => $source,
     'data' => $data,
     'type' => $type,
-    'language' => &$language,
+    'language' => $language,
     'pattern' => $pattern,
   );
   drupal_alter('pathauto_alias', $alias, $context);
@@ -391,10 +340,20 @@ function pathauto_create_alias($module, $op, $source, $data, $type = NULL, $lang
     return '';
   }
 
-  // If the alias already exists, generate a new, hopefully unique, variant.
-  $original_alias = $alias;
-  pathauto_alias_uniquify($alias, $source, $language);
-  if ($original_alias != $alias) {
+  // If the alias already exists, generate a new, hopefully unique, variant
+  if (_pathauto_alias_exists($alias, $source, $language)) {
+    $maxlength = min(variable_get('pathauto_max_length', 100), _pathauto_get_schema_alias_maxlength());
+    $separator = variable_get('pathauto_separator', '-');
+    $original_alias = $alias;
+
+    $i = 0;
+    do {
+      // Append an incrementing numeric suffix until we find a unique alias.
+      $unique_suffix = $separator . $i;
+      $alias = truncate_utf8($original_alias, $maxlength - drupal_strlen($unique_suffix, TRUE)) . $unique_suffix;
+      $i++;
+    } while (_pathauto_alias_exists($alias, $source, $language));
+
     // Alert the user why this happened.
     _pathauto_verbose(t('The automatically generated alias %original_alias conflicted with an existing alias. Alias changed to %alias.', array(
       '%original_alias' => $original_alias,
@@ -418,39 +377,6 @@ function pathauto_create_alias($module, $op, $source, $data, $type = NULL, $lang
 }
 
 /**
- * Check to ensure a path alias is unique and add suffix variants if necessary.
- *
- * Given an alias 'content/test' if a path alias with the exact alias already
- * exists, the function will change the alias to 'content/test-0' and will
- * increase the number suffix until it finds a unique alias.
- *
- * @param $alias
- *   A string with the alias. Can be altered by reference.
- * @param $source
- *   A string with the path source.
- * @param $langcode
- *   A string with a language code.
- */
-function pathauto_alias_uniquify(&$alias, $source, $langcode) {
-  if (!_pathauto_alias_exists($alias, $source, $langcode)) {
-    return;
-  }
-
-  // If the alias already exists, generate a new, hopefully unique, variant
-  $maxlength = min(variable_get('pathauto_max_length', 100), _pathauto_get_schema_alias_maxlength());
-  $separator = variable_get('pathauto_separator', '-');
-  $original_alias = $alias;
-
-  $i = 0;
-  do {
-    // Append an incrementing numeric suffix until we find a unique alias.
-    $unique_suffix = $separator . $i;
-    $alias = truncate_utf8($original_alias, $maxlength - drupal_strlen($unique_suffix, TRUE)) . $unique_suffix;
-    $i++;
-  } while (_pathauto_alias_exists($alias, $source, $langcode));
-}
-
-/**
  * Verify if the given path is a valid menu callback.
  *
  * Taken from menu_execute_active_handler().
@@ -461,23 +387,8 @@ function pathauto_alias_uniquify(&$alias, $source, $langcode) {
  *   TRUE if the path already exists.
  */
 function _pathauto_path_is_callback($path) {
-  // We need to use a try/catch here because of a core bug which will throw an
-  // exception if $path is something like 'node/foo/bar'.
-  // @todo Remove when http://drupal.org/node/1302158 is fixed in core.
-  try {
-    $menu = menu_get_item($path);
-  }
-  catch (Exception $e) {
-    return FALSE;
-  }
-
+  $menu = menu_get_item($path);
   if (isset($menu['path']) && $menu['path'] == $path) {
-    return TRUE;
-  }
-  elseif (is_file(DRUPAL_ROOT . '/' . $path) || is_dir(DRUPAL_ROOT . '/' . $path)) {
-    // Do not allow existing files or directories to get assigned an automatic
-    // alias. Note that we do not need to use is_link() to check for symbolic
-    // links since this returns TRUE for either is_file() or is_dir() already.
     return TRUE;
   }
   return FALSE;
@@ -607,6 +518,7 @@ function pathauto_clean_token_values(&$replacements, $data = array(), $options =
     if (!preg_match('/(path|alias|url|url-brief)\]$/', $token)) {
       $replacements[$token] = pathauto_cleanstring($value);
     }
+    // @todo Clean up 'tree-style' tokens that are not actually URLs.
   }
 }
 
@@ -622,52 +534,42 @@ function pathauto_clean_token_values(&$replacements, $data = array(), $options =
  *   value and a textual description.
  */
 function pathauto_punctuation_chars() {
-  $punctuation = &drupal_static(__FUNCTION__);
+  static $punctuation;
 
   if (!isset($punctuation)) {
-    $cid = 'pathauto:punctuation:' . $GLOBALS['language']->language;
-    if ($cache = cache_get($cid)) {
-      $punctuation = $cache->data;
-    }
-    else {
-      $punctuation = array();
-      $punctuation['double_quotes']      = array('value' => '"', 'name' => t('Double quotation marks'));
-      $punctuation['quotes']             = array('value' => '\'', 'name' => t("Single quotation marks (apostrophe)"));
-      $punctuation['backtick']           = array('value' => '`', 'name' => t('Back tick'));
-      $punctuation['comma']              = array('value' => ',', 'name' => t('Comma'));
-      $punctuation['period']             = array('value' => '.', 'name' => t('Period'));
-      $punctuation['hyphen']             = array('value' => '-', 'name' => t('Hyphen'));
-      $punctuation['underscore']         = array('value' => '_', 'name' => t('Underscore'));
-      $punctuation['colon']              = array('value' => ':', 'name' => t('Colon'));
-      $punctuation['semicolon']          = array('value' => ';', 'name' => t('Semicolon'));
-      $punctuation['pipe']               = array('value' => '|', 'name' => t('Vertical bar (pipe)'));
-      $punctuation['left_curly']         = array('value' => '{', 'name' => t('Left curly bracket'));
-      $punctuation['left_square']        = array('value' => '[', 'name' => t('Left square bracket'));
-      $punctuation['right_curly']        = array('value' => '}', 'name' => t('Right curly bracket'));
-      $punctuation['right_square']       = array('value' => ']', 'name' => t('Right square bracket'));
-      $punctuation['plus']               = array('value' => '+', 'name' => t('Plus sign'));
-      $punctuation['equal']              = array('value' => '=', 'name' => t('Equal sign'));
-      $punctuation['asterisk']           = array('value' => '*', 'name' => t('Asterisk'));
-      $punctuation['ampersand']          = array('value' => '&', 'name' => t('Ampersand'));
-      $punctuation['percent']            = array('value' => '%', 'name' => t('Percent sign'));
-      $punctuation['caret']              = array('value' => '^', 'name' => t('Caret'));
-      $punctuation['dollar']             = array('value' => '$', 'name' => t('Dollar sign'));
-      $punctuation['hash']               = array('value' => '#', 'name' => t('Number sign (pound sign, hash)'));
-      $punctuation['at']                 = array('value' => '@', 'name' => t('At sign'));
-      $punctuation['exclamation']        = array('value' => '!', 'name' => t('Exclamation mark'));
-      $punctuation['tilde']              = array('value' => '~', 'name' => t('Tilde'));
-      $punctuation['left_parenthesis']   = array('value' => '(', 'name' => t('Left parenthesis'));
-      $punctuation['right_parenthesis']  = array('value' => ')', 'name' => t('Right parenthesis'));
-      $punctuation['question_mark']      = array('value' => '?', 'name' => t('Question mark'));
-      $punctuation['less_than']          = array('value' => '<', 'name' => t('Less-than sign'));
-      $punctuation['greater_than']       = array('value' => '>', 'name' => t('Greater-than sign'));
-      $punctuation['slash']              = array('value' => '/', 'name' => t('Slash'));
-      $punctuation['back_slash']         = array('value' => '\\', 'name' => t('Backslash'));
-
-      // Allow modules to alter the punctuation list and cache the result.
-      drupal_alter('pathauto_punctuation_chars', $punctuation);
-      cache_set($cid, $punctuation);
-    }
+    $punctuation = array();
+    $punctuation['double_quotes']      = array('value' => '"', 'name' => t('Double quotes "'));
+    $punctuation['quotes']             = array('value' => "'", 'name' => t("Single quotes (apostrophe) '"));
+    $punctuation['backtick']           = array('value' => '`', 'name' => t('Back tick `'));
+    $punctuation['comma']              = array('value' => ',', 'name' => t('Comma ,'));
+    $punctuation['period']             = array('value' => '.', 'name' => t('Period .'));
+    $punctuation['hyphen']             = array('value' => '-', 'name' => t('Hyphen -'));
+    $punctuation['underscore']         = array('value' => '_', 'name' => t('Underscore _'));
+    $punctuation['colon']              = array('value' => ':', 'name' => t('Colon :'));
+    $punctuation['semicolon']          = array('value' => ';', 'name' => t('Semicolon ;'));
+    $punctuation['pipe']               = array('value' => '|', 'name' => t('Pipe |'));
+    $punctuation['left_curly']         = array('value' => '{', 'name' => t('Left curly bracket {'));
+    $punctuation['left_square']        = array('value' => '[', 'name' => t('Left square bracket ['));
+    $punctuation['right_curly']        = array('value' => '}', 'name' => t('Right curly bracket }'));
+    $punctuation['right_square']       = array('value' => ']', 'name' => t('Right square bracket ]'));
+    $punctuation['plus']               = array('value' => '+', 'name' => t('Plus +'));
+    $punctuation['equal']              = array('value' => '=', 'name' => t('Equal ='));
+    $punctuation['asterisk']           = array('value' => '*', 'name' => t('Asterisk *'));
+    $punctuation['ampersand']          = array('value' => '&', 'name' => t('Ampersand &'));
+    $punctuation['percent']            = array('value' => '%', 'name' => t('Percent %'));
+    $punctuation['caret']              = array('value' => '^', 'name' => t('Caret ^'));
+    $punctuation['dollar']             = array('value' => '$', 'name' => t('Dollar $'));
+    $punctuation['hash']               = array('value' => '#', 'name' => t('Hash #'));
+    $punctuation['at']                 = array('value' => '@', 'name' => t('At @'));
+    $punctuation['exclamation']        = array('value' => '!', 'name' => t('Exclamation !'));
+    $punctuation['tilde']              = array('value' => '~', 'name' => t('Tilde ~'));
+    $punctuation['left_parenthesis']   = array('value' => '(', 'name' => t('Left parenthesis ('));
+    $punctuation['right_parenthesis']  = array('value' => ')', 'name' => t('Right parenthesis )'));
+    $punctuation['question_mark']      = array('value' => '?', 'name' => t('Question mark ?'));
+    $punctuation['less_than']          = array('value' => '<', 'name' => t('Less than <'));
+    $punctuation['greater_than']       = array('value' => '>', 'name' => t('Greater than >'));
+    $punctuation['slash']              = array('value' => '/', 'name' => t('Slash /'));
+    $punctuation['back_slash']         = array('value' => '\\', 'name' => t('Backslash \\'));
   }
 
   return $punctuation;

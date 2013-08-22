@@ -1,4 +1,5 @@
 <?php
+// $Id: JobScheduler.inc,v 1.11.2.1 2011/01/10 22:12:27 alexb Exp $
 
 /**
  * @file
@@ -26,7 +27,7 @@ class JobScheduler {
     static $schedulers;
     // Instantiante a new scheduler for $name if we haven't done so yet.
     if (!isset($schedulers[$name])) {
-      $class = variable_get('job_scheduler_class_' . $name, 'JobScheduler');
+      $class = variable_get('job_scheduler_class_'. $name, 'JobScheduler');
       $schedulers[$name] = new $class($name);
     }
     return $schedulers[$name];
@@ -42,7 +43,7 @@ class JobScheduler {
   /**
    * Returns scheduler info.
    *
-   * @see hook_cron_job_scheduler_info()
+   * @see hook_cron_job_scheduler_info().
    *
    * @throws JobSchedulerException.
    */
@@ -50,7 +51,7 @@ class JobScheduler {
     if ($info = job_scheduler_info($this->name)) {
       return $info;
     }
-    throw new JobSchedulerException('Could not find Job Scheduler cron information for ' . check_plain($this->name));
+    throw new JobSchedulerException('Could not find Job Scheduler cron information for '. check_plain($this->name));
   }
 
   /**
@@ -173,7 +174,7 @@ class JobScheduler {
     else {
       // @todo If worker doesn't exist anymore we should do something about it, remove and throw exception?
       $this->remove($job);
-      throw new JobSchedulerException('Could not find worker callback function: ' . $info['worker callback']);
+      throw new JobSchedulerException('Could not find worker callback function: '. $info['worker callback']);
     }
   }
 

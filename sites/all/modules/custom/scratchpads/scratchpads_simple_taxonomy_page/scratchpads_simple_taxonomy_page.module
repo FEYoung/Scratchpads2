@@ -57,8 +57,7 @@ function scratchpads_simple_taxonomy_page_form_taxonomy_form_vocabulary_alter(&$
     }
     $form['simple_taxonomy_display'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Display options'),
-      '#weight' => 2
+      '#title' => t('Display options')
     );
     $form['simple_taxonomy_display']['display_tab'] = array(
       '#title' => t('Display tab'),

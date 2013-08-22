@@ -2,16 +2,15 @@
 
 function scratchpads_contact_install(){
   // Add report abuse form
-  $t = get_t();
   db_insert('contact')->fields(array(
-    'category' => $t('Report abuse'),
+    'category' => 'Report abuse',
     'recipients' => 'site-email-address@scratchpads.eu, scratchpad@nhm.ac.uk',
     'selected' => 1,
     'reply' => ''
   ))->execute();
   // Update the feedback form
   db_update('contact')->fields(array(
-    'category' => $t('Contact us'),
+    'category' => 'Contact us',
     'recipients' => 'site-email-address@scratchpads.eu'
   ))->condition('cid', 1)->execute();
 }

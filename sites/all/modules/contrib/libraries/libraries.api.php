@@ -162,13 +162,10 @@
  *         variant, a boolean indicating whether the variant is installed or
  *         not.
  *       Note that in this group the 'versions' property is no longer available.
- *     - pre-dependencies-load: Callbacks registered in this group are applied
- *       directly before the library's dependencies are loaded. At this point
- *       the library contains variant-specific information, if specified. Note
- *       that in this group the 'variants' property is no longer available.
- *     - pre-load: Callbacks registered in this group are applied directly after
- *       the library's dependencies are loaded and before the library itself is
- *       loaded.
+ *     - pre-load: Callbacks registered in this group are applied directly
+ *       before this library is loaded. At this point the library contains
+ *       variant-specific information, if specified. Note that in this group the
+ *       'variants' property is no longer available.
  *     - post-load: Callbacks registered in this group are applied directly
  *       after this library is loaded. At this point, the library contains a
  *       'loaded' key, which contains the number of files that were loaded.
@@ -297,10 +294,6 @@ function hook_libraries_info() {
       // Called after detecting the library.
       'post-detect' => array(
         'mymodule_example_libraries_postdetect_callback',
-      ),
-      // Called before the library's dependencies are loaded.
-      'pre-dependencie-load' => array(
-        'mymodule_example_libraries_pre_dependencies_load_callback',
       ),
       // Called before the library is loaded.
       'pre-load' => array(
