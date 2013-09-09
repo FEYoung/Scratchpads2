@@ -1213,11 +1213,14 @@ function scratchpads_tweaks_update_7061(){
 }
 
 /**
- * Set the Durden variables so that bigimage works with Durden when enabled.
+ * Uninstall mollom and scratchpads_mollom
+ * 
  */
 function scratchpads_tweaks_update_7062(){
-  variable_set('bigimage_durden_installed', TRUE);
-  variable_set('bigimage_durden_path', '/usr/local/bin/durden');
+  drupal_uninstall_modules(array(
+    'scratchpads_mollom',
+    'mollom'
+  ));
 }
 
 /**
@@ -1244,12 +1247,18 @@ function scratchpads_tweaks_update_7063(){
 
 /**
  * Uninstall mollom and scratchpads_mollom
- * 
- * FIXME - Please uncomment this function following the 2.1.7 release.
-function scratchpads_tweaks_update_7062(){
+ */
+function scratchpads_tweaks_update_7064(){
   drupal_uninstall_modules(array(
     'scratchpads_mollom',
     'mollom'
   ));
 }
+
+/**
+ * Set the Durden variables so that bigimage works with Durden when enabled.
  */
+function scratchpads_tweaks_update_7065(){
+  variable_set('bigimage_durden_installed', TRUE);
+  variable_set('bigimage_durden_path', '/usr/local/bin/durden');
+}
