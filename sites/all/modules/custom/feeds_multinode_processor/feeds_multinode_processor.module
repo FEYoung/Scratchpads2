@@ -34,16 +34,34 @@ function feeds_multinode_processor_schema_alter(&$schema){
   );
 }
 
+/**
+ * Implements hook_menu_alter().
+ */
 function feeds_multinode_processor_menu_alter(&$items){
   $items['import/%feeds_importer/template']['page callback'] = 'feeds_multinode_processor_download_template';
   $items['import/%feeds_importer/template']['file'] = 'feeds_multinode_processor.template.inc';
   $items['import/%feeds_importer/template']['file path'] = drupal_get_path('module', 'feeds_multinode_processor');
   $items['import/%feeds_importer/populated-template']['page callback'] = 'feeds_multinode_processor_download_populated_template';
   $items['import/%feeds_importer/populated-template']['file'] = 'feeds_multinode_processor.template.inc';
-  $items['import/%feeds_importer/populated-template']['file path'] = drupal_get_path('module', 'feeds_multinode_processor');
-  $items['feeds_multinode_processor/getfile']['page callback'] = 'feeds_multinode_processor_get_populated_template';
-  $items['feeds_multinode_processor/getfile']['file'] = 'feeds_multinode_processor.template.inc';
-  $items['feeds_multinode_processor/getfile']['file path'] = drupal_get_path('module', 'feeds_multinode_processor');
+  $items['import/%feeds_importer/populated-template']['file path'] = drupal_get_path('module', 'feeds_multinode_processor');  
+}
+
+/**
+ * Implements hook_menu().
+ */
+function feeds_multinode_processor_menu(){
+  return array(
+    'feeds_multinode_processor/getfile' => array(
+      'title' => 'Download Populated Excel template',
+      'page callback' => 'feeds_multinode_processor_get_populated_template',
+      'access arguments' => array(
+        'access content'
+      ),
+      'file' => 'feeds_multinode_processor.template.inc',
+      'file path' => drupal_get_path('module', 'feeds_multinode_processor'),
+      'type' => MENU_CALLBACK
+    )
+  );
 }
 
 /**
