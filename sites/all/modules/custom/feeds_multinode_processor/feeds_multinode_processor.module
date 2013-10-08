@@ -47,24 +47,6 @@ function feeds_multinode_processor_menu_alter(&$items){
 }
 
 /**
- * Implements hook_menu().
- */
-function feeds_multinode_processor_menu(){
-  return array(
-    'feeds_multinode_processor/getfile' => array(
-      'title' => 'Download Populated Excel template',
-      'page callback' => 'feeds_multinode_processor_get_populated_template',
-      'access arguments' => array(
-        'access content'
-      ),
-      'file' => 'feeds_multinode_processor.template.inc',
-      'file path' => drupal_get_path('module', 'feeds_multinode_processor'),
-      'type' => MENU_CALLBACK
-    )
-  );
-}
-
-/**
  * Implements hook_permission().
  */
 function feeds_multinode_processor_permission(){

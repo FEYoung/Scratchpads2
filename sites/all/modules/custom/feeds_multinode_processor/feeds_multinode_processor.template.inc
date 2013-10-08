@@ -362,7 +362,7 @@ function feeds_multinode_processor_redirect_to_populated_file($success, $results
     feeds_multinode_processor_set_headers(feeds_importer_load($results['importer']), $objPHPExcel, $results['csv_path'] . '.xls');
     //drupal_unlink($results['csv_path']);
     $_SESSION['feeds_xls'] = $results;
-    drupal_goto('feeds_multinode_processor/getfile');
+    drupal_goto('feeds_xls/getfile');
   }
 }
 
