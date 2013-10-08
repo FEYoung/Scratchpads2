@@ -225,8 +225,7 @@ function feeds_multinode_processor_create_csv_of_data($feeds_importer, &$context
               $guid = $entity->uuid;
             }
             $feeds_item = feeds_multinode_processor_get_or_generate_feeds_item_entry($context['sandbox']['entity'], $entity_id, $feeds_importer->id, $guid);
-            $row_values[$key] = _feeds_multinode_processor_get_value($feeds_item['guid']);
-            dd($row_values);
+            $row_values[$key] = _feeds_multinode_processor_get_value($feeds_item['guid']);         
             break;
           default:
             if(isset($entity[$entity_id]->{$target})){

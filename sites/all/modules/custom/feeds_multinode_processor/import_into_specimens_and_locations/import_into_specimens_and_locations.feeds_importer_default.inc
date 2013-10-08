@@ -34,9 +34,8 @@ function import_into_specimens_and_locations_feeds_importer_default() {
     'processor' => array(
       'plugin_key' => 'FeedsMultiNodeProcessor',
       'config' => array(
-        'content_type' => 'specimen_observation',
         'expire' => '-1',
-        'author' => '748',
+        'author' => '0',
         'mappings' => array(
           0 => array(
             'source' => 'Location GUID',
@@ -270,22 +269,22 @@ function import_into_specimens_and_locations_feeds_importer_default() {
           ),
           46 => array(
             'source' => 'Specimen Collector (Name on Site)',
-            'target' => 'specimen_observation:field_collector:uid',
+            'target' => 'specimen_observation:field_collector:name',
             'unique' => FALSE,
-          ),
+          ),          
           47 => array(
-            'source' => 'Specimen Identified by (Name on site)',
-            'target' => 'specimen_observation:field_identified_by:uid',
-            'unique' => FALSE,
-          ),
-          48 => array(
             'source' => 'Specimen Identified by (UID)',
             'target' => 'specimen_observation:field_identified_by:uid',
             'unique' => FALSE,
           ),
+          48 => array(
+            'source' => 'Specimen Identified by (Name on site)',
+            'target' => 'specimen_observation:field_identified_by:name',
+            'unique' => FALSE,
+          ),
         ),
         'update_existing' => '2',
-        'input_format' => 'plain_text',
+        'input_format' => 'filtered_html',
         'content_types' => array(
           'location' => 'location',
           'specimen_observation' => 'specimen_observation',
