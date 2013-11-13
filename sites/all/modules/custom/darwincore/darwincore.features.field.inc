@@ -1467,7 +1467,7 @@ function darwincore_field_default_fields(){
       'bundle' => 'specimen_observation',
       'default_value' => NULL,
       'deleted' => '0',
-      'description' => 'The catalogue number/identifier for this specimen',
+      'description' => 'The catalogue number/identifier for this specimen.  If left blank, a UUID will be generated for this specimen.',
       'display' => array(
         'default' => array(
           'label' => 'above',
@@ -1492,7 +1492,7 @@ function darwincore_field_default_fields(){
       'entity_type' => 'node',
       'field_name' => 'field_catalogue_number',
       'label' => 'Catalogue number',
-      'required' => 1,
+      'required' => 0,
       'settings' => array(
         'text_processing' => '0',
         'user_register_form' => FALSE
@@ -1541,7 +1541,7 @@ function darwincore_field_default_fields(){
       'bundle' => 'specimen_observation',
       'default_value' => NULL,
       'deleted' => '0',
-      'description' => 'The code (or acronym) identifying the collection within the institution in which the organism record is catalogued.',
+      'description' => 'The code (or acronym) identifying the collection within the institution in which the organism record is catalogued. If left blank, this field will be populated with "N/A".',
       'display' => array(
         'default' => array(
           'label' => 'above',
@@ -1566,7 +1566,7 @@ function darwincore_field_default_fields(){
       'entity_type' => 'node',
       'field_name' => 'field_collection_code',
       'label' => 'Collection code',
-      'required' => 1,
+      'required' => 0,
       'settings' => array(
         'text_processing' => '0',
         'user_register_form' => FALSE
