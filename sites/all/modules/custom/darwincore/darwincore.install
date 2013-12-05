@@ -284,11 +284,18 @@ function darwincore_update_7015(){
 }
 
 /**
+ * Update to the token module requires a change to our ANT pattern.
+ */
+function darwincore_update_7016(){
+  variable_set('ant_pattern_specimen_observation', '[node:field_institution_code] - [node:field_collection_code] - [node:field_catalogue_number]');
+}
+
+/**
  * Alter the Collection Code and Catalogue Number fields so that they are no
  * longer required.  We will add a description to the field to advise users that
  * values will be added to the fields if left empty.
  */
-function darwincore_update_7016(){
+function darwincore_update_7017(){
   module_load_include('features.field.inc', 'darwincore');
   $fields = darwincore_field_default_fields();
   field_update_instance($fields['node-specimen_observation-field_catalogue_number']['field_instance']);
