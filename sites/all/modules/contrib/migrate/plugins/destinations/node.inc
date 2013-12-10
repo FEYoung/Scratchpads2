@@ -61,11 +61,6 @@ class MigrateDestinationNode extends MigrateDestinationEntity {
     $fields['nid'] = t('Node: <a href="@doc">Existing node ID</a>',
                 array('@doc' => 'http://drupal.org/node/1349696#nid'));
     $node_type = node_type_load($this->bundle);
-    
-		// Hack to prevent error messages
-		if(!$node_type){
-			return;
-		}    
     if ($node_type->has_title) {
       $fields['title'] = t('Node: <a href="@doc">',
                            array('@doc' => 'http://drupal.org/node/1349696#title'))
@@ -91,6 +86,8 @@ class MigrateDestinationNode extends MigrateDestinationEntity {
                     array('@doc' => 'http://drupal.org/node/1349696#language'));
     $fields['tnid'] = t('Node: <a href="@doc">The translation set id for this node</a>',
                     array('@doc' => 'http://drupal.org/node/1349696#tnid'));
+    $fields['translate'] = t('Node: <a href="@doc">A boolean indicating whether this translation page needs to be updated</a>',
+                    array('@doc' => 'http://drupal.org/node/1349696#translate'));
     $fields['revision_uid'] = t('Node: <a href="@doc">Modified (uid)</a>',
                     array('@doc' => 'http://drupal.org/node/1349696#revision_uid'));
     $fields['is_new'] = t('Option: <a href="@doc">Indicates a new node with the specified nid should be created</a>',
@@ -154,7 +151,7 @@ class MigrateDestinationNode extends MigrateDestinationEntity {
                     array('!nid' => $node->nid)));
       }
       $node->vid = $values['vid'];
-      if (empty($row->tnid)) {
+      if (empty($node->tnid)) {
         $node->tnid = $values['tnid'];
       }
     }
@@ -190,7 +187,7 @@ class MigrateDestinationNode extends MigrateDestinationEntity {
     // Set some required properties.
 
     if ($migration->getSystemOfRecord() == Migration::SOURCE) {
-      if (!isset($node->language)) {
+      if (empty($node->language)) {
         $node->language = $this->language;
       }
 
