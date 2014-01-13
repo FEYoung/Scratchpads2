@@ -385,9 +385,9 @@ function itis_term_fields(){
         ),
         'widget' => array(
           'active' => 1,
-          'module' => 'options',
+          'module' => 'cck_select_other',
           'settings' => array(),
-          'type' => 'options_select',
+          'type' => 'cck_select_other',
           'weight' => '1'
         )
       )

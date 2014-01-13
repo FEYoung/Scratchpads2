@@ -305,3 +305,21 @@ function itis_term_update_7009(){
     'locked' => 1
   ))->condition('field_name', $fields_to_lock)->execute();
 }
+
+/**
+ * Convert the rank field to one which has an "other" option.
+ */
+function itis_term_update_7010(){
+  $field_info = field_info_field('field_rank');
+  module_load_include('fields.inc', 'itis_term');
+  $fields = itis_term_fields();
+  foreach($field_info['bundles'] as $entity_type => $bundles){
+    foreach($bundles as $bundle){
+      $field_instance = field_info_instance($entity_type, 'field_rank', $bundle);
+      $new_field_instance_widget = $fields[2]['field_instance']['widget'];
+      $new_field_instance_widget['weight'] = $field_instance['widget']['weight'];
+      $field_instance['widget'] = $new_field_instance_widget;
+      field_update_instance($field_instance);
+    }
+  }
+}
