@@ -1,0 +1,53 @@
+<?php
+
+/**
+ * Test BibTeX style plugin.
+ */
+class BiblioBibtexTestCase extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'BibTex',
+      'description' => 'Test Import and render of BibTex style plugin.',
+      'group' => 'Biblio',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('biblio');
+
+    biblio_create_fields_by_bundle(array('book'));
+  }
+
+  /**
+   * Test BibTex.
+   */
+  function testBibTex() {
+    $data = '
+@Book{abramowitz+stegun,
+  author    = "Milton {Abramowitz} and Irene A. {Stegun}",
+  title     = "Handbook of Mathematical Functions with Formulas, Graphs, and Mathematical Tables",
+  publisher = "Dover",
+  year      =  1964,
+  address   = "New York",
+  edition   = "ninth Dover printing, tenth GPO printing"
+}';
+
+    $expected_result = '@Book{abramowitz+stegun,
+	address = "New York",
+	author = "Milton Abramowitz and Irene A. Stegun",
+	edition = "ninth Dover printing, tenth GPO printing",
+	publisher = "Dover",
+	title = "Handbook of Mathematical Functions with Formulas, Graphs, and Mathematical Tables",
+	year = "1964"
+}';
+
+    $biblio_style = biblio_get_class_from_style('bibtex');
+
+    $biblios = $biblio_style->import($data);
+    $biblio = $biblios['new'][0];
+    $output = $biblio->getText('bibtex', array('opening_tag' => '"', 'closing_tag' => '"'));
+
+    $this->assertEqual(trim($output), trim($expected_result), 'BibTex render is equal to the expected result');
+  }
+}

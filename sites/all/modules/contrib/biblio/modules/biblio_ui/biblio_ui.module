@@ -1,0 +1,1351 @@
+<?php
+/**
+ * @file
+ * Main functionality file for the biblio UI module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function biblio_ui_menu() {
+  $items = array();
+
+  // Biblio UI.
+  $items['biblio/add'] = array(
+    'title' => 'Add biblio entries',
+    'description' => 'Select a biblio type to create an entry for.',
+    'access callback' => 'biblio_access',
+    'access arguments' => array('create'),
+    'page callback' => 'biblio_ui_add_biblio_list',
+  );
+
+  foreach (biblio_types() as $type => $info) {
+    $items['biblio/add/' . $type] = array(
+      'title' => $info->name,
+      'description' => 'Create biblio entries.',
+      'access callback' => 'biblio_access',
+      'access arguments' => array('create'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('biblio_ui_manage_biblio', $type),
+    );
+  }
+
+  $items['biblio/%biblio'] = array(
+    'title callback' => 'biblio_ui_biblio_title',
+    'title arguments' => array(1),
+    'access callback' => 'biblio_access',
+    'access arguments' => array('view', 1),
+    'page callback' => 'biblio_ui_view_biblio',
+    'page arguments' => array(1),
+  );
+
+  $items['biblio/%biblio/view'] = array(
+    'title' => 'View',
+    'access callback' => 'biblio_access',
+    'access arguments' => array('view', 1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('biblio_ui_manage_biblio', 1),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => '50',
+  );
+
+  $items['biblio/%biblio/edit'] = array(
+    'title' => 'Edit',
+    'description callback' => 'biblio_ui_description_callback',
+    'access callback' => 'biblio_access',
+    'access arguments' => array('update', 1),
+    'description arguments' => array(1, 'edit'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('biblio_ui_manage_biblio', 1),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'weight' => '60',
+  );
+
+  $items['biblio/%biblio/delete'] = array(
+    'title' => 'Delete',
+    'description callback' => 'biblio_ui_description_callback',
+    'access callback' => 'biblio_access',
+    'description arguments' => array(1, 'delete'),
+    'access arguments' => array('delete', 1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('biblio_ui_delete_biblio', 1),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'weight' => '70',
+  );
+
+  // For example:
+  // biblio/export/1,2,3/endnote/tagged
+  // biblio/export/4,5,6/bibtex
+  $items['biblio/export/%/%'] = array(
+    'title' => t('Export Biblio'),
+    'description callback' => 'biblio_ui_description_callback',
+    'description arguments' => array(1, 'export'),
+    'access callback' => 'biblio_ui_export_access',
+    'access arguments' => array(2, 3, 4),
+    'page callback' => 'biblio_ui_export_menu_item',
+    'page arguments' => array(2, 3, 4),
+  );
+
+  // For example:
+  // biblio/export_view/biblio/page/endnote
+  // biblio/export_view/biblio/page/endnote/tagged
+  $items['biblio/export_view/%/%/%'] = array(
+    'title' => t('Export Biblio by View'),
+    'description callback' => 'biblio_ui_description_callback',
+    'description arguments' => array(1, 'export'),
+    'access callback' => 'biblio_ui_export_view_access',
+    'access arguments' => array(2, 3, 4, 5),
+    'page callback' => 'biblio_ui_export_view',
+    'page arguments' => array(2, 3, 4, 5),
+  );
+
+  if (module_exists('devel')) {
+    $items['biblio/%biblio/devel'] = array(
+      'title' => 'Devel',
+      'page callback' => 'devel_load_object',
+      'page arguments' => array('biblio', 1),
+      'access arguments' => array('access devel information'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'devel.pages.inc',
+      'file path' => drupal_get_path('module', 'devel'),
+      'weight' => 80,
+    );
+  }
+
+  $items['biblio/import'] = array(
+    'title' => 'Import biblio entries',
+    'description' => 'Import publications in various styles.',
+    'access arguments' => array('create biblio'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('biblio_ui_import_biblio'),
+    'file' => 'biblio_ui.pages.inc',
+  );
+
+  $items['admin/structure/biblio'] = array(
+    'title' => 'Biblio types',
+    'description' => 'Manage biblio types',
+    'access arguments' => array('administer biblio'),
+    'page callback' => 'biblio_ui_manage_bundles',
+  );
+
+  $items['admin/structure/biblio/add'] = array(
+    'title' => 'Add biblio type',
+    'description' => 'Manage biblio types',
+    'access arguments' => array('administer biblio'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('biblio_ui_manage_bundles_manage'),
+    'type' => MENU_LOCAL_ACTION,
+  );
+
+  $items['admin/structure/biblio/attach-fields'] = array(
+    'title' => 'Attach biblio fields',
+    'description' => 'Import predefined biblio types',
+    'access arguments' => array('administer biblio'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('biblio_ui_attach_biblio_fields'),
+    'type' => MENU_LOCAL_ACTION,
+  );
+
+  foreach (biblio_types() as $biblio_type) {
+    $items['admin/structure/biblio/' . $biblio_type->type] = array(
+      'title' => $biblio_type->name,
+      'access arguments' => array('manage biblio structure'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('biblio_ui_manage_bundles_manage', 3),
+    );
+
+    $items['admin/structure/biblio/' . $biblio_type->type . '/edit'] = array(
+      'title' => 'Edit',
+      'access arguments' => array('manage biblio structure'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('biblio_ui_manage_bundles_manage', 3),
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => 0,
+    );
+
+    $items['admin/structure/biblio/' . $biblio_type->type . '/delete'] = array(
+      'title' => 'Delete',
+      'access callback' => 'biblio_ui_can_delete_bundle',
+      'access arguments' => array($biblio_type->type),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('biblio_ui_delete_bundle', $biblio_type->type),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 1,
+    );
+
+    $items['admin/structure/biblio/' . $biblio_type->type . '/fields/add'] = array(
+      'title' => 'Attach biblio fields',
+      'description' => 'Attach predefined biblio types',
+      'access arguments' => array('administer biblio'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('biblio_ui_create_fields', 3),
+      'type' => MENU_LOCAL_ACTION,
+    );
+  }
+
+  $items['admin/config/content/biblio'] = array(
+    'title' => 'Biblio settings',
+    'description' => 'Configure Biblio settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('biblio_ui_admin_form'),
+    'access arguments' => array('administer biblio'),
+    'file' => 'biblio_ui.admin.inc'
+  );
+
+  // Biblio contributor UI.
+  $items['admin/biblio-contributor'] = array(
+    'title' => 'Biblio contributor',
+    'access callback' => 'biblio_contributor_access',
+    'access arguments' => array('create'),
+    'page callback' => array('views_embed_view'),
+    'page arguments' => array('biblio_contributor'),
+  );
+
+  $items['admin/biblio-contributor/add'] = array(
+    'title' => 'Add biblio contributor',
+    'access callback' => 'biblio_contributor_access',
+    'access arguments' => array('create'),
+    'page callback' => array('drupal_get_form'),
+    'page arguments' => array('biblio_ui_contributor_create_form'),
+    'type' => MENU_LOCAL_ACTION,
+  );
+
+  $items['biblio-contributor/%biblio_contributor/edit'] = array(
+    'title' => 'Edit',
+    'description arguments' => array(1, 'edit'),
+    'access callback' => 'biblio_contributor_access',
+    'access arguments' => array('update', 1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('biblio_ui_contributor_create_form', 1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => '60',
+  );
+
+  $items['biblio-contributor/%biblio_contributor/delete'] = array(
+    'title' => 'Delete',
+    'description arguments' => array(1, 'delete'),
+    'access callback' => 'biblio_contributor_access',
+    'access arguments' => array('delete', 1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('biblio_ui_contributor_delete_form', 1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => '70',
+  );
+
+  if (module_exists('devel')) {
+    $items['biblio-contributor/%biblio_contributor/devel'] = array(
+      'title' => 'Devel',
+      'page callback' => 'devel_load_object',
+      'page arguments' => array('biblio-contributor', 1),
+      'access arguments' => array('access devel information'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'devel.pages.inc',
+      'file path' => drupal_get_path('module', 'devel'),
+      'weight' => 80,
+    );
+  }
+
+  return $items;
+}
+
+/**
+ * Access callback which determine if the bundle can be deleted.
+ */
+function biblio_ui_can_delete_bundle($bundle, $account = NULL) {
+  global $user;
+
+  if (empty($account)) {
+    $account = user_load($user->uid);
+  }
+
+  $query = new entityFieldQuery();
+  $number = $query
+    ->entityCondition('entity_type', 'biblio')
+    ->propertyCondition('type', $bundle)
+    ->count()
+    ->execute();
+
+  return !($number && user_access('manage biblio structure', $account));
+}
+
+/**
+ * Title callback; Return the biblio title and the type.
+ */
+function biblio_ui_biblio_title(Biblio $biblio) {
+  $type = biblio_types($biblio->type);
+  $params = array(
+    '@title' => $biblio->title,
+    '@type' =>$type->name,
+  );
+  return format_string('@title (@type)', $params);
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function biblio_ui_admin_paths() {
+  return array(
+    'biblio/add' => TRUE,
+    'biblio/add/*' => TRUE,
+    'biblio/*/edit' => TRUE,
+    'biblio/*/delete' => TRUE,
+    'biblio/*/devel' => TRUE,
+    'biblio-contributor/add' => TRUE,
+    'biblio-contributor/*/edit' => TRUE,
+    'biblio-contributor/*/delete' => TRUE,
+    'biblio-contributor/*/devel' => TRUE,
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function biblio_ui_theme() {
+  return array(
+    'biblio_ui_add_biblio_list' => array(),
+    'biblio_ui_bundle_overview' => array(),
+    'biblio_ui_view_export_area' => array(),
+    'biblio_ui_entity_export_area' => array(),
+  );
+}
+
+/**
+ * Generating a description for page when editing or deleting a biblio.
+ *
+ * @param $biblio
+ *  The biblio object.
+ * @param $action
+ *  The action: delete or edit.
+ *
+ * @return string
+ *  The title which the page should present.
+ */
+function biblio_ui_description_callback($biblio, $action) {
+  switch ($action) {
+    case "edit":
+      $action_string = "Editing";
+      break;
+    case "delete":
+      $action_string = "Deleting";
+      break;
+    case "export":
+      $action_string = "Exporting";
+      break;
+  }
+  return t('@action @title', array(
+    '@action' => $action_string,
+    '@title' => $biblio->title,
+  ));
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function biblio_ui_entity_info_alter(&$info) {
+  if (!$biblio_types = biblio_types()) {
+    return;
+  }
+
+  foreach ($biblio_types as $bundle) {
+    $info['biblio']['bundles'][$bundle->type] = array(
+      'label' => $bundle->name,
+      'admin' => array(
+        'path' => 'admin/structure/biblio/' . $bundle->type,
+        'access arguments' => array('manage biblio structure'),
+      ),
+    );
+  }
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function biblio_ui_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'biblio_ui') . '/includes/views',
+  );
+}
+
+/**
+ * Display a list of biblio types for creating an entry.
+ */
+function biblio_ui_add_biblio_list() {
+  $types = biblio_types();
+
+  return theme('biblio_ui_add_biblio_list', array(
+    'types' => $types,
+  ));
+}
+
+/**
+ * Theme callback - display a list of the biblio entry a user can create.
+ */
+function theme_biblio_ui_add_biblio_list($variables) {
+  $types = $variables['types'];
+
+  if ($types) {
+    $output = '<ul class="admin-list">';
+    foreach ($types as $type => $info) {
+      $output .= '<li class="clearfix">';
+      $output .= '<span class="label">' . l($info->name, 'biblio/add/' . $type) . '</span>';
+      $output .= '<div class="description">' . filter_xss_admin($info->description) . '</div>';
+      $output .= '</li>';
+    }
+    $output .= '</ul>';
+  }
+  else {
+    $output = '<p>' . t('There is no bilbio types. Go to the <a href="@url">biblio types create page</a> to add a new biblio type.', array('@url' => url('admin/structure/biblio'))) . '</p>';
+  }
+  return $output;
+}
+
+/**
+ * Viewing a biblio entity entry.
+ *
+ * @param Biblio $biblio
+ *  The biblio entity object.
+ * @param $view_mode
+ *  The view mode. Default to full.
+ *
+ * @return
+ *  A renderable array of the rendered biblio.
+ */
+function biblio_ui_view_biblio(Biblio $biblio, $view_mode = 'full') {
+  $info = $biblio->view();
+
+  $info += array(
+    '#theme' => 'biblio',
+    '#entity' => $biblio,
+    '#view_mode' => $view_mode,
+  );
+
+  $info['#contextual_links']['biblio'] = array('biblio', array($biblio->identifier()));
+
+  return $info;
+}
+
+/**
+ * Form for creating a biblio entry.
+ */
+function biblio_ui_manage_biblio($form, &$form_state, $type) {
+  global $user;
+
+  $account = user_load($user->uid);
+
+  $biblio = !is_object($type) ? biblio_create($type) :  $type;
+
+  $form_state['#entity'] = $biblio;
+
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#required' => TRUE,
+    '#weight' => -10,
+    '#default_value' => !empty($biblio->title) ? $biblio->title : '',
+  );
+
+  field_attach_form('biblio', $biblio, $form, $form_state);
+
+  // Show publication year only if biblio status is "published".
+  $form['biblio_year']['#states'] = array(
+    'visible' => array(
+      ':input[name="biblio_status[und]"]' => array('value' => 'published'),
+    ),
+  );
+
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+    '#weight' => 99,
+  );
+
+  $form['owner'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Authoring information'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#attributes' => array(
+      'class' => array('biblio-form-owner'),
+    ),
+    '#attached' => array(
+      'js' => array(
+        drupal_get_path('module', 'biblio_ui') . '/js/biblio_ui.js',
+        array(
+          'type' => 'setting',
+          'data' => array('anonymous' => variable_get('anonymous', t('Anonymous'))),
+        ),
+      ),
+    ),
+    '#weight' => 90,
+  );
+
+  $form['owner']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Created by'),
+    '#maxlength' => 60,
+    '#autocomplete_path' => 'user/autocomplete',
+    '#default_value' => !empty($biblio->uid) ? user_load($biblio->uid)->name : $account->name,
+    '#weight' => -1,
+    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => variable_get('anonymous', t('Anonymous')))),
+  );
+
+  // Add the path field to the Biblio form. This is based on the path module
+  // function path_form_node_form_alter().
+  $path = array();
+  if (!empty($form['#entity']->bid)) {
+    $conditions = array('source' => 'biblio/' . $form['#entity']->bid);
+    $langcode = entity_language('biblio', $form['#entity']);
+    if ($langcode && $langcode != LANGUAGE_NONE) {
+      $conditions['language'] = $langcode;
+    }
+    $path = path_load($conditions);
+    if ($path === FALSE) {
+      $path = array();
+    }
+  }
+  $path += array(
+    'pid' => NULL,
+    'source' => isset($form['#entity']->bid) ? 'biblio/' . $form['#entity']->bid : NULL,
+    'alias' => '',
+    'language' => isset($langcode) ? $langcode : LANGUAGE_NONE,
+  );
+
+  $form['path'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('URL path settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => empty($path['alias']),
+    '#group' => 'additional_settings',
+    '#attributes' => array(
+      'class' => array('path-form'),
+    ),
+    '#attached' => array(
+      'js' => array(drupal_get_path('module', 'path') . '/path.js'),
+    ),
+    '#access' => user_access('create url aliases') || user_access('administer url aliases'),
+    '#weight' => 30,
+    '#tree' => TRUE,
+    '#element_validate' => array('path_form_element_validate'),
+  );
+  $form['path']['alias'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL alias'),
+    '#default_value' => $path['alias'],
+    '#maxlength' => 255,
+    '#description' => t('Optionally specify an alternative URL by which this content can be accessed. For example, type "about" when writing an about page. Use a relative path and don\'t add a trailing slash or the URL alias won\'t work.'),
+  );
+  $form['path']['pid'] = array('#type' => 'value', '#value' => $path['pid']);
+  $form['path']['source'] = array('#type' => 'value', '#value' => $path['source']);
+  $form['path']['language'] = array('#type' => 'value', '#value' => $path['language']);
+
+  $form['published'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Published'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#weight' => 100,
+  );
+
+  $timestamp_property = empty($biblio->is_new) ? 'changed' : 'created';
+
+  $form['published']['created'] = array(
+    '#type' => 'textfield',
+    '#date_format' => 'Y-m-d G:i',
+    '#title' => t('Published time'),
+    '#default_value' => date('Y-m-d H:i', $biblio->{$timestamp_property}),
+  );
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+    ),
+    'cancel' => array(
+      '#markup' => l(t('Cancel'), 'biblio'),
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Validate the submitted biblio.
+ *
+ * Make sure that year has value, unless "In press" or "Submitted" or checked.
+ */
+function biblio_ui_manage_biblio_validate($form, &$form_state) {
+  field_attach_form_validate('biblio', $form_state['#entity'], $form, $form_state);
+
+  if (isset($form_state['values']['biblio_year'][LANGUAGE_NONE][0]['value']) && is_numeric($form_state['values']['biblio_year'][LANGUAGE_NONE][0]['value'])) {
+    // Year has value.
+    return;
+  }
+
+  if ($form_state['values']['biblio_status'][LANGUAGE_NONE][0]['value'] != 'published') {
+    // "In press" or "Submitted" are checked.
+    return;
+  }
+
+  form_set_error('biblio_year', t('Year is required if Publication status is "Published".'));
+}
+
+/**
+ * Save the form biblio.
+ */
+function biblio_ui_manage_biblio_submit($form, &$form_state) {
+  $biblio = $form_state['#entity'];
+
+  field_attach_submit('biblio', $biblio, $form, $form_state);
+
+  $biblio->title = $form_state['values']['title'];
+  $biblio->path = $form_state['values']['path'];
+
+  $timestamp_property = empty($biblio->is_new) ? 'changed' : 'created';
+
+  $biblio->{$timestamp_property} = strtotime($form_state['values']['created']);
+  $biblio->drupal_uid = user_load_by_name($form_state['values']['name'])->uid;
+
+  $biblio->save();
+
+  $form_state['redirect'] = 'biblio/' . $biblio->bid;
+}
+
+/**
+ * Form for deleting the a biblio entry.
+ */
+function biblio_ui_delete_biblio($form, $form_state, $biblio) {
+  // When the bundle is exported - display a message to the user.
+  $form_state['#entity'] = $biblio;
+
+  // Always provide entity id in the same form key as in the entity edit form.
+  return confirm_form($form,
+    t('Are you sure you want to delete @title?',
+      array('@title' => $biblio->title)),
+    'biblio',
+    t('Are you sure you want to delete this biblio entry? This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel'));
+}
+
+/**
+ * Delete the biblio entry.
+ */
+function biblio_ui_delete_biblio_submit($form, &$form_state) {
+  $biblio = $form_state['#entity'];
+  $biblio->delete();
+
+  $form_state['redirect'] = 'biblio';
+}
+
+/**
+ * Display list of bundles the user can manage.
+ */
+function biblio_ui_manage_bundles() {
+  $bundles = biblio_types();
+
+  $data = array();
+  foreach ($bundles as $i => $bundle) {
+    $data[$i] = array(
+      theme('biblio_ui_bundle_overview', array('bundle' => $bundle)),
+      l(t('Edit'), 'admin/structure/biblio/' . $bundle->type),
+      l(t('Manage fields'), 'admin/structure/biblio/' . $bundle->type . '/fields'),
+      l(t('Manage display'), 'admin/structure/biblio/' . $bundle->type . '/display'),
+    );
+
+    $data[$i][] = biblio_ui_can_delete_bundle($bundle->type) ? l(t('Delete'), 'admin/structure/biblio/' . $bundle->type . '/delete') : '';
+  }
+
+  $headers = array(
+    t('Name'),
+    array('data' => t('Operations'), 'colspan' => 5, 'width' => '50%')
+  );
+
+  return theme('table', array('header' => $headers, 'rows' => $data));
+}
+
+/**
+ * Theme callback - display a small description of the biblio bundle.
+ */
+function theme_biblio_ui_bundle_overview($variables) {
+  $bundle = $variables['bundle'];
+
+  $output = check_plain($bundle->name);
+  $output .= ' <small>' . t('(Machine name: @type)', array('@type' => $bundle->type)) . '</small>';
+  $output .= '<div class="description">' . filter_xss_admin($bundle->description) . '</div>';
+
+  return $output;
+}
+
+/**
+ * Managing bundles - creating bundles(i.e biblio types).
+ */
+function biblio_ui_manage_bundles_manage($form, $form_state, $data = '') {
+  if ($data) {
+    $info = biblio_types($data);
+    $name = $info->name;
+    $machine = $info->type;
+    $description = $info->description;
+    $form_state['op'] = 'edit';
+  }
+  else {
+    $name = '';
+    $machine = '';
+    $description = '';
+    $form_state['op'] = 'create';
+  }
+  $form['name'] = array(
+    '#title' => t('Name'),
+    '#type' => 'textfield',
+    '#default_value' => $name,
+    '#description' => t('The human readable name of the biblio type.'),
+    '#required' => TRUE,
+    '#size' => 30,
+  );
+
+  $form['type'] = array(
+    '#type' => 'machine_name',
+    '#default_value' => $machine,
+    '#maxlength' => 32,
+    '#machine_name' => array(
+      'exists' => 'biblio_types',
+    ),
+    '#description' => t('A machine readable name of the biblio type.'),
+  );
+
+  $form['description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Description'),
+    '#description' => t('A short description about the new biblio type.'),
+    '#required' => TRUE,
+    '#default_value' => $description,
+  );
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+    ),
+    'cancel' => array(
+      '#markup' => l(t('Cancel'), 'admin/structure/biblio'),
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Creating/saving the new biblio type.
+ */
+function biblio_ui_manage_bundles_manage_submit($form, &$form_state) {
+  $values = (object)array(
+    'type' => $form_state['values']['type'],
+    'name' => $form_state['values']['name'],
+    'description' => $form_state['values']['description'],
+  );
+  biblio_type_save($values);
+
+  $form_state['redirect'] = 'admin/structure/biblio';
+
+  drupal_set_message(t('The bundle @title was created successfully.', array(
+    '@title' => $form_state['values']['name'],
+  )));
+
+  // Clearing the menu cache after creating a new menu biblio type.
+  variable_set('menu_rebuild_needed', TRUE);
+}
+
+/**
+ * Delete the a biblio entry.
+ */
+function biblio_ui_delete_bundle($form, &$form_state, $type) {
+  // When the bundle is exported - display a message to the user.
+  $type = biblio_types($type);
+  $form_state['#type'] = $type;
+
+  // Always provide entity id in the same form key as in the entity edit form.
+  return confirm_form($form,
+    t('Are you sure you want to delete the bundle @title?',
+      array('@title' => $type->name)),
+    'admin/structure/biblio',
+    t('Are you sure you want to delete this biblio type? This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel'));
+}
+
+/**
+ * Delete the biblio bundle.
+ */
+function biblio_ui_delete_bundle_submit($form, $form_state) {
+  biblio_type_delete($form_state['#type']->type);
+
+  drupal_set_message(t('The bundle @title was deleted successfully.', array(
+    '@title' => $form_state['#type']->name,
+  )));
+}
+
+/**
+ * Attach biblio fields to biblio types.
+ */
+function biblio_ui_attach_biblio_fields() {
+  $form = array();
+  $types = biblio_types();
+  $options = array();
+
+  foreach ($types as $type => $info) {
+    $options[$type] = $info->name;
+  }
+
+  $form['biblio_types'] = array(
+    '#type' => 'select',
+    '#title' => t('Biblio types'),
+    '#description' => t('Select the biblio types you would like to attach the biblio fields.'),
+    '#multiple' => TRUE,
+    '#options' => $options,
+    '#size' => 10,
+  );
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Attach fields to selected types'),
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler; Attach biblio fields to selected biblio types.
+ */
+function biblio_ui_attach_biblio_fields_submit($form, $form_state) {
+  // Import all the selected biblio types via batch api.
+  $operations = array();
+  foreach ($form_state['values']['biblio_types'] as $type) {
+    $bundles = array($type);
+    $operations[] = array('biblio_create_fields_by_bundle', array($bundles));
+  }
+
+  $batch = array(
+    'operations' => $operations,
+    'title' => t('Attaching biblio fields to selected bundles.'),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Example Batch has encountered an error.'),
+  );
+
+  batch_set($batch);
+
+  batch_process('admin/structure/biblio/attach-fields');
+}
+
+/**
+ * Manage the fields of the biblio bundle.
+ */
+function biblio_ui_create_fields($form, &$form_state, $bundle) {
+  // Save the bundle for later.
+  $form_state['bundle'] = $bundle;
+
+  // Get the existing fields and the fields which not yet added.
+  $fields = biblio_fields_info();
+  $existing_fields = field_info_instances('biblio', $bundle);
+
+  $options = array();
+  foreach ($fields as $name => $field) {
+    if (in_array($name, array_keys($existing_fields))) {
+      continue;
+    }
+
+    $options[$name] = $field['instance']['label'];
+  }
+
+  if (!$options) {
+    drupal_set_message(t("There aren't any fields to add."), 'warning');
+  }
+
+  // Sorting the fields name in alphabetical order.
+  asort($options);
+
+  // Creating a select. When changing the description of the field will be shown
+  // via AJAX.
+  $field_info = '';
+  $selected_field_name = !empty($form_state['values']['field_name']) ? $form_state['values']['field_name'] : '';
+  if (isset($fields[$selected_field_name]['instance']['description'])) {
+    $field_info = t('Description: <b>' . $fields[$selected_field_name]['instance']['description'] . '</b>');
+  }
+
+  $form['field_info_wrapper'] = array(
+    '#prefix' => '<div id="field-info-wrapper">',
+    '#suffix' => '</div>',
+    '#parents' => array('field_info_wrapper'),
+  );
+
+  $form['field_info_wrapper']['field_name'] = array(
+    '#type' => 'select',
+    '#title' => t('Select field to add'),
+    '#description' => t('Select the field you would like to add.'),
+    '#options' => array('' => t('Select a field')) + $options,
+    '#ajax' => array(
+      'callback' => 'biblio_ui_fields_ajax_callback',
+      'wrapper' => 'field-info-wrapper',
+    ),
+  );
+
+  $form['field_info_wrapper']['description'] = array(
+    '#markup' => $field_info,
+  );
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Add field'),
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Ajax callback; Using AJAX we can display the description of each selected
+ * list.
+ */
+function biblio_ui_fields_ajax_callback($form, $form_state) {
+  return $form['field_info_wrapper'];
+}
+
+/**
+ * Validate handler; Attaching the field on the bundle.
+ */
+function biblio_ui_create_fields_validate($form, $form_state) {
+  if (!$form_state['values']['field_name']) {
+    form_set_error('field_name', t('Please select a field.'));
+  }
+}
+
+/**
+ * Submit handler; Attaching the field on the bundle.
+ */
+function biblio_ui_create_fields_submit($form, $form_state) {
+  biblio_create_field($form_state['values']['field_name'], 'biblio', $form_state['bundle']);
+
+  $field_info = biblio_fields_info($form_state['values']['field_name']);
+  $type = biblio_types($form_state['bundle']);
+
+  $params = array(
+    '%name' => $field_info['instance']['label'],
+    '%bundle' => $type->name,
+  );
+  drupal_set_message(t('The field %name added to the bundle %bundle succesfully.', $params));
+}
+
+/**
+ * Manage biblio contributor UI.
+ */
+function biblio_ui_contributor_create_form($form, &$form_state, BiblioContributor $contributor = NULL) {
+  if (!$contributor) {
+    $contributor = biblio_contributor_create();
+  }
+  $form_state['#entity'] = $contributor;
+
+  $form['prefix'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Prefix'),
+    '#default_value' => $contributor->prefix,
+  );
+
+  $form['firstname'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First name'),
+    '#default_value' => $contributor->firstname,
+  );
+
+  $form['initials'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Initials'),
+    '#default_value' => $contributor->initials,
+  );
+
+  $form['lastname'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Last name'),
+    '#default_value' => $contributor->lastname,
+  );
+
+  $form['suffix'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Suffix'),
+    '#default_value' => $contributor->suffix,
+  );
+
+  if (!empty($contributor->name)) {
+    $form['name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Full name'),
+      '#default_value' => $contributor->name,
+      '#disabled' => TRUE,
+    );
+  }
+
+  $form['publisher'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Existing user'),
+    '#maxlength' => 60,
+    '#autocomplete_path' => 'user/autocomplete',
+    '#default_value' => !empty($contributor->uid) ? user_load($contributor->uid)->name : '',
+  );
+
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+    '#weight' => 99,
+  );
+
+  $form['published'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Published'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#weight' => 100,
+  );
+
+  $timestamp_property = empty($contributor->is_new) ? 'changed' : 'created';
+
+  $form['published']['created'] = array(
+    '#type' => 'textfield',
+    '#date_format' => 'Y-m-d G:i',
+    '#title' => t('Published time'),
+    '#default_value' => date('Y-m-d H:i', $contributor->{$timestamp_property}),
+  );
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+    ),
+    'cancel' => array(
+      '#markup' => l(t('Cancel'), 'biblio-contributor'),
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Validate handler for the biblio contributor.
+ */
+function biblio_ui_contributor_create_form_validate($form, $form_state) {
+  field_attach_form_validate('biblio_contributor', $form_state['#entity'], $form, $form_state);
+}
+
+/**
+ * Creating/updating the biblio contributor.
+ */
+function biblio_ui_contributor_create_form_submit($form, &$form_state) {
+  $contributor = $form_state['#entity'];
+  $keys = array('prefix', 'firstname', 'initials', 'lastname', 'suffix');
+
+  foreach ($keys as $key) {
+    $contributor->{$key} = $form_state['values'][$key];
+  }
+
+  $timestamp_property = empty($contributor->is_new) ? 'changed' : 'created';
+
+  $contributor->{$timestamp_property} = strtotime($form_state['values']['created']);
+  $contributor->drupal_uid = user_load_by_name($form_state['values']['publisher'])->uid;
+
+  $contributor->save();
+
+  $form_state['redirect'] = 'biblio-contributor/' . $contributor->cid;
+}
+
+/**
+ * Form for deleting a contributor entry.
+ */
+function biblio_ui_contributor_delete_form($form, $form_state, BiblioContributor $contributor) {
+  $form_state['#entity'] = $contributor;
+
+  return confirm_form($form,
+    t('Are you sure you want to delete @title?',
+      array('@title' => $contributor->name)),
+    'biblio',
+    t('Are you sure you want to delete this contributor entry? This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel'));
+}
+
+/**
+ * Delete the contributor entry.
+ */
+function biblio_ui_contributor_delete_form_submit($form, &$form_state) {
+  $contributor = $form_state['#entity'];
+  $contributor->delete();
+
+  $form_state['redirect'] = 'admin/biblio-contributor';
+}
+
+/**
+ * Menu access; Allow export based on existing Biblio style and user access.
+ *
+ * @param $view_name
+ *   Biblio related View name.
+ * @param $display_name
+ *   Biblio related View display name.
+ * @param $style_name
+ *   Biblio style string.
+ * @param $format_name
+ *   (Optional) Biblio export format string.
+ *
+ * @return bool
+ *   TRUE if user has access to export by View.
+ */
+function biblio_ui_export_view_access($view_name, $display_name, $style_name, $format_name = NULL) {
+  if (!user_access('view biblio')) {
+    // User can't view Biblios.
+    return;
+  }
+  if (!biblio_get_exportable_biblio_style($style_name, $format_name)) {
+    // Style name doesn't exist.
+    return;
+  }
+  if (!biblio_ui_is_biblio_view($view_name, $display_name)) {
+    // The given view/display does not fit for Biblio.
+    return;
+  }
+  return TRUE;
+}
+
+/**
+ * Export a Biblio entity to a file by a given format and array of IDs.
+ *
+ * @param array $bids
+ *   Array of Biblio IDs.
+ * @param $style_name
+ *   Biblio style string.
+ * @param $format_name
+ *   (Optinal) Biblio export format name.
+ */
+function biblio_ui_export($bids = array(), $style_name, $format_name = NULL) {
+  $plugin = biblio_get_exportable_biblio_style($style_name, $format_name);
+
+  // Use the first format if not given.
+  if (!$format_name) {
+    $format_name = reset(array_keys($plugin['export']));
+  }
+  $format = $plugin['export'][$format_name];
+  $filename = $style_name . '.' . $format['file extension'];
+
+  drupal_add_http_header('Content-type', 'application/text; charset=utf-8');
+  drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+  $options = array();
+  $options['type'] = $format_name;
+
+  foreach (biblio_load_multiple($bids) as $biblio) {
+    print_r($biblio->getText($style_name, $options));
+  }
+}
+
+/**
+ * Export a Biblio entities to a file by a View.
+ *
+ * @param $view_name
+ *   Biblio related View name.
+ * @param $display_name
+ *   Biblio related View display name.
+ * @param $style_name
+ *   Biblio style string.
+ * @param $format_name
+ *   (Optional) Biblio export format string.
+ */
+function biblio_ui_export_view($view_name, $display_name, $style_name, $format_name = NULL) {
+  $bids = array();
+
+  $view = views_get_view($view_name);
+  $view->set_display($display_name);
+
+  // Disable pager. Need to export all at once.
+  $pager = $view->display_handler->get_option('pager');
+  $pager['type'] = 'none';
+  $view->display_handler->set_option('pager', $pager);
+
+  // Execute and gather the IDs.
+  $view->execute($display_name);
+  foreach ($view->result as $biblio) {
+    $bids[] = $biblio->bid;
+  }
+  biblio_ui_export($bids, $style_name, $format_name);
+}
+
+/**
+ * Menu access; Allow export based on existing Biblio style and user access.
+ *
+ * @param $bids_string
+ *   String of comma separated Biblio IDs.
+ * @param $style_name
+ *   Biblio style name.
+ * @param $format_name
+ *   (Optinal) Biblio export format string.
+ */
+function biblio_ui_export_access($bids_string, $style_name, $format_name = NULL) {
+  if (!user_access('view biblio')) {
+    // User can't view Biblios.
+    return;
+  }
+  if (!biblio_get_exportable_biblio_style($style_name, $format_name)) {
+    // Style name doesn't exist.
+    return;
+  }
+  if (!biblio_ui_get_ids_from_string($bids_string)) {
+    // No Biblios found on string.
+    return;
+   }
+   return TRUE;
+ }
+
+
+/**
+ * Export a Biblio entity to a file by a given format.
+ *
+ * @param $bids_string
+ *   Comma-separated list of Biblio IDs.
+ * @param $style_name
+ *   Biblio style string.
+ * @param $format_name
+ *   (Optional) Biblio export format string.
+ */
+function biblio_ui_export_menu_item($bids_string = '', $style_name, $format_name = NULL) {
+  $bids = biblio_ui_get_ids_from_string($bids_string);
+  biblio_ui_export($bids, $style_name, $format_name);
+}
+
+/**
+ * Get IDs from string of comma separated numbers.
+ *
+ * @param $bids_string
+ *   Comma-separated list of Biblio IDs.
+ *
+ * @return array|bool
+ *   Array of Biblio IDs, or FALSE if none found.
+ */
+function biblio_ui_get_ids_from_string($bids_string = '') {
+  if (!$bids = explode(',', $bids_string)) {
+    return;
+  }
+  // Verify each item is a number.
+  foreach ($bids as $bid) {
+    if (!is_numeric($bid)) {
+      return;
+    }
+  }
+  return $bids;
+}
+
+/**
+ * Verify the given View and display names exist and related to Biblio.
+ *
+ * @param $view_name
+ *   View name.
+ * @param $display_name
+ *   View display name.
+ *
+ * @return
+ *   TRUE if Biblio view and display exist and accessible.
+ *   FALSE otherwise.
+ */
+function biblio_ui_is_biblio_view($view_name, $display_name) {
+  if (!$view = views_get_view($view_name)) {
+    // View does not exist.
+    return;
+  }
+  if ($view->base_table != 'biblio') {
+    // View does not provide Biblio entities.
+    return;
+  }
+  if (!$view->access($display_name)) {
+    // No access to the given display.
+    return;
+  }
+  return TRUE;
+}
+
+/**
+ * Theme callback; Display a button for export in a View.
+ */
+function theme_biblio_ui_view_export_area($variables) {
+  $links = array();
+  foreach (biblio_get_exportable_biblio_styles() as $style_name => $style) {
+    if (!empty($style['export'])) {
+      foreach ($style['export'] as $format_name => $format) {
+        $links[$style_name . "_" . $format_name] = array(
+          'href' => 'biblio/export_view/' . $variables['view_name'] . '/' . $variables['display_name'] . '/' . $style_name . '/' . $format_name,
+          'title' => $format['name'],
+          'attributes' => array(
+            'title' => t('Click to Download Biblio in @format format', array('@format' => $format['name'])),
+          ),
+        );
+      }
+    }
+  }
+  $attributes = array(
+    'links' => $links,
+    'title' => t('Export'),
+    'class' => 'biblio-export-buttons',
+  );
+  return theme('ctools_dropdown', $attributes);
+}
+
+/**
+ * Theme callback; Display a button for export in Biblio entity.
+ */
+function theme_biblio_ui_entity_export_area($variables) {
+  $title = t('Export');
+  $links = array();
+  foreach (biblio_get_exportable_biblio_styles() as $style_name => $style) {
+    if (!empty($style['export'])) {
+      foreach ($style['export'] as $format_name => $format) {
+        $links[$style_name . "_" . $format_name] = array(
+          'href' => 'biblio/export/' . $variables['bid'] . '/' . $style_name . '/' . $format_name,
+          'title' => $format['name'],
+          'attributes' => array(
+            'title' => t('Click to Download Biblio in @format format', array('@format' => $format['name'])),
+          ),
+        );
+      }
+    }
+  }
+
+  $attributes = array(
+    'links' => $links,
+    'title' => $title,
+    'class' => 'biblio-export-buttons',
+  );
+  return theme('ctools_dropdown', $attributes);
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function biblio_ui_field_extra_fields() {
+  $return = array();
+  $info = entity_get_info('biblio');
+  foreach (array_keys($info['bundles']) as $bundle) {
+    $return['biblio'][$bundle] = array(
+      'display' => array(
+        'export' => array(
+          'label' => t('Export links'),
+          'description' => t('Export Biblio to a file.'),
+          'weight' => -10,
+        ),
+      ),
+    );
+  }
+  return $return;
+}

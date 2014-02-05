@@ -1,0 +1,125 @@
+<?php
+
+/**
+ * Test Biblio Contributors.
+ */
+class BiblioContributorTestCase extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Contributors name',
+      'description' => 'Test parsing different formats of contributor names and preventing duplications.',
+      'group' => 'Biblio',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('biblio');
+  }
+
+  /**
+   * Test parsing different formats of contributor names.
+   */
+  function testGetBiblioContributorsFromNames() {
+    // Test single last name.
+    $data = 'Bush';
+    $biblio_contributors = BiblioContributorUtility::getBiblioContributorsFromNames($data);
+    $this->assertEqual($biblio_contributors[0]->lastname, 'Bush');
+
+    // Test single name with multiple spaces.
+    $data = '  George    W.    Bush  ';
+    $biblio_contributors = BiblioContributorUtility::getBiblioContributorsFromNames($data);
+    $this->assertEqual($biblio_contributors[0]->firstname, 'George');
+    $this->assertEqual($biblio_contributors[0]->initials, 'W');
+    $this->assertEqual($biblio_contributors[0]->lastname, 'Bush');
+
+    // Test single name with a comma and spaces.
+    $data = '  Bush  ,   George   W  ';
+    $biblio_contributors = BiblioContributorUtility::getBiblioContributorsFromNames($data);
+    $this->assertEqual($biblio_contributors[0]->firstname, 'George');
+    $this->assertEqual($biblio_contributors[0]->initials, 'W');
+    $this->assertEqual($biblio_contributors[0]->lastname, 'Bush');
+
+    // Test single name with a prefix and with multiple spaces.
+    $data = '  de   la   Bush  ,  George    W  ';
+    $biblio_contributors = BiblioContributorUtility::getBiblioContributorsFromNames($data);
+    $this->assertEqual($biblio_contributors[0]->firstname, 'George');
+    $this->assertEqual($biblio_contributors[0]->initials, 'W');
+    $this->assertEqual($biblio_contributors[0]->prefix, 'de la');
+    $this->assertEqual($biblio_contributors[0]->lastname, 'Bush');
+
+    // Test single name with a suffix, two commas, and with multiple spaces.
+    $data = '  Bush   ,  Jr.   III  , George   W.   ';
+    $biblio_contributors = BiblioContributorUtility::getBiblioContributorsFromNames($data);
+    $this->assertEqual($biblio_contributors[0]->firstname, 'George');
+    $this->assertEqual($biblio_contributors[0]->initials, 'W');
+    $this->assertEqual($biblio_contributors[0]->suffix, 'Jr. III');
+    $this->assertEqual($biblio_contributors[0]->lastname, 'Bush');
+
+    // Test two names separated by 'and', with extra spaces.
+    $data = 'George W. Bush   and    George Bush ';
+    $biblio_contributors = BiblioContributorUtility::getBiblioContributorsFromNames($data);
+    $this->assertEqual($biblio_contributors[0]->firstname, 'George');
+    $this->assertEqual($biblio_contributors[0]->initials, 'W');
+    $this->assertEqual($biblio_contributors[0]->lastname, 'Bush');
+    $this->assertEqual($biblio_contributors[1]->firstname, 'George');
+    $this->assertEqual($biblio_contributors[1]->lastname, 'Bush');
+
+    // Test multiple names of different kinds.
+    $data = 'George W. Bush and George Bush and G W Bush ' .
+      'and Bush, George and Bush, G W and Bush, George W and de la Bush, George W ' .
+      'and Bush, Jr. III, George W';
+
+    $biblio_contributors = BiblioContributorUtility::getBiblioContributorsFromNames($data);
+
+    $this->assertEqual($biblio_contributors[0]->firstname, 'George');
+    $this->assertEqual($biblio_contributors[0]->initials, 'W');
+    $this->assertEqual($biblio_contributors[0]->lastname, 'Bush');
+    $this->assertEqual($biblio_contributors[1]->firstname, 'George');
+    $this->assertEqual($biblio_contributors[1]->initials, '');
+    $this->assertEqual($biblio_contributors[1]->lastname, 'Bush');
+    $this->assertEqual($biblio_contributors[2]->firstname, '');
+    $this->assertEqual($biblio_contributors[2]->initials, 'G W');
+    $this->assertEqual($biblio_contributors[2]->lastname, 'Bush');
+
+    $this->assertEqual($biblio_contributors[3]->firstname, 'George');
+    $this->assertEqual($biblio_contributors[3]->initials, '');
+    $this->assertEqual($biblio_contributors[3]->lastname, 'Bush');
+    $this->assertEqual($biblio_contributors[4]->firstname, '');
+    $this->assertEqual($biblio_contributors[4]->initials, 'G W');
+    $this->assertEqual($biblio_contributors[4]->lastname, 'Bush');
+    $this->assertEqual($biblio_contributors[5]->firstname, 'George');
+    $this->assertEqual($biblio_contributors[5]->initials, 'W');
+    $this->assertEqual($biblio_contributors[5]->lastname, 'Bush');
+    $this->assertEqual($biblio_contributors[6]->firstname, 'George');
+    $this->assertEqual($biblio_contributors[6]->initials, 'W');
+    $this->assertEqual($biblio_contributors[6]->prefix, 'de la');
+    $this->assertEqual($biblio_contributors[6]->lastname, 'Bush');
+
+    $this->assertEqual($biblio_contributors[7]->firstname, 'George');
+    $this->assertEqual($biblio_contributors[7]->initials, 'W');
+    $this->assertEqual($biblio_contributors[7]->suffix, 'Jr. III');
+    $this->assertEqual($biblio_contributors[7]->lastname, 'Bush');
+  }
+
+  /**
+   * Test preventing duplications in contributors' names.
+   */
+  function testDuplicateBiblioContributorsMd5() {
+    // Attempt to create 2 contributors with the same name.
+    $data = 'Harry J. K. de la Potter and Harry J. K. de la Potter';
+    $biblio_contributors1 = BiblioContributorUtility::getBiblioContributorsFromNames($data);
+
+    // The expected result: The duplication was prevented so the 2 contributors
+    // have the same ID.
+    $this->assertEqual($biblio_contributors1[0]->cid, $biblio_contributors1[1]->cid, 'Biblio Contributor duplication was prevented.');
+
+    // Attempt to create another contributor with the same name.
+    $data = 'Harry J. K. de la Potter';
+    $biblio_contributors2 = BiblioContributorUtility::getBiblioContributorsFromNames($data);
+
+    // The expected result: The duplication was prevented so the 2 contributors
+    // have the same ID.
+    $this->assertEqual($biblio_contributors1[0]->cid, $biblio_contributors2[0]->cid, 'Biblio Contributor duplication was prevented.');
+  }
+}
