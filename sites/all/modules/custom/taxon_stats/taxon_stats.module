@@ -440,6 +440,7 @@ function taxon_stats_get_overall_data($term){
 }
 
 function taxon_stats_has_protologues(){
+  return FALSE;
   $sql = "SELECT COUNT(tid) AS count_bp FROM biblio_types WHERE name = 'Botanical Protologue'";
   $result = db_query($sql)->fetchAll();
   switch($result[0]->count_bp){
