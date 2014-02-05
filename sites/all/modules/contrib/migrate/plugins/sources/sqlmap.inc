@@ -70,15 +70,22 @@ class MigrateSQLMap extends MigrateMap {
   protected $ensured;
 
   public function __construct($machine_name, array $source_key,
-      array $destination_key, $connection_key = 'default') {
+      array $destination_key, $connection_key = 'default', $options = array()) {
+    if (isset($options['track_last_imported'])) {
+      $this->trackLastImported = TRUE;
+    }
+
+    $this->connection = Database::getConnection('default', $connection_key);
+
     // Default generated table names, limited to 63 characters
+    $prefixLength = strlen($this->connection->tablePrefix()) ;
     $this->mapTable = 'migrate_map_' . drupal_strtolower($machine_name);
-    $this->mapTable = drupal_substr($this->mapTable, 0, 63);
+    $this->mapTable = drupal_substr($this->mapTable, 0, 63 - $prefixLength);
     $this->messageTable = 'migrate_message_' . drupal_strtolower($machine_name);
-    $this->messageTable = drupal_substr($this->messageTable, 0, 63);
+    $this->messageTable = drupal_substr($this->messageTable, 0, 63 - $prefixLength);
     $this->sourceKey = $source_key;
     $this->destinationKey = $destination_key;
-    $this->connection = Database::getConnection('default', $connection_key);
+
     // Build the source and destination key maps
     $this->sourceKeyMap = array();
     $count = 1;
@@ -104,29 +111,14 @@ class MigrateSQLMap extends MigrateMap {
         $count = 1;
         $source_key_schema = array();
         $pks = array();
-        $key_length = 0;
-        $var_char_fields = 0;
         foreach ($this->sourceKey as $field_schema) {
           $mapkey = 'sourceid' . $count++;
           $source_key_schema[$mapkey] = $field_schema;
           $pks[] = $mapkey;
-          if ($field_schema['type'] == 'varchar') {
-            $key_length += $field_schema['length'] * 3;
-            $var_char_fields++;
-          }
         }
-        if ($key_length > 1000) {
-          $new_pks = array();
-          foreach ($pks as $pk) {
-            if ($source_key_schema[$pk]['type'] == 'varchar') {
-              $new_pks[] = array($pk, intval(1000/(3*$var_char_fields)));
-            } else {
-              $new_pks[] = $pk;
-            }
-          }
-          $pks = $new_pks;
-        }
+
         $fields = $source_key_schema;
+
         // Add destination keys to map table
         // TODO: How do we discover the destination schema?
         $count = 1;
@@ -144,12 +136,26 @@ class MigrateSQLMap extends MigrateMap {
           'default' => MigrateMap::STATUS_IMPORTED,
           'description' => 'Indicates current status of the source row',
         );
+        $fields['rollback_action'] = array(
+          'type' => 'int',
+          'size' => 'tiny',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => MigrateMap::ROLLBACK_DELETE,
+          'description' => 'Flag indicating what to do for this item on rollback',
+        );
         $fields['last_imported'] = array(
           'type' => 'int',
           'unsigned' => TRUE,
           'not null' => TRUE,
           'default' => 0,
           'description' => 'UNIX timestamp of the last time this row was imported',
+        );
+        $fields['hash'] = array(
+          'type' => 'varchar',
+          'length' => '32',
+          'not null' => FALSE,
+          'description' => 'Hash of source row data, for detecting changes',
         );
         $schema = array(
           'description' => t('Mappings from source key to destination key'),
@@ -186,6 +192,29 @@ class MigrateSQLMap extends MigrateMap {
         );
         $this->connection->schema()->createTable($this->messageTable, $schema);
       }
+      else {
+        // Add any missing columns to the map table
+        if (!$this->connection->schema()->fieldExists($this->mapTable,
+                                                      'rollback_action')) {
+          $this->connection->schema()->addField($this->mapTable,
+                                                'rollback_action', array(
+            'type' => 'int',
+            'size' => 'tiny',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+            'default' => 0,
+            'description' => 'Flag indicating what to do for this item on rollback',
+          ));
+        }
+        if (!$this->connection->schema()->fieldExists($this->mapTable, 'hash')) {
+          $this->connection->schema()->addField($this->mapTable, 'hash', array(
+            'type' => 'varchar',
+            'length' => '32',
+            'not null' => FALSE,
+            'description' => 'Hash of source row data, for detecting changes',
+          ));
+        }
+      }
       $this->ensured = TRUE;
     }
   }
@@ -213,14 +242,14 @@ class MigrateSQLMap extends MigrateMap {
    * @param array $source_id
    */
   public function getRowByDestination(array $destination_id) {
-    migrate_instrument_start('mapRowByDestination');
+    migrate_instrument_start('getRowByDestination');
     $query = $this->connection->select($this->mapTable, 'map')
               ->fields('map');
     foreach ($this->destinationKeyMap as $key_name) {
       $query = $query->condition("map.$key_name", array_shift($destination_id), '=');
     }
     $result = $query->execute();
-    migrate_instrument_stop('mapRowByDestination');
+    migrate_instrument_stop('getRowByDestination');
     return $result->fetchAssoc();
   }
 
@@ -234,7 +263,7 @@ class MigrateSQLMap extends MigrateMap {
    */
   public function getRowsNeedingUpdate($count) {
     $rows = array();
-    $result = db_select($this->mapTable, 'map')
+    $result = $this->connection->select($this->mapTable, 'map')
                       ->fields('map')
                       ->condition('needs_update', MigrateMap::STATUS_NEEDS_UPDATE)
                       ->range(0, $count)
@@ -290,9 +319,9 @@ class MigrateSQLMap extends MigrateMap {
   }
 
   /**
-   * Called upon successful import of one record, we record a mapping from
-   * the source key to the destination key. Also may be called, setting the
-   * third parameter to NEEDS_UPDATE, to signal an existing record should be remigrated.
+   * Called upon import of one record, we record a mapping from the source key
+   * to the destination key. Also may be called, setting the third parameter to
+   * NEEDS_UPDATE, to signal an existing record should be remigrated.
    *
    * @param stdClass $source_row
    *  The raw source data. We use the key map derived from the source object
@@ -301,8 +330,15 @@ class MigrateSQLMap extends MigrateMap {
    *  The destination key values.
    * @param int $needs_update
    *  Status of the source row in the map. Defaults to STATUS_IMPORTED.
+   * @param int $rollback_action
+   *  How to handle the destination object on rollback. Defaults to
+   *  ROLLBACK_DELETE.
+   * $param string $hash
+   *  If hashing is enabled, the hash of the raw source row.
    */
-  public function saveIDMapping(stdClass $source_row, array $dest_ids, $needs_update = MigrateMap::STATUS_IMPORTED) {
+  public function saveIDMapping(stdClass $source_row, array $dest_ids,
+      $needs_update = MigrateMap::STATUS_IMPORTED,
+      $rollback_action = MigrateMap::ROLLBACK_DELETE, $hash = NULL) {
     migrate_instrument_start('saveIDMapping');
     // Construct the source key
     $keys = array();
@@ -318,10 +354,16 @@ class MigrateSQLMap extends MigrateMap {
       $keys[$key_name] = $source_row->$field_name;
     }
 
-    $fields = array('needs_update' => (int)$needs_update);
+    $fields = array(
+      'needs_update' => (int)$needs_update,
+      'rollback_action' => (int)$rollback_action,
+      'hash' => $hash,
+    );
     $count = 1;
-    foreach ($dest_ids as $dest_id) {
-      $fields['destid' . $count++] = $dest_id;
+    if (!empty($dest_ids)) {
+      foreach ($dest_ids as $dest_id) {
+        $fields['destid' . $count++] = $dest_id;
+      }
     }
     if ($this->trackLastImported) {
       $fields['last_imported'] = time();

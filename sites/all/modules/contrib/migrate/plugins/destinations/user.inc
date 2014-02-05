@@ -75,39 +75,41 @@ class MigrateDestinationUser extends MigrateDestinationEntity {
   public function fields($migration = NULL) {
     $fields = array();
     // First the core (users table) properties
-    $fields['uid'] = t('User: <a href="@doc">Existing user ID</a>',
+    $fields['uid'] = t('<a href="@doc">Existing user ID</a>',
             array('@doc' => 'http://drupal.org/node/1349632#uid'));
-    $fields['mail'] = t('User: <a href="@doc">Email address</a>',
+    $fields['mail'] = t('<a href="@doc">Email address</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#mail'));
-    $fields['name'] = t('User: <a href="@doc">Username</a>',
+    $fields['name'] = t('<a href="@doc">Username</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#name'));
-    $fields['pass'] = t('User: <a href="@doc">Password (plain text)</a>',
+    $fields['pass'] = t('<a href="@doc">Password</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#pass'));
-    $fields['status'] = t('User: <a href="@doc">Status</a>',
+    $fields['status'] = t('<a href="@doc">Status</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#status'));
-    $fields['created'] = t('User: <a href="@doc">Registered timestamp</a>',
+    $fields['created'] = t('<a href="@doc">Registered timestamp</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#created'));
-    $fields['access'] = t('User: <a href="@doc">Last access timestamp</a>',
+    $fields['access'] = t('<a href="@doc">Last access timestamp</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#access'));
-    $fields['login'] = t('User: <a href="@doc">Last login timestamp</a>',
+    $fields['login'] = t('<a href="@doc">Last login timestamp</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#login'));
-    $fields['roles'] = t('User: <a href="@doc">Role IDs</a>',
+    $fields['roles'] = t('<a href="@doc">Role IDs</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#roles'));
-    $fields['role_names'] = t('User: <a href="@doc">Role Names</a>',
+    $fields['role_names'] = t('<a href="@doc">Role Names</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#role_names'));
-    $fields['picture'] = t('User: <a href="@doc">Picture</a>',
+    $fields['picture'] = t('<a href="@doc">Picture</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#picture'));
-    $fields['signature'] = t('User: <a href="@doc">Signature</a>',
+    $fields['signature'] = t('<a href="@doc">Signature</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#signature'));
-    $fields['signature_format'] = t('User: <a href="@doc">Signature format</a>',
+    $fields['signature_format'] = t('<a href="@doc">Signature format</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#signature_format'));
-    $fields['timezone'] = t('User: <a href="@doc">Timezone</a>',
+    $fields['timezone'] = t('<a href="@doc">Timezone</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#timezone'));
-    $fields['language'] = t('User: <a href="@doc">Language</a>',
+    $fields['language'] = t('<a href="@doc">Language</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#language'));
-    $fields['theme'] = t('User: <a href="@doc">Default theme</a>',
+    $fields['theme'] = t('<a href="@doc">Default theme</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#theme'));
-    $fields['init'] = t('User: <a href="@doc">Init</a>',
+    $fields['init'] = t('<a href="@doc">Init</a>',
+                array('@doc' => 'http://drupal.org/node/1349632#init'));
+    $fields['data'] = t('<a href="@doc">Data</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#init'));
     $fields['is_new'] = t('Option: <a href="@doc">Indicates a new user with the specified uid should be created</a>',
                 array('@doc' => 'http://drupal.org/node/1349632#is_new'));
@@ -170,9 +172,7 @@ class MigrateDestinationUser extends MigrateDestinationEntity {
           array('!uid' => $account->uid)));
       }
     }
-    elseif(isset($account->original)) {
-      $old_account = $account->original;
-    }else{
+    else {
       $old_account = $account;
     }
 
@@ -210,7 +210,7 @@ class MigrateDestinationUser extends MigrateDestinationEntity {
 
     // While user_save is happy to see a fid in $account->picture on insert,
     // when updating an existing account it wants a file object.
-    if ($updating && ($fid = $account->picture)) {
+    if ($updating && isset($account->picture) && ($fid = $account->picture)) {
       $account->picture = file_load($fid);
     }
 
@@ -230,7 +230,7 @@ class MigrateDestinationUser extends MigrateDestinationEntity {
       $account->login = MigrationBase::timestamp($account->login);
     }
 
-    migrate_instrument_start('user_save');    
+    migrate_instrument_start('user_save');
     $newaccount = user_save($old_account, (array)$account);
     migrate_instrument_stop('user_save');
     if ($newaccount) {
@@ -243,6 +243,19 @@ class MigrateDestinationUser extends MigrateDestinationEntity {
           ->fields(array('pass' => $password))
           ->condition('uid', $newaccount->uid)
           ->execute();
+      }
+      // Unlike nodes and taxonomy terms, core does not automatically save an
+      // alias in a user entity, we must do it ourselves.
+      if (module_exists('path')) {
+        if (!empty($account->path['alias'])) {
+          $path = array(
+            'source' => 'user/' . $account->uid,
+            'alias' => $account->path['alias'],
+          );
+          migrate_instrument_start('path_save');
+          path_save($path);
+          migrate_instrument_stop('path_save');
+        }
       }
       if ($updating) {
         $this->numUpdated++;
@@ -302,20 +315,23 @@ class MigrateDestinationRole extends MigrateDestinationTable {
    */
   public function import(stdClass $entity, stdClass $row) {
     $migration = Migration::currentMigration();
+    $updating = FALSE;
     // Updating previously-migrated content?
     if (isset($row->migrate_map_destid1)) {
+      $updating = TRUE;
       if (isset($entity->rid)) {
         if ($entity->rid != $row->migrate_map_destid1) {
           throw new MigrateException(t("Incoming id !id and map destination id !destid don't match",
             array('!id' => $entity->rid, '!destid' => $row->migrate_map_destid1)));
         }
-        else {
-          $entity->rid = $row->migrate_map_destid1;
-        }
+      }
+      else {
+        $entity->rid = $row->migrate_map_destid1;
       }
     }
 
     if ($migration->getSystemOfRecord() == Migration::DESTINATION) {
+      $updating = TRUE;
       if (!isset($entity->rid)) {
         throw new MigrateException(t('System-of-record is DESTINATION, but no destination id provided'));
       }
@@ -334,6 +350,12 @@ class MigrateDestinationRole extends MigrateDestinationTable {
 
     if (!empty($entity->rid)) {
       $id = array($entity->rid);
+      if ($updating) {
+        $this->numUpdated++;
+      }
+      else {
+        $this->numCreated++;
+      }
     }
     else {
       $id = FALSE;

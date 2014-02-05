@@ -65,33 +65,33 @@ class MigrateDestinationComment extends MigrateDestinationEntity {
   public function fields($migration = NULL) {
     $fields = array();
     // First the core (comment table) properties
-    $fields['cid'] = t('Comment: <a href="@doc">Existing comment ID</a>',
+    $fields['cid'] = t('<a href="@doc">Existing comment ID</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#cid'));
-    $fields['nid'] = t('Comment: <a href="@doc">Node (by Drupal ID)</a>',
+    $fields['nid'] = t('<a href="@doc">Node (by Drupal ID)</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#nid'));
-    $fields['uid'] = t('Comment: <a href="@doc">User (by Drupal ID)</a>',
+    $fields['uid'] = t('<a href="@doc">User (by Drupal ID)</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#uid'));
-    $fields['pid'] = t('Comment: <a href="@doc">Parent (by Drupal ID)</a>',
+    $fields['pid'] = t('<a href="@doc">Parent (by Drupal ID)</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#pid'));
-    $fields['subject'] = t('Comment: <a href="@doc">Subject</a>',
+    $fields['subject'] = t('<a href="@doc">Subject</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#subject'));
-    $fields['created'] = t('Comment: <a href="@doc">Created timestamp</a>',
+    $fields['created'] = t('<a href="@doc">Created timestamp</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#created'));
-    $fields['changed'] = t('Comment: <a href="@doc">Modified timestamp</a>',
+    $fields['changed'] = t('<a href="@doc">Modified timestamp</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#changed'));
-    $fields['status'] = t('Comment: <a href="@doc">Status</a>',
+    $fields['status'] = t('<a href="@doc">Status</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#status'));
-    $fields['hostname'] = t('Comment: <a href="@doc">Hostname/IP address</a>',
+    $fields['hostname'] = t('<a href="@doc">Hostname/IP address</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#hostname'));
-    $fields['name'] = t('Comment: <a href="@doc">User name (not username)</a>',
+    $fields['name'] = t('<a href="@doc">User name (not username)</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#name'));
-    $fields['mail'] = t('Comment: <a href="@doc">Email address</a>',
+    $fields['mail'] = t('<a href="@doc">Email address</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#mail'));
-    $fields['homepage'] = t('Comment: <a href="@doc">Homepage</a>',
+    $fields['homepage'] = t('<a href="@doc">Homepage</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#homepage'));
-    $fields['language'] = t('Comment: <a href="@doc">Language</a>',
+    $fields['language'] = t('<a href="@doc">Language</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#language'));
-    $fields['thread'] = t('Comment: <a href="@doc">Thread</a>',
+    $fields['thread'] = t('<a href="@doc">Thread</a>',
                 array('@doc' => 'http://drupal.org/node/1349714#thread'));
 
     // Then add in anything provided by handlers
@@ -147,6 +147,10 @@ class MigrateDestinationComment extends MigrateDestinationEntity {
     }
     if (isset($comment->changed)) {
       $comment->changed = MigrationBase::timestamp($comment->changed);
+    }
+
+    if (!isset($comment->node_type)) {
+      $comment->node_type = $this->bundle;
     }
 
     if ($migration->getSystemOfRecord() == Migration::DESTINATION) {
@@ -235,7 +239,40 @@ class MigrateDestinationComment extends MigrateDestinationEntity {
     return $return;
   }
 
+  /**
+   * Implements MigrateDestination::preImport().
+   */
   public function preImport() {
+    $this->disableStatistics();
+  }
+
+  /**
+   * Implements MigrateDestination::postImport().
+   */
+  public function postImport() {
+    $this->enableStatistics();
+  }
+
+  /**
+   * Implements MigrateDestination::preRollback().
+   */
+  public function preRollback() {
+    $this->disableStatistics();
+  }
+
+  /**
+   * Implements MigrateDestination::postRollback().
+   */
+  public function postRollback() {
+    $this->enableStatistics();
+  }
+
+  /**
+   * Updating node statistics on every comment imported or rolled back is
+   * expensive. We disable node statistics while performing imports and rollbacks,
+   * then re-enable and compute them in bulk when done.
+   */
+  protected function disableStatistics() {
     // If maintaining node statistics is enabled, temporarily disable it
     $this->maintainNodeStatistics =
       variable_get('comment_maintain_node_statistics', TRUE);
@@ -244,7 +281,11 @@ class MigrateDestinationComment extends MigrateDestinationEntity {
     }
   }
 
-  public function postImport() {
+  /**
+   * Re-enable and recompute node statistics after an import or rollback
+   * operation.
+   */
+  protected function enableStatistics() {
     // If originally enabled, re-enable and rebuild the stats
     if ($this->maintainNodeStatistics) {
       $GLOBALS['conf']['comment_maintain_node_statistics'] = TRUE;
@@ -268,7 +309,7 @@ class MigrateDestinationComment extends MigrateDestinationEntity {
       // Insert records into the node_comment_statistics for nodes that are missing.
       $query = db_select('node', 'n');
       $query->leftJoin('node_comment_statistics', 'ncs', 'ncs.nid = n.nid');
-      $query->addField('n', 'changed', 'last_comment_timestamp');
+      $query->addField('n', 'created', 'last_comment_timestamp');
       $query->addField('n', 'uid', 'last_comment_uid');
       $query->addField('n', 'nid');
       $query->addExpression('0', 'comment_count');
