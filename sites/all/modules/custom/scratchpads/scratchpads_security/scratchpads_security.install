@@ -12,36 +12,19 @@ function scratchpads_security_install(){
   variable_set('image_captcha_noise_level', 1);
   // Set the CAPTCHA options
   variable_set('captcha_default_challenge', 'image_captcha/Image');
-  // Set the CAPTCHA After options
-  db_delete('captcha_after')->execute();
-  $query = db_insert('captcha_after')->fields(array(
-    'form_id',
-    'enable',
-    'options'
-  ));
-  foreach(array(
-    'user_login_block',
-    'user_login'
-  ) as $form_id){
-    $query->values(array(
-      'form_id' => $form_id,
-      'enable' => 1,
-      'options' => serialize(array(
-        'submit_threshold' => '',
-        'flooding_threshold' => '',
-        'global_flooding_threshold' => ''
-      ))
-    ));
-  }
-  $query->execute();
   // Set the forms that require a CAPTCHA.
   scratchpads_security_flush_caches();
   // Set the Spambot settings.
   variable_set('spambot_blocked_message_email', 'Your email address is blacklisted.');
   variable_set('spambot_blocked_message_ip', 'Your IP address is blacklisted.');
-  variable_set('spambot_cron_user_limit', 1);
+  variable_set('spambot_cron_user_limit', 10);
   variable_set('spambot_check_blocked_accounts', 1);
   variable_set('spambot_spam_account_action', 1);
+  variable_set('spambot_criteria_ip', 5);
+  variable_set('spambot_criteria_username', 0);
+  variable_set('spambot_blacklisted_delay', 5);
+  // Set the Honeypot settings
+  variable_set('honeypot_form_user_register_form', 1);
 }
 
 /**
@@ -79,4 +62,34 @@ function scratchpads_security_update_7001(){
   variable_set('spambot_cron_user_limit', 1);
   variable_set('spambot_check_blocked_accounts', 1);
   variable_set('spambot_spam_account_action', 1);
+}
+
+/**
+ * Disable the captcha_after module, and also prevent captcha from being added
+ * to the login block form.  This is to enable caching to work.
+ */
+function scratchpads_security_update_7002(){
+  module_disable(array(
+    'captcha_after'
+  ));
+  db_delete('captcha_points')->condition('form_id', array(
+    'user_login',
+    'user_login_block'
+  ))->execute();
+}
+
+/**
+ * Enable honeypot and make spambot a little more sensitive.
+ */
+function scratchpads_security_update_7003(){
+  if(!module_exists('honeypot')){
+    module_enable(array(
+      'honeypot'
+    ));
+  }
+  variable_set('honeypot_form_user_register_form', 1);
+  variable_set('spambot_criteria_ip', 5);
+  variable_set('spambot_criteria_username', 0);
+  variable_set('spambot_blacklisted_delay', 5);
+  variable_set('spambot_cron_user_limit', 10);
 }

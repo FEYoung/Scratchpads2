@@ -5,6 +5,14 @@
  */
 include_once ('scratchpads_group.features.inc');
 
+function scratchpads_group_tools_pre_disable(){
+  $tools_settings = array(
+    'can_disable' => TRUE,
+    'disable_message' => t('Disabling this module will result in ALL Groups being removed from your Scratchpad.  This may result in content which was hidden from anonymous users being made visible.')
+  );
+  return $tools_settings;
+}
+
 /**
  * Implementation of hook_node_type_insert().
  * 
@@ -65,6 +73,24 @@ function scratchpads_group_menu_alter(&$items){
     }
   }
   unset($items['group/%/group']);
+}
+
+/**
+ * Implements hook_scratchpads_hands_off_urls_alter()
+ */
+function scratchpads_group_scratchpads_hands_off_urls_alter(&$urls){
+  $urls[] = 'admin/config/group';
+}
+
+/**
+ * Implements hook_og_ui_get_group_admin_alter().
+ * 
+ * Remove the "Roles" and "Permissions" menu items from the node/%nid/group
+ * pages.
+ */
+function scratchpads_group_og_ui_get_group_admin_alter(&$data, $gid){
+  unset($data['roles']);
+  unset($data['permissions']);
 }
 
 /**
@@ -337,6 +363,18 @@ function scratchpads_group_map_callback($values, $options){
     }
   }else{
     return array();
+  }
+}
+
+/**
+ * Implement hook_apachesolr_query_prepare
+ *
+ * Sort the results page (chronological descending)
+ * on the Group page.
+ */
+function scratchpads_group_apachesolr_query_prepare($query){
+  if(arg(0) == 'group'){
+    $query->setSolrSort('ds_created', 'desc');
   }
 }
 

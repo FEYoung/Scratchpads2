@@ -21,11 +21,9 @@ function scratchpads_pages_views_default_views(){
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['query']['options']['query_comment'] = FALSE;
   $handler->display->display_options['exposed_form']['type'] = 'basic';
-  $handler->display->display_options['pager']['type'] = 'mini';
-  $handler->display->display_options['pager']['options']['items_per_page'] = '100';
+  $handler->display->display_options['pager']['type'] = 'some';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '0';
   $handler->display->display_options['pager']['options']['offset'] = '0';
-  $handler->display->display_options['pager']['options']['id'] = '0';
-  $handler->display->display_options['pager']['options']['expose']['items_per_page_options_all'] = 0;
   $handler->display->display_options['style_plugin'] = 'slickgrid';
   $handler->display->display_options['style_options']['grouping_field'] = '';
   $handler->display->display_options['style_options']['collapse_groups_by_default'] = 0;
@@ -115,6 +113,10 @@ function scratchpads_pages_views_default_views(){
   $handler->display->display_options['fields']['view_node']['empty_zero'] = 0;
   $handler->display->display_options['fields']['view_node']['hide_alter_empty'] = 1;
   $handler->display->display_options['fields']['view_node']['text'] = 'View specimen';
+  /* Sort criterion: Content: Title */
+  $handler->display->display_options['sorts']['title']['id'] = 'title';
+  $handler->display->display_options['sorts']['title']['table'] = 'node';
+  $handler->display->display_options['sorts']['title']['field'] = 'title';
   /* Filter criterion: Content: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
@@ -142,6 +144,8 @@ function scratchpads_pages_views_default_views(){
     'default' => 'default',
     'page_1' => 'page_1'
   );
+  $handler->display->display_options['use_batch'] = 'batch';
+  $handler->display->display_options['segment_size'] = '100';
   /* Display: CSV Export */
   $handler = $view->new_display('views_data_export', 'CSV Export', 'views_data_export_2');
   $handler->display->display_options['pager']['type'] = 'none';
@@ -152,6 +156,8 @@ function scratchpads_pages_views_default_views(){
     'default' => 'default',
     'page_1' => 'page_1'
   );
+  $handler->display->display_options['use_batch'] = 'batch';
+  $handler->display->display_options['segment_size'] = '100';
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page_1');
   $handler->display->display_options['path'] = 'specimen_observation';

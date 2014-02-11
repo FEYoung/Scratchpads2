@@ -38,6 +38,15 @@ function scratchpads_biblio_menu_alter(&$items){
 }
 
 /**
+ * Implements hook_node_view_alter().
+ */
+function scratchpads_biblio_node_view_alter(&$build){
+  if($build['#node']->type == 'biblio' && (biblio_access('download', $build['#node']) == NODE_ACCESS_DENY || !biblio_access('download', $build['#node']))){
+    unset($build['field_file']);
+  }
+}
+
+/**
  * Implements hook_node_presave().
  * 
  * Prevent biblio nodes from being saved with a title.
@@ -54,7 +63,16 @@ function scratchpads_biblio_node_presave($node){
         'tid'
       ))->condition('vid', $vids)->condition('name', $node->biblio_keywords)->execute();
       foreach($results as $row){
-        $node->field_taxonomic_name[LANGUAGE_NONE][] = (array)taxonomy_term_load($row->tid);
+        $not_found = TRUE;
+        foreach($node->field_taxonomic_name[LANGUAGE_NONE] as $key => $value){
+          if(isset($value['tid']) && $value['tid'] == $row->tid){
+            $not_found = FALSE;
+            break;
+          }
+        }
+        if($not_found){
+          $node->field_taxonomic_name[LANGUAGE_NONE][] = (array)taxonomy_term_load($row->tid);
+        }
       }
     }
   }
