@@ -78,6 +78,9 @@ function darwincore_form_specimen_observation_node_form_alter(&$form, &$form_sta
     $form['#validate'] = array();
   }
   $form['#validate'][] = 'darwincore_specimen_observation_node_form_validate';
+  // Add a submit function so that we can add taxonomic names to images that
+  // are attached to the specimen.
+  $form['#submit'][] = 'darwincore_specimen_observation_node_form_submit';
 }
 
 /**
@@ -102,6 +105,41 @@ function darwincore_form_field_ui_display_overview_form_alter(&$form, &$form_sta
     }
     if(($name != 'field_genbank_number') && ($match)){
       unset($form['fields'][$name]['format']['type']['#options']['darwincore_link_to_ncbi']);
+    }
+  }
+}
+
+/**
+ * Submit function for the specimen/observation form.
+ */
+function darwincore_specimen_observation_node_form_submit($form, &$form_state){
+  if(@isset($form_state['values']['field_taxonomic_name'][LANGUAGE_NONE][0]['tid']) && @isset($form_state['values']['field_media'][LANGUAGE_NONE][0]['fid'])){
+    $send_message = FALSE;
+    foreach($form_state['values']['field_media'][LANGUAGE_NONE] as $file){
+      if($file['fid'] && ($file = file_load($file['fid'])) != FALSE){
+        if(!count($file->field_taxonomic_name)){
+          $file->field_taxonomic_name[LANGUAGE_NONE] = array();
+        }
+        foreach($form_state['values']['field_taxonomic_name'][LANGUAGE_NONE] as $term){
+          $add_term = TRUE;
+          foreach($file->field_taxonomic_name[LANGUAGE_NONE] as $delta => $value){
+            if($value['tid'] == $term['tid']){
+              $add_term = FALSE;
+              break;
+            }
+          }
+          if($add_term){
+            $file->field_taxonomic_name[LANGUAGE_NONE][] = array(
+              'tid' => $term['tid']
+            );
+            $send_message = TRUE;
+          }
+        }
+        file_save($file);
+      }
+    }
+    if($send_message){
+      drupal_set_message(t('Any additional terms added to this specimen/observation, have been added to attached images.'));
     }
   }
 }
@@ -207,9 +245,47 @@ function _darwincore_add_ncbi_links($values){
   return implode(', ', $link_array);
 }
 
+/**
+ * Returns the total number of 'location' and 'specimen_observation' nodes
+ */
+function darwincore_node_count(){
+  $query = db_select('node', 'n');
+  $or = db_or()->condition('n.type', 'location', '=')->condition('n.type', 'specimen_observation', '=');
+  $query->condition($or);
+  return $query->countQuery()->execute()->fetchField();
+}
 
+/**
+ * If this is the first node to be created, we clear the views cache.
+ */
+function darwincore_node_insert($node){
+  if($node->type == 'specimen_observation'){
+    if(db_select('node', 'n')->condition('type', 'specimen_observation')->countQuery()->execute()->fetchField() == 1){
+      drupal_register_shutdown_function('drupal_flush_all_caches');
+    }
+  }
+}
 
+/**
+ * If this is the last node to be deleted, we clear the views cache.
+ */
+function darwincore_node_delete($node){
+  darwincore_node_insert($node);
+}
 
-
-
-
+/**
+ * Implements hook_tools_pre_disable().
+ */
+function darwincore_tools_pre_disable(){
+  if(darwincore_node_count() > 0){
+    $can_disable = false;
+  }else{
+    $can_disable = true;
+  }
+  $tools_settings = array(
+    'can_disable' => $can_disable,
+    'cannot_disable_message' => 'You cannot disable Darwincore while there is still data in Specimen/Observation or Location content types.',
+    'disable_message' => 'Specimen/Observation and Location content types will be removed.'
+  );
+  return $tools_settings;
+}

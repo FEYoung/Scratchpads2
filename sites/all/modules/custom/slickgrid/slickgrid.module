@@ -523,15 +523,17 @@ function slickgrid_editor_form($form, &$form_state){
  */
 function slickgrid_module_implements_alter(&$implementations, $hook){
   if($hook == 'file_presave'){
-    $move = $implementations['slickgrid'];
-    unset($implementations['slickgrid']);
-    $new_implementations = array(
-      'slickgrid' => $move
-    );
-    foreach($implementations as $key => $move){
-      $new_implementations[$key] = $move;
+    if(isset($implementations['slickgrid'])){
+      $move = $implementations['slickgrid'];
+      unset($implementations['slickgrid']);
+      $new_implementations = array(
+        'slickgrid' => $move
+      );
+      foreach($implementations as $key => $move){
+        $new_implementations[$key] = $move;
+      }
+      $implementations = $new_implementations;
     }
-    $implementations = $new_implementations;
   }
 }
 
@@ -683,7 +685,7 @@ function slickgrid_form_alter(&$form, &$form_state, $form_id){
  * loginless changes.
  */
 function slickgrid_form_user_profile_form_alter(&$form, &$form_state){
-  if($form['#user']->uid){
+  if($form['#user']->uid && !arg(3)){
     $disabled = db_select('slickgrid', 's')->fields('s')->condition('uid', $form['#user']->uid)->countQuery()->execute()->fetchCol();
     $form['slickgrid'] = array(
       '#type' => 'fieldset',

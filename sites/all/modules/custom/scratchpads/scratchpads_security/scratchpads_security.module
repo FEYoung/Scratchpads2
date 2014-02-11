@@ -5,8 +5,6 @@
  */
 function scratchpads_security_flush_caches(){
   $form_ids_to_captcha = array(
-    'user_login' => 'user_login',
-    'user_login_block' => 'user_login_block',
     'user_pass' => 'user_pass',
     'user_register_form' => 'user_register_form'
   );
@@ -53,6 +51,33 @@ function comment_scratchpads_security_captcha_form_ids_alter(&$form_ids){
 function contact_scratchpads_security_captcha_form_ids_alter(&$form_ids){
   $form_ids['contact_personal_form'] = 'contact_personal_form';
   $form_ids['contact_site_form'] = 'contact_site_form';
+}
+
+/**
+ * Implements hook_scratchpads_security_captcha_form_ids_alter()
+ * 
+ * Add webforms to the mix.
+ */
+function webform_scratchpads_security_captcha_form_ids_alter(&$form_ids){
+  $query = db_select('node', 'n');
+  $query->addExpression("CONCAT('webform_client_form_',nid)", 'form_id');
+  $rows = $query->condition('type', 'webform')->execute()->fetchCol();
+  $rows = drupal_map_assoc($rows);
+  $form_ids = array_merge($form_ids, $rows);
+}
+
+/**
+ * Implements hook_node_insert()
+ */
+function scratchpads_security_node_insert($node){
+  if($node->type == 'webform'){
+    $query = db_merge('captcha_points')->key(array(
+      'form_id' => 'webform_client_form_' . $node->nid
+    ))->fields(array(
+      'form_id' => 'webform_client_form_' . $node->nid,
+      'captcha_type' => 'default'
+    ))->execute();
+  }
 }
 
 /**
