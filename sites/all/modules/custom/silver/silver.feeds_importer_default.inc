@@ -63,8 +63,10 @@ function silver_feeds_importer_default(){
               'unique' => 0
             )
           ),
+          'bundle' => $vocabulary->machine_name,
           'update_existing' => '2',
-          'input_format' => 'plain_text'
+          'input_format' => 'plain_text',
+          'skip_hash_check' => 0
         )
       ),
       'content_type' => '',
@@ -117,8 +119,10 @@ function silver_feeds_importer_default(){
               'unique' => TRUE
             )
           ),
+          'bundle' => $node_type,
           'update_existing' => '2',
-          'input_format' => 'filtered_html'
+          'input_format' => 'filtered_html',
+          'skip_hash_check' => 0
         )
       ),
       'content_type' => '',
@@ -136,6 +140,7 @@ function silver_feeds_importer_default(){
       );
     }
     $field_info = field_info_instances('node', $node_type);
+    $field_info = _silver_feeds_sort_field_info('node', $node_type, $field_info);
     _silver_feeds_importer_default_helper($field_info, $feeds_importer, "node:$node_type:");
     $export['node_importer_' . $node_type] = $feeds_importer;
   }
@@ -293,6 +298,44 @@ function silver_feeds_importer_default(){
 }
 
 /**
+ * Helper function to sort the field_info array
+ */
+function _silver_feeds_sort_field_info($entity_type, $bundle, $field_info){
+  $groups = field_group_info_groups($entity_type, $bundle, 'form');
+  foreach($groups as $key => $group){
+    foreach($group->children as $child_key => $child){
+      if(isset($groups[$child])){
+        $groups[$key]->children[$child_key] = $groups[$child];
+        unset($groups[$child]);
+      }
+    }
+  }
+  foreach($groups as $key => $group){
+    uasort($groups[$key]->children, '_silver_sort_groups');
+    foreach($group->children as $child_key => $child){
+      foreach($child->children as $gchild_key => $gchild){
+        if(isset($field_info[$gchild])){
+          $groups[$key]->children[$child_key]->children[$gchild_key] = $field_info[$gchild];
+          unset($field_info[$gchild]);
+        }else{
+          unset($groups[$key]->children[$child_key]->children[$gchild_key]);
+        }
+      }
+      uasort($groups[$key]->children[$child_key]->children, '_silver_sort_groups');
+    }
+  }
+  uasort($groups, '_silver_sort_groups');
+  foreach(array_keys($groups) as $key){
+    foreach(array_keys($groups[$key]->children) as $child_key){
+      foreach(array_keys($groups[$key]->children[$child_key]->children) as $gchild_key){
+        $field_info[$groups[$key]->children[$child_key]->children[$gchild_key]['field_name']] = $groups[$key]->children[$child_key]->children[$gchild_key];
+      }
+    }
+  }
+  return $field_info;
+}
+
+/**
  * Helper function which creates the correct mapping for certain field types.
  */
 function _silver_feeds_importer_default_helper($field_info, &$feeds_importer, $additional = '', $map_field_collection = FALSE, $field_collection_label_addition = ''){
@@ -300,7 +343,17 @@ function _silver_feeds_importer_default_helper($field_info, &$feeds_importer, $a
     $field_info = field_info_field($field['field_name']);
     switch($field_info['type']){
       case 'file':
-        // Do nothing.  We can't import files in an Excel template.
+        // We allow importing from a file, or a URL.
+        $feeds_importer->config['processor']['config']['mappings'][] = array(
+          'source' => $field_collection_label_addition . trim($field['label']) . ' (Filename)',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':MediaFeedsLibraryProvider' : $key . ':MediaFeedsLibraryProvider',
+          'unique' => 0
+        );
+        $feeds_importer->config['processor']['config']['mappings'][] = array(
+          'source' => $field_collection_label_addition . trim($field['label']) . ' (URL)',
+          'target' => $map_field_collection ? $map_field_collection . $key : $key,
+          'unique' => 0
+        );
         break;
       case 'field_collection':
         // We get the info about the field collection, and add a mapping for
@@ -318,8 +371,8 @@ function _silver_feeds_importer_default_helper($field_info, &$feeds_importer, $a
         );
         break;
       case 'date':
+      case 'datetime':
         // Add the from date, and also the to date if required.
-        // We add two columns for the user reference field.
         $feeds_importer->config['processor']['config']['mappings'][] = array(
           'source' => $field_collection_label_addition . $field['label'] . ' (' . t('Start') . ')',
           'target' => $map_field_collection ? $map_field_collection . $key . ':start' : $key . ':start',
@@ -332,8 +385,12 @@ function _silver_feeds_importer_default_helper($field_info, &$feeds_importer, $a
         );
         break;
       case 'link_field':
-        // Add the from date, and also the to date if required.
-        // We add two columns for the user reference field.
+        // We add two columns: 'title' and 'url'
+        $feeds_importer->config['processor']['config']['mappings'][] = array(
+          'source' => $field_collection_label_addition . $field['label'] . ' (' . t('TITLE') . ')',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':title' : $key . ':title',
+          'unique' => 0
+        );
         $feeds_importer->config['processor']['config']['mappings'][] = array(
           'source' => $field_collection_label_addition . $field['label'] . ' (' . t('URL') . ')',
           'target' => $map_field_collection ? $map_field_collection . $key . ':url' : $key . ':url',
@@ -341,7 +398,12 @@ function _silver_feeds_importer_default_helper($field_info, &$feeds_importer, $a
         );
         break;
       case 'user_reference':
-        // We add two columns for the user reference field.
+        // We add three columns for the user reference field.
+        $feeds_importer->config['processor']['config']['mappings'][] = array(
+          'source' => $field_collection_label_addition . $field['label'] . ' (GUID)',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':guid:duplicates' : $key . ':guid:duplicates',
+          'unique' => 0
+        );
         $feeds_importer->config['processor']['config']['mappings'][] = array(
           'source' => $field_collection_label_addition . $field['label'] . ' (UID)',
           'target' => $map_field_collection ? $map_field_collection . $key . ':uid:duplicates' : $key . ':uid:duplicates',
@@ -354,7 +416,12 @@ function _silver_feeds_importer_default_helper($field_info, &$feeds_importer, $a
         );
         break;
       case 'node_reference':
-        // We add two columns for the node reference field.
+        // We add three columns for the node reference field.
+        $feeds_importer->config['processor']['config']['mappings'][] = array(
+          'source' => $field_collection_label_addition . $field['label'] . ' (GUID)',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':guid:duplicates' : $key . ':guid:duplicates',
+          'unique' => 0
+        );
         $feeds_importer->config['processor']['config']['mappings'][] = array(
           'source' => $field_collection_label_addition . $field['label'] . ' (NID)',
           'target' => $map_field_collection ? $map_field_collection . $key . ':nid:duplicates' : $key . ':nid:duplicates',
@@ -392,4 +459,11 @@ function _silver_feeds_importer_default_helper($field_info, &$feeds_importer, $a
         );
     }
   }
+}
+
+function _silver_sort_groups($a, $b){
+  $a_weight = (is_object($a) && isset($a->weight)) ? $a->weight : 0;
+  $b_weight = (is_object($b) && isset($b->weight)) ? $b->weight : 0;
+  if($a_weight == $b_weight){return 0;}
+  return ($a_weight < $b_weight) ? -1 : 1;
 }

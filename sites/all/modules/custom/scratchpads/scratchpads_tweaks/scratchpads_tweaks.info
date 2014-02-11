@@ -6,7 +6,8 @@ core = 7.x
 features[menu_links][] = "management:http://help.scratchpads.eu/"
 
 ; Files
-files[] = scratchpads_tweaks.test
+files[] = tests/scratchpads_tweaks.test
+files[] = tests/scratchpads_tweaks.selenium.test
 
 ; Drupal core
 dependencies[] = block
@@ -17,6 +18,7 @@ dependencies[] = dashboard
 dependencies[] = dblog
 dependencies[] = field_ui
 dependencies[] = file
+dependencies[] = filter
 dependencies[] = image
 dependencies[] = list
 dependencies[] = menu
@@ -31,7 +33,7 @@ dependencies[] = toolbar
 
 ; Contrib
 dependencies[] = advanced_help
-dependencies[] = boost
+dependencies[] = ajaxblocks
 dependencies[] = ckeditor
 dependencies[] = clone
 dependencies[] = comment_notify
@@ -51,8 +53,8 @@ dependencies[] = plupload
 dependencies[] = remember_me
 dependencies[] = role_delegation
 dependencies[] = uuid
+dependencies[] = varnish
 dependencies[] = weight
-dependencies[] = honeypot
 
 ; Scratchpads modules
 dependencies[] = scratchpads_apachesolr_instant
@@ -91,6 +93,7 @@ dependencies[] = scratchpads_solr
 dependencies[] = scratchpads_species
 dependencies[] = scratchpads_statistics
 dependencies[] = scratchpads_taxonomic_name_field
+dependencies[] = scratchpads_twitter
 dependencies[] = scratchpads_user
 dependencies[] = scratchpads_width_and_height
 
@@ -110,4 +113,4 @@ dependencies[] = taxonomy_breadcrumb_lite
 dependencies[] = tools
 dependencies[] = tree_widget
 dependencies[] = tui
-dependencies[] = twitterscript
+dependencies[] = twitter_filter
