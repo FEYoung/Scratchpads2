@@ -144,6 +144,29 @@ function silver_feeds_importer_default(){
     _silver_feeds_importer_default_helper($field_info, $feeds_importer, "node:$node_type:");
     $export['node_importer_' . $node_type] = $feeds_importer;
   }
+  // We tweak the node_importer_specimen_observation importer, adding the
+  // location importer to it.
+  if(isset($export['node_importer_specimen_observation']) && isset($export['node_importer_location'])){
+    $export['node_importer_specimen_observation']->config['processor']['plugin_key'] = 'FeedsMultiNodeProcessor';
+    $export['node_importer_specimen_observation']->config['processor']['config']['content_type'] = '';
+    $export['node_importer_specimen_observation']->config['processor']['config']['content_types'] = array(
+      'location' => 'location',
+      'specimen_observation' => 'specimen_observation'
+    );
+    $mappings = array();
+    foreach($export['node_importer_specimen_observation']->config['processor']['config']['mappings'] as $mapping){
+      $mapping['target'] = 'specimen_observation:' . $mapping['target'];
+      $mapping['source'] = 'Specimen/Observation: ' . $mapping['source'];
+      $mappings[] = $mapping;
+    }
+    foreach($export['node_importer_location']->config['processor']['config']['mappings'] as $mapping){
+      $mapping['target'] = 'location:' . $mapping['target'];
+      $mapping['source'] = 'Location: ' . $mapping['source'];
+      $mappings[] = $mapping;
+    }
+    $export['node_importer_specimen_observation']->config['processor']['config']['mappings'] = $mappings;
+  }
+  //  print_r($export['node_importer_specimen_observation']);exit;
   // Get a list of the file types.
   $entity_info = entity_get_info('file');
   foreach($entity_info['bundles'] as $file_type => $file_type_info){

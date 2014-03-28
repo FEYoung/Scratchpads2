@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the Import into specimens and locations feature.
- */
-
-include_once('import_into_specimens_and_locations.features.inc');

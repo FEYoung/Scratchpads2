@@ -68,7 +68,7 @@ class FeedsMultiNodeProcessor extends FeedsNodeProcessor{
     $targets = array();
     $types = $this->multiNodeContentTypes();
     foreach($this->config['content_types'] as $type){
-      $this->config['content_type'] = $type;
+      $this->config['bundle'] = $type;
       $type_targets = parent::getMappingTargets();
       foreach($type_targets as $key => $value){
         if(isset($value['name'])){
