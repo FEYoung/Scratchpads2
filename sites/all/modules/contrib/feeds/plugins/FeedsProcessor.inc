@@ -14,6 +14,9 @@ define('FEEDS_UPDATE_EXISTING', 2);
 // processors.
 define('FEEDS_PROCESS_LIMIT', 50);
 
+// Default Language trigger
+define('FEEDS_LANGUAGE_DEFAULT', 'xx_');
+
 /**
  * Thrown if a validation fails.
  */
@@ -72,6 +75,23 @@ abstract class FeedsProcessor extends FeedsPlugin {
       else {
         $options[$bundle] = $bundle;
       }
+    }
+    return $options;
+  }
+
+  /**
+   * Provides a list of language options for use in select lists.
+   *
+   * @return array
+   *   A keyed array of langcode => language.
+   */
+  public function languageOptions() {
+    $options = array(
+      FEEDS_LANGUAGE_DEFAULT => t('Default Language'),
+      LANGUAGE_NONE => t('Language neutral'),
+    );
+    foreach (language_list() as $langcode => $language) {
+      $options[$langcode] = $language->name;
     }
     return $options;
   }
@@ -216,11 +236,16 @@ abstract class FeedsProcessor extends FeedsPlugin {
         // Build a new entity.
         else {
           $entity = $this->newEntity($source);
+          // Set the language if it wasn't set specifically by a processor
+          if (!isset($entity->language)) {
+            $entity->language = $this->getConfigLanguage();
+          }
           $this->newItemInfo($entity, $source->feed_nid, $hash);
         }
 
         // Set property and field values.
         $this->map($source, $parser_result, $entity);
+        $this->processEntityTitleReplacements($entity);
         $this->entityValidate($entity);
 
         // Allow modules to alter the entity before saving.
@@ -236,6 +261,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
         // This will throw an exception on failure.
         $this->entitySaveAccess($entity);
+        $this->processTranslations($entity);
         $this->entitySave($entity);
 
         // Allow modules to perform operations using the saved entity data.
@@ -400,23 +426,87 @@ abstract class FeedsProcessor extends FeedsPlugin {
   }
 
   /**
-   * Delete feed items younger than now - $time. Do not invoke expire on a
-   * processor directly, but use FeedsImporter::expire() instead.
+   * Deletes feed items older than REQUEST_TIME - $time.
    *
-   * @see FeedsImporter::expire().
-   * @see FeedsDataProcessor::expire().
+   * Do not invoke expire on a processor directly, but use
+   * FeedsSource::expire() instead.
+   *
+   * @param FeedsSource $source
+   *   The source to expire entities for.
    *
    * @param $time
-   *   If implemented, all items produced by this configuration that are older
-   *   than REQUEST_TIME - $time should be deleted.
-   *   If $time === NULL processor should use internal configuration.
+   *   (optional) All items produced by this configuration that are older than
+   *   REQUEST_TIME - $time should be deleted. If NULL, processor should use
+   *   internal configuration. Defaults to NULL.
    *
-   * @return
+   * @return float
    *   FEEDS_BATCH_COMPLETE if all items have been processed, a float between 0
    *   and 0.99* indicating progress otherwise.
+   *
+   * @see FeedsSource::expire()
    */
-  public function expire($time = NULL) {
-    return FEEDS_BATCH_COMPLETE;
+  public function expire(FeedsSource $source, $time = NULL) {
+    $state = $source->state(FEEDS_PROCESS_EXPIRE);
+
+    if ($time === NULL) {
+      $time = $this->expiryTime();
+    }
+    if ($time == FEEDS_EXPIRE_NEVER) {
+      return;
+    }
+
+    $select = $this->expiryQuery($source, $time);
+
+    // If there is no total, query it.
+    if (!$state->total) {
+      $state->total = $select->countQuery()->execute()->fetchField();
+    }
+
+    // Delete a batch of entities.
+    $entity_ids = $select->range(0, $this->getLimit())->execute()->fetchCol();
+    if ($entity_ids) {
+      $this->entityDeleteMultiple($entity_ids);
+      $state->deleted += count($entity_ids);
+      $state->progress($state->total, $state->deleted);
+    }
+    else {
+      $state->progress($state->total, $state->total);
+    }
+  }
+
+  /**
+   * Returns a database query used to select entities to expire.
+   *
+   * Processor classes should override this method to set the age portion of the
+   * query.
+   *
+   * @param FeedsSource $source
+   *   The feed source.
+   * @param int $time
+   *   Delete entities older than this.
+   *
+   * @return SelectQuery
+   *   A select query to execute.
+   *
+   * @see FeedsNodeProcessor::expiryQuery()
+   */
+  protected function expiryQuery(FeedsSource $source, $time) {
+    // Build base select statement.
+    $info = $this->entityInfo();
+    $id_key = db_escape_field($info['entity keys']['id']);
+
+    $select = db_select($info['base table'], 'e');
+    $select->addField('e', $info['entity keys']['id'], 'entity_id');
+    $select->join(
+      'feeds_item',
+      'fi',
+      "e.$id_key = fi.entity_id AND fi.entity_type = :entity_type", array(
+        ':entity_type' => $this->entityType(),
+    ));
+    $select->condition('fi.id', $this->id);
+    $select->condition('fi.feed_nid', $source->feed_nid);
+
+    return $select;
   }
 
   /**
@@ -470,10 +560,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
     // mapping on a prepopulated item such as an existing node.
     foreach ($this->config['mappings'] as $mapping) {
       if (isset($targets[$this->id][$mapping['target']]['real_target'])) {
-        unset($target_item->{$targets[$this->id][$mapping['target']]['real_target']});
+        $target_item->{$targets[$this->id][$mapping['target']]['real_target']} = NULL;
       }
-      elseif (isset($target_item->{$mapping['target']})) {
-        unset($target_item->{$mapping['target']});
+      else {
+        $target_item->{$mapping['target']} = NULL;
       }
     }
 
@@ -506,12 +596,19 @@ abstract class FeedsProcessor extends FeedsPlugin {
           isset($targets[$this->id][$mapping['target']]['callback']) &&
           function_exists($targets[$this->id][$mapping['target']]['callback'])) {
         $callback = $targets[$this->id][$mapping['target']]['callback'];
+
+        // All target callbacks expect an array.
+        if (!is_array($value)) {
+          $value = array($value);
+        }
+
         $callback($source, $target_item, $mapping['target'], $value, $mapping);
       }
       else {
         $this->setTargetElement($source, $target_item, $mapping['target'], $value, $mapping);
       }
     }
+
     return $target_item;
   }
 
@@ -538,6 +635,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
       'input_format' => NULL,
       'skip_hash_check' => FALSE,
       'bundle' => $bundle,
+      'language' => LANGUAGE_NONE,
     );
   }
 
@@ -563,6 +661,14 @@ abstract class FeedsProcessor extends FeedsPlugin {
         '#value' => $this->entityType(),
       );
     }
+
+    $form['language'] = array(
+      '#type' => 'select',
+      '#options' => $this->languageOptions(),
+      '#title' => t('Language'),
+      '#required' => TRUE,
+      '#default_value' => $this->config['language'],
+    );
 
     $tokens = array('@entities' => strtolower($info['label plural']));
 
@@ -657,6 +763,101 @@ abstract class FeedsProcessor extends FeedsPlugin {
       default:
         $target_item->$target_element = $value;
         break;
+    }
+  }
+
+  /**
+   * Returns the configured language for the processor
+   *
+   * @return
+   *   The language code configured for the processor
+   */
+  public function getConfigLanguage() {
+    return ($this->config['language'] == FEEDS_LANGUAGE_DEFAULT) ? language_default('language') : $this->config['language'];
+  }
+
+  /**
+   * Returns the language for the entity.
+   *
+   * @param string $entity
+   *   The entity for which to get the language.
+   *
+   * @return
+   *   The language code for the entity, or the language code that's configured
+   *   for the processor if the entity doesn't have any language support.
+   */
+  public function getEntityLanguage($entity) {
+    $language = entity_language($this->entityType(), $entity);
+    return $language ? $language : $this->getConfigLanguage();
+  }
+
+  /**
+   * Process entity properties that have been replaced with the title module
+   *
+   * @param  object $entity
+   *   The entity to check for replaced properties
+   */
+  public function processEntityTitleReplacements(&$entity) {
+    if (module_exists('title')) {
+      // Get the possible replacements for this entity type
+      if ($replacements = title_field_replacement_info($this->entityType())) {
+        // Loop through replacements
+        foreach ($replacements as $legacy_field => $field_info) {
+          // Populate legacy field with value from the field of the language
+          // for the entity.
+          $language = $this->getEntityLanguage($entity);
+          if (!empty($entity->{$field_info['field']['field_name']}[$language]) && empty($entity->{$legacy_field})) {
+            $entity->{$legacy_field} = $entity->{$field_info['field']['field_name']}[$language][0]['value'];
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Add translations to an entity for each mapped language
+   *
+   * @param  object $entity
+   *   The entity to add translations to
+   */
+  public function processTranslations(&$entity) {
+    // Add translations (if the entity_translation module exists) provided at
+    // least one field has a translation
+    if (module_exists('entity_translation')) {
+      $handler = entity_translation_get_handler($this->entityType(), $entity);
+      $languages = array();
+      $default_langcode = $this->getEntityLanguage($entity);
+
+      // Init the translations if there's not translation data yet
+      if (empty($entity->translations->data)) {
+        $handler->initTranslations();
+      }
+
+      // Loop through the mappings
+      foreach ($this->getMappings() as $mapping) {
+        if (!empty($mapping['language']) && $mapping['language'] != LANGUAGE_NONE && $mapping['language'] != $default_langcode && empty($entity->translations->data[$mapping['language']])) {
+          list($field_name) = explode(':', $mapping['target']);
+
+          // If this field's language has items we create a translation for it
+          if (!empty($entity->{$field_name}[$mapping['language']])) {
+            $translation = array(
+              'translate' => 0,
+              'status' => 1,
+              'language' => $mapping['language'],
+              'source' => $default_langcode,
+            );
+            $handler->setTranslation($translation, $entity);
+          }
+        }
+      }
+
+      // Loop through every language for the site, and remove translations for
+      // the one that hasn't got any values.
+      foreach (language_list() as $language) {
+        if (!isset($entity->translations->data[$language->language])) {
+          $handler->removeTranslation($language->language);
+        }
+      }
     }
   }
 

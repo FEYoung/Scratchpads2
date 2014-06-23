@@ -97,11 +97,15 @@ class FeedsTermProcessor extends FeedsProcessor {
               $parent_tid = $term->tid;
             }
           }
-          if ($parent_tid) {
-            if(!isset($target_term->parent) || array_search($parent_tid, $target_term->parent) === FALSE){
-              $target_term->parent[] = $parent_tid;
-            }
+          if (!empty($parent_tid)) {
+            $target_term->parent[] = $parent_tid;
           }
+          else {
+            $target_term->parent[] = 0;
+          }
+        }
+        else {
+          $target_term->parent[] = 0;
         }
         break;
       case 'parentguid':
@@ -110,11 +114,8 @@ class FeedsTermProcessor extends FeedsProcessor {
           ->fields('feeds_item', array('entity_id'))
           ->condition('entity_type', $this->entityType());
         $parent_tid = $query->condition('guid', $value)->execute()->fetchField();
-        if($parent_tid){
-          if(!isset($target_term->parent) || array_search($parent_tid, $target_term->parent) === FALSE){
-            $target_term->parent[] = $parent_tid;
-          }
-        }
+        $target_term->parent[] = ($parent_tid) ? $parent_tid : 0;
+
         break;
       case 'weight':
         if (!empty($value)) {

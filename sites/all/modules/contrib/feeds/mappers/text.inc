@@ -25,7 +25,18 @@ function text_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
         'name' => check_plain($instance['label']),
         'callback' => 'text_feeds_set_target',
         'description' => t('The @label field of the entity.', array('@label' => $instance['label'])),
+        'summary_callback' => 'feeds_mapper_summary_language',
+        'form_callback' => 'feeds_mapper_form_language',
       );
+      if ($info['type'] == 'text_with_summary') {
+        // Allow mapping to summary.
+        $targets[$name . ':summary'] = array(
+          'name' => t('@name: Summary', array('@name' => $instance['label'])),
+          'callback' => 'text_feeds_set_target',
+          'description' => t('The @label field of the entity.', array('@label' => $instance['label'])),
+          'real_target' => $name,
+        );
+      }
     }
   }
 }
@@ -33,47 +44,42 @@ function text_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
 /**
  * Callback for mapping text fields.
  */
-function text_feeds_set_target($source, $entity, $target, $value) {
-  if (!strlen(trim($value))) {
-    return;
-  }
+function text_feeds_set_target($source, $entity, $target, array $values, $mapping = array()) {
+  list($field_name, $column) = explode(':', $target . ':value');
 
-  if (!is_array($value)) {
-    $value = array($value);
-  }
-
-  if (isset($source->importer->processor->config['input_format'])) {
+  if ($column === 'value' && isset($source->importer->processor->config['input_format'])) {
     $format = $source->importer->processor->config['input_format'];
   }
 
-  $info = field_info_field($target);
+  // Set the language of the field depending on the mapping configuration.
+  $langcode = isset($mapping['language']) ? $mapping['language'] : LANGUAGE_NONE;
 
-  // Iterate over all values.
-  $field = isset($entity->$target) ? $entity->$target : array('und' => array());
+  $field = isset($entity->$target) ? $entity->$target : array($langcode => array());
 
-  // Allow for multiple mappings to the same target.
-  $delta = count($field['und']);
-
-  foreach ($value as $v) {
-
-    if ($info['cardinality'] == $delta) {
-      break;
-    }
-
-    if (is_object($v) && ($v instanceof FeedsElement)) {
-      $v = $v->getValue();
-    }
-
-    if (is_scalar($v)) {
-      $field['und'][$delta]['value'] = $v;
-
-      if (isset($format)) {
-        $field['und'][$delta]['format'] = $format;
-      }
-
-      $delta++;
-    }
+  // If it's a new language we need to add it to the field
+  if (!isset($field[$langcode])) {
+    $field[$langcode] = array();
   }
 
-  $entity->$target = $field;
+  // Iterate over all values.
+  $delta = 0;
+  foreach ($values as $value) {
+
+    if (is_object($value) && $value instanceof FeedsElement) {
+      $value = $value->getValue();
+    }
+
+    if (is_scalar($value) && strlen($value)) {
+
+      $field[$langcode][$delta][$column] = (string) $value;
+
+      if (isset($format)) {
+        $field[$langcode][$delta]['format'] = $format;
+      }
+    }
+
+    $delta++;
+  }
+
+  $entity->$field_name = $field;
 }
